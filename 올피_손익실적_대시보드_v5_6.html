@@ -1929,7 +1929,7 @@ function initMirae(){
 
   // ── 교재·원격 CC별 상세표 (3년 비교)
   const YRS = ['yr25','yr26p','yr26a'];
-  const YR_LABELS = {'yr25':'25년실적','yr26p':'26년계획','yr26a':'26년실적'};
+  const YR_LABELS = {'yr25':'25년 실적','yr26p':'26년 계획','yr26a':'26년 실적'};
   const YR_COLORS = {'yr25':'var(--c25)','yr26p':'var(--c26p)','yr26a':'var(--c26a)'};
 
   const totals = {};
@@ -1941,13 +1941,15 @@ function initMirae(){
     };
   });
 
-  const thYr = (yr) => `<th colspan="3" style="padding:5px 8px;text-align:center;font-size:11px;font-weight:700;color:${YR_COLORS[yr]};border-left:1px solid var(--border)">${YR_LABELS[yr]}</th>`;
-  const thSub = `<th style="${thS2}">교재</th><th style="${thS2}">원격</th><th style="${thS2}">합계</th>`;
-  const cellYr = (d) => {
+  const thType = (label) => `<th colspan="3" style="padding:5px 8px;text-align:center;font-size:11px;font-weight:700;color:var(--text);border-left:2px solid var(--border2)">${label}</th>`;
+  const thYrSub = (yr) => `<th style="${thS2};color:${YR_COLORS[yr]}">${YR_LABELS[yr]}</th>`;
+  const cellBook = (d, first) => {
     const v = d.total > 0;
-    return `<td style="padding:5px 8px;text-align:right;font-size:14px;border-left:1px solid var(--border)">${v?fm(d.book):'-'}</td>
-            <td style="padding:5px 8px;text-align:right;font-size:14px">${v?fm(d.online):'-'}</td>
-            <td style="padding:5px 8px;text-align:right;font-size:14px;font-weight:600">${v?fm(d.total):'-'}</td>`;
+    return `<td style="padding:5px 8px;text-align:right;font-size:14px;${first?'border-left:2px solid var(--border2);':''}">${v?fm(d.book):'-'}</td>`;
+  };
+  const cellOnline = (d, first) => {
+    const v = d.total > 0;
+    return `<td style="padding:5px 8px;text-align:right;font-size:14px;${first?'border-left:2px solid var(--border2);':''}">${v?fm(d.online):'-'}</td>`;
   };
 
   let revRows = '';
@@ -1955,23 +1957,27 @@ function initMirae(){
     const col = COLORS[cc];
     revRows += `<tr style="border-bottom:1px solid var(--border)">
       <td style="padding:5px 10px;font-size:12px;font-weight:600;color:${col}">${cc}</td>
-      ${YRS.map(yr=>cellYr(MIRAE[cc][yr])).join('')}
+      ${YRS.map((yr,i)=>cellBook(MIRAE[cc][yr], i===0)).join('')}
+      ${YRS.map((yr,i)=>cellOnline(MIRAE[cc][yr], i===0)).join('')}
     </tr>`;
   }
   revRows += `<tr style="background:var(--s2);font-weight:700;border-top:2px solid var(--border2)">
     <td style="padding:6px 10px;font-size:12px">합계</td>
-    ${YRS.map(yr=>cellYr(totals[yr])).join('')}
+    ${YRS.map((yr,i)=>cellBook(totals[yr], i===0)).join('')}
+    ${YRS.map((yr,i)=>cellOnline(totals[yr], i===0)).join('')}
   </tr>`;
 
   document.getElementById('mirae_rev_table').innerHTML = `
-    <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;min-width:700px">
+    <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;min-width:600px">
       <thead>
         <tr style="background:var(--s3)">
           <th rowspan="2" style="${thL2}">CC</th>
-          ${YRS.map(thYr).join('')}
+          ${thType('교재')}
+          ${thType('원격')}
         </tr>
         <tr style="background:var(--s3)">
-          ${YRS.map(()=>thSub).join('')}
+          ${YRS.map(yr=>`<th style="${thS2};color:${YR_COLORS[yr]}">${YR_LABELS[yr]}</th>`).join('')}
+          ${YRS.map(yr=>`<th style="${thS2};color:${YR_COLORS[yr]}">${YR_LABELS[yr]}</th>`).join('')}
         </tr>
       </thead>
       <tbody>${revRows}</tbody>
