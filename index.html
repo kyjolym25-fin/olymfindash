@@ -1506,7 +1506,7 @@ function initOverview(){
 // DEPT: 학원사업본부
 // ============================================================
 function initHakwon(){
-  const campuses=['광진','동대문','성동','중랑'];
+  const campuses=['광진','성동','동대문','중랑'];
   const campusSales=campuses.map(c=>{
     const keys=Object.keys(PL).filter(k=>k.startsWith(c)&&k!=='학원본부');
     return keys.reduce((s,k)=>s+PL[k].sales,0)/1e6;
@@ -1678,8 +1678,8 @@ function initHakwon(){
     document.getElementById(containerId).innerHTML=html;
   }
 
-  renderCostTable('hak_cost_table', ['광진','동대문','성동','중랑']);
-  renderCostTable('u2m_cost_table', ['미사','송파방이','위례','중계']);
+  renderCostTable('hak_cost_table', ['광진','성동','동대문','중랑']);
+  renderCostTable('u2m_cost_table', ['중계','송파방이','미사','위례']);
 
   // 계층 트리 렌더링
   renderHakwonTree();
