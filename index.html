@@ -64,7 +64,7 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
 .ch{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px}
 .ct{font-size:13px;font-weight:600}
 .cs{font-size:11px;color:var(--muted);margin-top:2px}
-.cbg{font-size:11px;background:var(--s2);border:1px solid var(--border);border-radius:14px;padding:3px 10px;color:var(--muted)}
+.cbg{font-size:12px;background:var(--s2);border:1px solid var(--border);border-radius:14px;padding:3px 10px;color:var(--muted)}
 .cw{position:relative}
 
 /* ── KPI BOX (통합형) ── */
@@ -73,14 +73,14 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
 .kpi-box-title{font-size:13px;font-weight:700}
 .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 .kpi-item{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:13px 14px}
-.kpi-item-lbl{font-size:10px;color:var(--muted);letter-spacing:.3px;margin-bottom:8px}
+.kpi-item-lbl{font-size:12px;color:var(--muted);letter-spacing:.3px;margin-bottom:8px}
 .kpi-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
-.kpi-row-lbl{font-size:10px}
+.kpi-row-lbl{font-size:12px}
 .kpi-row-val{font-size:12px;font-weight:700}
 .kpi-divider{height:1px;background:var(--border);margin:5px 0}
 .kpi-main-row{display:flex;justify-content:space-between;align-items:baseline}
 .kpi-main-val{font-size:16px;font-weight:900}
-.kpi-delta{font-size:10px;text-align:right;margin-top:3px}
+.kpi-delta{font-size:12px;text-align:right;margin-top:3px}
 
 /* ── METRIC MINI CARDS ── */
 .mini-cards{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px}
@@ -92,7 +92,7 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
 .mini-card.cr::after{background:var(--loss)}
 .mc-lbl{font-size:10px;color:var(--muted);margin-bottom:7px;letter-spacing:.3px}
 .mc-val{font-size:20px;font-weight:700;letter-spacing:-1px;line-height:1}
-.mc-unit{font-size:11px;font-weight:400;color:var(--muted);margin-left:2px}
+.mc-unit{font-size:12px;font-weight:400;color:var(--muted);margin-left:2px}
 .mc-meta{font-size:10px;margin-top:6px}
 
 /* ── CAMPUS HIERARCHY ── */
@@ -110,7 +110,7 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
 .cr-name{font-size:12px;font-weight:600;width:110px;flex-shrink:0}
 .cr-sales{font-size:12px;font-weight:600;color:var(--c25);min-width:70px;text-align:right}
 .cr-profit{font-size:12px;font-weight:700;min-width:70px;text-align:right}
-.cr-margin{font-size:11px;min-width:46px;text-align:right}
+.cr-margin{font-size:12px;min-width:46px;text-align:right}
 .cr-bar-wrap{flex:1;height:5px;background:var(--border);border-radius:3px;overflow:hidden}
 .cr-bar{height:100%;border-radius:3px}
 
@@ -238,7 +238,7 @@ tbody td.indent{padding-left:26px;color:var(--muted2)}
 .subtab{font-size:14px}
 .ct{font-size:16px}.cs{font-size:13px}
 .mc-lbl,.mc-meta{font-size:12px}
-.mc-val{font-size:36px}
+.mc-val{font-size:34px}
 table{font-size:14px}
 thead th{font-size:13px}
 .legend-bar{font-size:14px}
@@ -1371,7 +1371,7 @@ const RAW=[
 // CHART UTILITIES
 // ============================================================
 const CO={responsive:true,maintainAspectRatio:false,
-  plugins:{legend:{labels:{color:'#6b7599',font:{size:11},boxWidth:10,padding:10}}},
+  plugins:{legend:{labels:{color:'#6b7599',font:{size:12},boxWidth:10,padding:10}}},
   scales:{x:{grid:{color:'#1d2340'},ticks:{color:'#8b98c7',font:{size:14}}},
           y:{grid:{color:'#1d2340'},ticks:{color:'#8b98c7',font:{size:14}}}}};
 const CO_SM={...CO,scales:{x:{grid:{color:'#1d2340'},ticks:{color:'#8b98c7',font:{size:12}}},y:{grid:{color:'#1d2340'},ticks:{color:'#8b98c7',font:{size:12}}}}};
@@ -1528,7 +1528,7 @@ function initHakwon(){
     function cell26(val, sales, bold){
       const pct=sales>0?(val/sales*100).toFixed(1)+'%':'-';
       return `<td style="padding:4px 10px;text-align:right;white-space:nowrap;vertical-align:top;${bold?'font-weight:700;':''}color:var(--c26a)">
-        <div style="font-size:18px">${(val/M).toFixed(1)}</div>
+        <div style="font-size:14px">${(val/M).toFixed(1)}</div>
         <div style="font-size:11px;color:var(--muted);font-weight:400;margin-top:1px">${pct}</div>
       </td>`;
     }
@@ -1537,7 +1537,7 @@ function initHakwon(){
       const f=(v,s,c)=>{
         const pct=s>0?(v/s*100).toFixed(1)+'%':'-';
         return `<td style="padding:4px 10px;text-align:right;white-space:nowrap;vertical-align:top;${bold?'font-weight:700;':''}${c?`color:${c};`:''}">
-          <div style="font-size:18px">${(v/M).toFixed(1)}</div>
+          <div style="font-size:14px">${(v/M).toFixed(1)}</div>
           <div style="font-size:11px;color:var(--muted);font-weight:400;margin-top:1px">${pct}</div>
         </td>`;
       };
@@ -1568,16 +1568,16 @@ function initHakwon(){
         yr26a: ['staff','instr','vehicle'].reduce((s,k)=>s+d[k].yr26a, 0),
       };
       rows+=`<tr style="background:rgba(77,150,240,0.07);border-bottom:1px solid var(--border)">
-        <td style="padding:4px 10px;font-size:18px;font-weight:600;display:flex;align-items:center">${dot(di++)}인건비 소계</td>
-        <td style="padding:4px 10px;font-size:18px;color:var(--muted)">직원인건비+강사비+차량운행비</td>
+        <td style="padding:4px 10px;font-size:14px;font-weight:600;display:flex;align-items:center">${dot(di++)}인건비 소계</td>
+        <td style="padding:4px 10px;font-size:14px;color:var(--muted)">직원인건비+강사비+차량운행비</td>
         ${cells3(laborTotal.yr25,laborTotal.yr26p,laborTotal.yr26a,d.sales.yr25,d.sales.yr26p,d.sales.yr26a,true)}
       </tr>`;
       // 인건비 세부
       for(const item of ITEMS.filter(i=>i.indent)){
         const v=d[item.key];
         rows+=`<tr style="border-bottom:1px solid var(--border)">
-          <td style="padding:3px 10px 3px 26px;font-size:18px;color:var(--muted)">↳ ${item.label}</td>
-          <td style="padding:3px 10px;font-size:18px;color:var(--muted)">${item.desc||''}</td>
+          <td style="padding:3px 10px 3px 26px;font-size:14px;color:var(--muted)">↳ ${item.label}</td>
+          <td style="padding:3px 10px;font-size:14px;color:var(--muted)">${item.desc||''}</td>
           ${cells3(v.yr25,v.yr26p,v.yr26a,d.sales.yr25,d.sales.yr26p,d.sales.yr26a,false)}
         </tr>`;
       }
@@ -1585,15 +1585,15 @@ function initHakwon(){
       for(const item of ITEMS.filter(i=>!i.indent)){
         const v=d[item.key];
         rows+=`<tr style="border-bottom:1px solid var(--border)">
-          <td style="padding:4px 10px;font-size:18px;display:flex;align-items:center">${dot(di++)}${item.label}</td>
-          <td style="padding:4px 10px;font-size:18px;color:var(--muted)">${item.desc||''}</td>
+          <td style="padding:4px 10px;font-size:14px;display:flex;align-items:center">${dot(di++)}${item.label}</td>
+          <td style="padding:4px 10px;font-size:14px;color:var(--muted)">${item.desc||''}</td>
           ${cells3(v.yr25||0,v.yr26p||0,v.yr26a||0,d.sales.yr25,d.sales.yr26p,d.sales.yr26a,false)}
         </tr>`;
       }
       // 합계 — 실제 YoY 표시
       const tot=d.total;
       rows+=`<tr style="background:var(--s2);border-top:2px solid var(--border2)">
-        <td style="padding:5px 10px;font-size:18px;font-weight:700;display:flex;align-items:center">${dot(di++)}합계</td>
+        <td style="padding:5px 10px;font-size:14px;font-weight:700;display:flex;align-items:center">${dot(di++)}합계</td>
         <td></td>
         ${cells3(tot.yr25,tot.yr26p,tot.yr26a,d.sales.yr25,d.sales.yr26p,d.sales.yr26a,true)}
       </tr>`;
@@ -1732,7 +1732,7 @@ function renderCC3YTree(containerId, groupDef, dataObj){
       </div>
 
       <div style="overflow-x:auto">
-      <table style="width:100%;border-collapse:collapse;font-size:17px;min-width:860px">
+      <table style="width:100%;border-collapse:collapse;font-size:14px;min-width:860px">
         <thead>
           <tr style="background:var(--s3)">
             <th rowspan="2" style="padding:7px 10px;text-align:left;color:var(--muted);font-weight:600;border-bottom:2px solid var(--border2);min-width:110px">CC</th>
@@ -1907,7 +1907,7 @@ function initMirae(){
       },
       options:{
         responsive:true, maintainAspectRatio:false,
-        plugins:{legend:{labels:{color:'#6b7599',font:{size:11},boxWidth:10,padding:10}}},
+        plugins:{legend:{labels:{color:'#6b7599',font:{size:12},boxWidth:10,padding:10}}},
         scales:{
           x:{grid:{color:'#1d2340'}, ticks:{color:'#6b7599',font:{size:11}}},
           y:{grid:{color:'#1d2340'}, ticks:{color:'#6b7599',font:{size:11}}},
@@ -1927,20 +1927,20 @@ function initMirae(){
     const col = COLORS[cc];
     revRows += `<tr style="border-bottom:1px solid var(--border)">
       <td style="padding:5px 10px;font-size:12px;font-weight:600;color:${col}">${cc}</td>
-      <td style="padding:5px 10px;text-align:right;font-size:18px">${fm(d.book)}</td>
+      <td style="padding:5px 10px;text-align:right;font-size:14px">${fm(d.book)}</td>
       <td style="padding:5px 10px;text-align:right;font-size:11px;color:var(--muted)">${fp(d.book,d.total)}</td>
-      <td style="padding:5px 10px;text-align:right;font-size:18px">${fm(d.online)}</td>
+      <td style="padding:5px 10px;text-align:right;font-size:14px">${fm(d.online)}</td>
       <td style="padding:5px 10px;text-align:right;font-size:11px;color:var(--muted)">${fp(d.online,d.total)}</td>
-      <td style="padding:5px 10px;text-align:right;font-size:18px;font-weight:600;color:${col}">${fm(d.total)}</td>
+      <td style="padding:5px 10px;text-align:right;font-size:14px;font-weight:600;color:${col}">${fm(d.total)}</td>
     </tr>`;
   }
   revRows += `<tr style="background:var(--s2);font-weight:700;border-top:2px solid var(--border2)">
     <td style="padding:6px 10px;font-size:12px">합계</td>
-    <td style="padding:6px 10px;text-align:right;font-size:18px">${fm(totalBook)}</td>
+    <td style="padding:6px 10px;text-align:right;font-size:14px">${fm(totalBook)}</td>
     <td style="padding:6px 10px;text-align:right;font-size:11px;color:var(--muted)">${fp(totalBook,totalAll)}</td>
-    <td style="padding:6px 10px;text-align:right;font-size:18px">${fm(totalOnline)}</td>
+    <td style="padding:6px 10px;text-align:right;font-size:14px">${fm(totalOnline)}</td>
     <td style="padding:6px 10px;text-align:right;font-size:11px;color:var(--muted)">${fp(totalOnline,totalAll)}</td>
-    <td style="padding:6px 10px;text-align:right;font-size:18px;color:var(--c26a)">${fm(totalAll)}</td>
+    <td style="padding:6px 10px;text-align:right;font-size:14px;color:var(--c26a)">${fm(totalAll)}</td>
   </tr>`;
 
   document.getElementById('mirae_rev_table').innerHTML = `
@@ -1978,14 +1978,14 @@ function initMirae(){
       ? `<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${row.color};margin-right:6px;vertical-align:middle"></span>`
       : '';
     cRows += `<tr style="${bStyle}${btop}">
-      <td style="padding:5px 10px;font-size:18px;${bStyle}">${dot}${row.label}</td>
-      <td style="padding:5px 10px;text-align:right;font-size:18px;color:var(--c25);${bStyle}">
+      <td style="padding:5px 10px;font-size:14px;${bStyle}">${dot}${row.label}</td>
+      <td style="padding:5px 10px;text-align:right;font-size:14px;color:var(--c25);${bStyle}">
         ${fm(row.yr25)}${pcS(row.yr25, SALES3.yr25)}
       </td>
-      <td style="padding:5px 10px;text-align:right;font-size:18px;color:var(--c26p);${bStyle}">
+      <td style="padding:5px 10px;text-align:right;font-size:14px;color:var(--c26p);${bStyle}">
         ${fm(row.yr26p)}${pcS(row.yr26p, SALES3.yr26p)}
       </td>
-      <td style="padding:5px 10px;text-align:right;font-size:18px;color:var(--c26a);${bStyle}">
+      <td style="padding:5px 10px;text-align:right;font-size:14px;color:var(--c26a);${bStyle}">
         ${fm(row.yr26a)}${pcS(row.yr26a, SALES3.yr26a)}
       </td>
     </tr>`;
@@ -2071,25 +2071,25 @@ function renderDeptCostTable(containerId, items, salesK){
   const cell = (v, base, color) => {
     const pct = (base>0 && v>0) ? `<div style="font-size:11px;color:var(--muted);margin-top:1px">${(v/base*100).toFixed(1)}%</div>` : '';
     return `<td style="padding:5px 12px;text-align:right;white-space:nowrap;${color?'color:'+color+';':''}">
-      <div style="font-size:18px">${toM(v)}</div>${pct}
+      <div style="font-size:14px">${toM(v)}</div>${pct}
     </td>`;
   };
   const cellPlain = (v, color) =>
-    `<td style="padding:5px 12px;text-align:right;white-space:nowrap;font-size:18px;${color?'color:'+color+';':'color:var(--muted);'}">
+    `<td style="padding:5px 12px;text-align:right;white-space:nowrap;font-size:14px;${color?'color:'+color+';':'color:var(--muted);'}">
       ${toM(v)}
     </td>`;
 
   let rows = items.map((it,i)=>`
     <tr style="border-bottom:1px solid var(--border)">
-      <td style="padding:6px 12px;font-size:18px;display:flex;align-items:center;white-space:nowrap">${dot(i)}${it.label}</td>
-      <td style="padding:6px 12px;font-size:18px;color:var(--muted)">${it.desc||''}</td>
+      <td style="padding:6px 12px;font-size:14px;display:flex;align-items:center;white-space:nowrap">${dot(i)}${it.label}</td>
+      <td style="padding:6px 12px;font-size:14px;color:var(--muted)">${it.desc||''}</td>
       ${cellPlain(it.yr25||0, null)}
       ${cellPlain(it.yr26p||0, null)}
       ${cell(it.yr26a||0, showSales?salesK:tot26a, 'var(--c26a)')}
     </tr>`).join('');
 
   rows += `<tr style="background:var(--s2);border-top:2px solid var(--border2);font-weight:700">
-    <td style="padding:6px 12px;font-size:18px">합계</td>
+    <td style="padding:6px 12px;font-size:14px">합계</td>
     <td></td>
     ${cellPlain(tot25, null)}
     ${cellPlain(tot26p, null)}
