@@ -1763,9 +1763,9 @@ function renderCC3YTree(containerId, groupDef, dataObj){
         <td style="padding:9px 8px;text-align:right;font-weight:700">${fx(d26a.s)}</td>
         <td style="padding:9px 8px;text-align:right;color:${ac(sAch)};font-weight:600">${fp2(sAch)}</td>
         <td style="padding:9px 8px;text-align:right;color:${sDiff>=0?'var(--c26a)':'var(--loss)'};font-weight:600">${fd(sDiff)}</td>
-        <td style="padding:9px 8px;text-align:right;color:${pc(d25.p2)};border-left:2px solid var(--border2)">${fx(d25.p2)}<span style="font-size:9px;color:var(--muted);margin-left:2px">(${mg(d25.p2,d25.s)})</span></td>
-        <td style="padding:9px 8px;text-align:right;color:${pc(d26p.p2)}">${fx(d26p.p2)}<span style="font-size:9px;color:var(--muted);margin-left:2px">(${mg(d26p.p2,d26p.s)})</span></td>
-        <td style="padding:9px 8px;text-align:right;color:${pc(d26a.p2)};font-weight:700">${fx(d26a.p2)}<span style="font-size:9px;color:var(--muted);margin-left:2px">(${mg(d26a.p2,d26a.s)})</span></td>
+        <td style="padding:9px 8px;text-align:right;border-left:2px solid var(--border2)">${fx(d25.p2)}<span style="font-size:9px;color:var(--muted);margin-left:2px">(${mg(d25.p2,d25.s)})</span></td>
+        <td style="padding:9px 8px;text-align:right">${fx(d26p.p2)}<span style="font-size:9px;color:var(--muted);margin-left:2px">(${mg(d26p.p2,d26p.s)})</span></td>
+        <td style="padding:9px 8px;text-align:right;font-weight:700">${fx(d26a.p2)}<span style="font-size:9px;color:var(--muted);margin-left:2px">(${mg(d26a.p2,d26a.s)})</span></td>
         <td style="padding:9px 8px;text-align:right;color:${ac(pAch)};font-weight:600">${fp2(pAch)}</td>
         <td style="padding:9px 8px;text-align:right;color:${pDiff>=0?'var(--c26a)':'var(--loss)'};font-weight:600">${fd(pDiff)}</td>
       </tr>`;
@@ -1797,9 +1797,9 @@ function renderCC3YTree(containerId, groupDef, dataObj){
       <td style="padding:8px;text-align:right">${fx(T26a.s)}</td>
       <td style="padding:8px;text-align:right;color:${ac(tSach)}">${fp2(tSach)}</td>
       <td style="padding:8px;text-align:right;color:${tSdiff>=0?'var(--c26a)':'var(--loss)'}">${fd(tSdiff)}</td>
-      <td style="padding:8px;text-align:right;color:${pc(T25.p2)};border-left:2px solid var(--border2)">${fx(T25.p2)}<span style="font-size:9px;color:var(--muted);margin-left:2px">(${mg(T25.p2,T25.s)})</span></td>
-      <td style="padding:8px;text-align:right;color:${pc(T26p.p2)}">${fx(T26p.p2)}<span style="font-size:9px;color:var(--muted);margin-left:2px">(${mg(T26p.p2,T26p.s)})</span></td>
-      <td style="padding:8px;text-align:right;color:${pc(T26a.p2)}">${fx(T26a.p2)}<span style="font-size:9px;color:var(--muted);margin-left:2px">(${mg(T26a.p2,T26a.s)})</span></td>
+      <td style="padding:8px;text-align:right;border-left:2px solid var(--border2)">${fx(T25.p2)}<span style="font-size:9px;color:var(--muted);margin-left:2px">(${mg(T25.p2,T25.s)})</span></td>
+      <td style="padding:8px;text-align:right">${fx(T26p.p2)}<span style="font-size:9px;color:var(--muted);margin-left:2px">(${mg(T26p.p2,T26p.s)})</span></td>
+      <td style="padding:8px;text-align:right">${fx(T26a.p2)}<span style="font-size:9px;color:var(--muted);margin-left:2px">(${mg(T26a.p2,T26a.s)})</span></td>
       <td style="padding:8px;text-align:right;color:${ac(tPach)}">${fp2(tPach)}</td>
       <td style="padding:8px;text-align:right;color:${tPdiff>=0?'var(--c26a)':'var(--loss)'}">${fd(tPdiff)}</td>
     </tr>`;
@@ -1941,7 +1941,7 @@ function initMirae(){
     <td style="padding:6px 10px;text-align:right;font-size:11px;color:var(--muted)">${fp(totalBook,totalAll)}</td>
     <td style="padding:6px 10px;text-align:right;font-size:14px">${fm(totalOnline)}</td>
     <td style="padding:6px 10px;text-align:right;font-size:11px;color:var(--muted)">${fp(totalOnline,totalAll)}</td>
-    <td style="padding:6px 10px;text-align:right;font-size:14px;color:var(--c26a)">${fm(totalAll)}</td>
+    <td style="padding:6px 10px;text-align:right;font-size:14px">${fm(totalAll)}</td>
   </tr>`;
 
   document.getElementById('mirae_rev_table').innerHTML = `
