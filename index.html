@@ -1372,9 +1372,9 @@ const RAW=[
 // ============================================================
 const CO={responsive:true,maintainAspectRatio:false,
   plugins:{legend:{labels:{color:'#6b7599',font:{size:11},boxWidth:10,padding:10}}},
-  scales:{x:{grid:{color:'#1d2340'},ticks:{color:'#8b98c7',font:{size:11}}},
-          y:{grid:{color:'#1d2340'},ticks:{color:'#8b98c7',font:{size:11}}}}};
-const CO_SM={...CO,scales:{x:{grid:{color:'#1d2340'},ticks:{color:'#8b98c7',font:{size:9}}},y:{grid:{color:'#1d2340'},ticks:{color:'#8b98c7',font:{size:9}}}}};
+  scales:{x:{grid:{color:'#1d2340'},ticks:{color:'#8b98c7',font:{size:14}}},
+          y:{grid:{color:'#1d2340'},ticks:{color:'#8b98c7',font:{size:14}}}}};
+const CO_SM={...CO,scales:{x:{grid:{color:'#1d2340'},ticks:{color:'#8b98c7',font:{size:12}}},y:{grid:{color:'#1d2340'},ticks:{color:'#8b98c7',font:{size:12}}}}};
 
 function mkLine(id,labels,datasets){
   const ctx=document.getElementById(id);
@@ -1984,13 +1984,13 @@ function initMirae(){
       : '';
     cRows += `<tr style="${bStyle}${btop}">
       <td style="padding:5px 10px;font-size:12px;${bStyle}">${dot}${row.label}</td>
-      <td style="padding:5px 10px;text-align:right;font-size:12px;color:var(--c25);${bStyle}">
+      <td style="padding:5px 10px;text-align:right;font-size:18px;color:var(--c25);${bStyle}">
         ${fk(row.yr25)}${pcS(row.yr25, SALES3.yr25)}
       </td>
-      <td style="padding:5px 10px;text-align:right;font-size:12px;color:var(--c26p);${bStyle}">
+      <td style="padding:5px 10px;text-align:right;font-size:18px;color:var(--c26p);${bStyle}">
         ${fk(row.yr26p)}${pcS(row.yr26p, SALES3.yr26p)}
       </td>
-      <td style="padding:5px 10px;text-align:right;font-size:12px;color:var(--c26a);${bStyle}">
+      <td style="padding:5px 10px;text-align:right;font-size:18px;color:var(--c26a);${bStyle}">
         ${fk(row.yr26a)}${pcS(row.yr26a, SALES3.yr26a)}
       </td>
     </tr>`;
@@ -2075,11 +2075,11 @@ function renderDeptCostTable(containerId, items, salesK){
   const cell = (v, base, color) => {
     const pct = (base>0 && v>0) ? `<div style="font-size:11px;color:var(--muted);margin-top:1px">${(v/base*100).toFixed(1)}%</div>` : '';
     return `<td style="padding:5px 12px;text-align:right;white-space:nowrap;${color?'color:'+color+';':''}">
-      <div style="font-size:12px">${v>0?v.toLocaleString('ko-KR'):'-'}</div>${pct}
+      <div style="font-size:18px">${v>0?v.toLocaleString('ko-KR'):'-'}</div>${pct}
     </td>`;
   };
   const cellPlain = (v, color) =>
-    `<td style="padding:5px 12px;text-align:right;white-space:nowrap;font-size:12px;${color?'color:'+color+';':'color:var(--muted);'}">
+    `<td style="padding:5px 12px;text-align:right;white-space:nowrap;font-size:18px;${color?'color:'+color+';':'color:var(--muted);'}">
       ${v>0?v.toLocaleString('ko-KR'):'-'}
     </td>`;
 
