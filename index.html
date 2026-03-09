@@ -1696,10 +1696,10 @@ function renderCC3YTree(containerId, groupDef, dataObj){
     .replace(/영어$/, '<span style="font-size:10px;font-weight:400;color:#9474f0;margin-left:2px">영어</span>');
 
   // 열 헤더 (매출·영업이익 각 5열씩)
-  const subHd = color => `
-    <th style="padding:4px 8px;text-align:right;color:var(--c25)">25년실적</th>
-    <th style="padding:4px 8px;text-align:right;color:var(--c26p)">26년계획</th>
-    <th style="padding:4px 8px;text-align:right;color:${color};font-weight:700">26년실적</th>
+  const subHd = (color, showMgRatio=false) => `
+    <th style="padding:4px 8px;text-align:right;color:var(--c25)">25년실적${showMgRatio?'<br><span style="font-size:9px;font-weight:400;color:var(--muted)">매출比</span>':''}</th>
+    <th style="padding:4px 8px;text-align:right;color:var(--c26p)">26년계획${showMgRatio?'<br><span style="font-size:9px;font-weight:400;color:var(--muted)">매출比</span>':''}</th>
+    <th style="padding:4px 8px;text-align:right;color:${color};font-weight:700">26년실적${showMgRatio?'<br><span style="font-size:9px;font-weight:400;color:var(--muted)">매출比</span>':''}</th>
     <th style="padding:4px 8px;text-align:right;color:var(--muted)">계획비</th>
     <th style="padding:4px 8px;text-align:right;color:var(--muted)">증감액</th>`;
 
@@ -1742,7 +1742,7 @@ function renderCC3YTree(containerId, groupDef, dataObj){
           </tr>
           <tr style="background:var(--s3);font-size:10.5px">
             ${subHd('#4d96f0')}
-            ${subHd('#22bf85')}
+            ${subHd('#22bf85', true)}
           </tr>
           <!-- 구분선 -->
           <tr><td colspan="11" style="padding:0;border-bottom:2px solid var(--border2)"></td></tr>
@@ -1763,9 +1763,9 @@ function renderCC3YTree(containerId, groupDef, dataObj){
         <td style="padding:9px 8px;text-align:right;font-weight:700">${fx(d26a.s)}</td>
         <td style="padding:9px 8px;text-align:right;color:${ac(sAch)};font-weight:600">${fp2(sAch)}</td>
         <td style="padding:9px 8px;text-align:right;color:${sDiff>=0?'var(--c26a)':'var(--loss)'};font-weight:600">${fd(sDiff)}</td>
-        <td style="padding:9px 8px;text-align:right;border-left:2px solid var(--border2)">${fx(d25.p2)}<span style="font-size:9px;color:var(--muted);margin-left:2px">(${mg(d25.p2,d25.s)})</span></td>
-        <td style="padding:9px 8px;text-align:right">${fx(d26p.p2)}<span style="font-size:9px;color:var(--muted);margin-left:2px">(${mg(d26p.p2,d26p.s)})</span></td>
-        <td style="padding:9px 8px;text-align:right;font-weight:700">${fx(d26a.p2)}<span style="font-size:9px;color:var(--muted);margin-left:2px">(${mg(d26a.p2,d26a.s)})</span></td>
+        <td style="padding:6px 8px;text-align:right;border-left:2px solid var(--border2)"><div>${fx(d25.p2)}</div><div style="font-size:9px;color:var(--muted)">${mg(d25.p2,d25.s)}</div></td>
+        <td style="padding:6px 8px;text-align:right"><div>${fx(d26p.p2)}</div><div style="font-size:9px;color:var(--muted)">${mg(d26p.p2,d26p.s)}</div></td>
+        <td style="padding:6px 8px;text-align:right;font-weight:700"><div>${fx(d26a.p2)}</div><div style="font-size:9px;color:var(--muted)">${mg(d26a.p2,d26a.s)}</div></td>
         <td style="padding:9px 8px;text-align:right;color:${ac(pAch)};font-weight:600">${fp2(pAch)}</td>
         <td style="padding:9px 8px;text-align:right;color:${pDiff>=0?'var(--c26a)':'var(--loss)'};font-weight:600">${fd(pDiff)}</td>
       </tr>`;
@@ -1797,9 +1797,9 @@ function renderCC3YTree(containerId, groupDef, dataObj){
       <td style="padding:8px;text-align:right">${fx(T26a.s)}</td>
       <td style="padding:8px;text-align:right;color:${ac(tSach)}">${fp2(tSach)}</td>
       <td style="padding:8px;text-align:right;color:${tSdiff>=0?'var(--c26a)':'var(--loss)'}">${fd(tSdiff)}</td>
-      <td style="padding:8px;text-align:right;border-left:2px solid var(--border2)">${fx(T25.p2)}<span style="font-size:9px;color:var(--muted);margin-left:2px">(${mg(T25.p2,T25.s)})</span></td>
-      <td style="padding:8px;text-align:right">${fx(T26p.p2)}<span style="font-size:9px;color:var(--muted);margin-left:2px">(${mg(T26p.p2,T26p.s)})</span></td>
-      <td style="padding:8px;text-align:right">${fx(T26a.p2)}<span style="font-size:9px;color:var(--muted);margin-left:2px">(${mg(T26a.p2,T26a.s)})</span></td>
+      <td style="padding:6px 8px;text-align:right;border-left:2px solid var(--border2)"><div>${fx(T25.p2)}</div><div style="font-size:9px;color:var(--muted)">${mg(T25.p2,T25.s)}</div></td>
+      <td style="padding:6px 8px;text-align:right"><div>${fx(T26p.p2)}</div><div style="font-size:9px;color:var(--muted)">${mg(T26p.p2,T26p.s)}</div></td>
+      <td style="padding:6px 8px;text-align:right"><div>${fx(T26a.p2)}</div><div style="font-size:9px;color:var(--muted)">${mg(T26a.p2,T26a.s)}</div></td>
       <td style="padding:8px;text-align:right;color:${ac(tPach)}">${fp2(tPach)}</td>
       <td style="padding:8px;text-align:right;color:${tPdiff>=0?'var(--c26a)':'var(--loss)'}">${fd(tPdiff)}</td>
     </tr>`;
