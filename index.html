@@ -712,7 +712,7 @@ thead th{font-size:13px}
 
     <!-- 교재·원격 CC별 상세표 -->
     <div class="full card">
-      <div class="ch"><div><div class="ct">교재·원격 매출 CC별 상세</div><div class="cs">직영수학 / 직영영어 / FC수학 (단위: 백만원)</div></div></div>
+      <div class="ch"><div><div class="ct">교재·원격 매출 상세</div><div class="cs">직영수학 / 직영영어 / FC수학 (단위: 백만원)</div></div></div>
       <div id="mirae_rev_table"></div>
     </div>
   <div id="cb-mirae-m2" class="comment-box" style="display:none"><div class="cb-label"><span>✦</span> COMMENT</div><div class="cb-text" id="cb-text-mirae-m2"></div><div class="cb-date" id="cb-date-mirae-m2"></div></div>
@@ -1958,7 +1958,7 @@ function initMirae(){
       <td style="padding:5px 8px;text-align:right;font-size:14px;${bl}">${d25.total>0?fm(v25):'-'}</td>
       <td style="padding:5px 8px;text-align:right;font-size:14px">${d26p.total>0?fm(v26p):'-'}</td>
       <td style="padding:5px 8px;text-align:right;font-size:14px">${hasData?fm(v26a):'-'}</td>
-      <td style="padding:5px 8px;text-align:right;font-size:12px;color:var(--muted)">${hasData&&d26p.total>0?fPct(v26a,v26p):'-'}</td>
+      <td style="padding:5px 8px;text-align:right;font-size:12px;color:${hasData&&d26p.total>0?(v26a>=v26p?'var(--c26a)':'var(--loss)'):'var(--muted)'}">${hasData&&d26p.total>0?fPct(v26a,v26p):'-'}</td>
       <td style="padding:5px 8px;text-align:right;font-size:12px;color:${diff>=0?'var(--c26a)':'var(--loss)'}">${hasData&&d25.total>0?fDiff(diff):'-'}</td>`;
   };
 
@@ -1983,7 +1983,7 @@ function initMirae(){
     <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;min-width:750px">
       <thead>
         <tr style="background:var(--s3)">
-          <th rowspan="2" style="${thL2}">CC</th>
+          <th rowspan="2" style="${thL2}">구분</th>
           ${thType('교재')}
           ${thType('원격')}
         </tr>
