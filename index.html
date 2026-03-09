@@ -231,45 +231,9 @@ tbody td.indent{padding-left:26px;color:var(--muted2)}
 }
 
 /* ═══════════════════════════════════
-   ② 폰트 ×1.5 (데스크톱)
+   ② 미니카드 수치만 강조 (원래 20px의 ×1.8)
 ═══════════════════════════════════ */
-.hdr-title{font-size:23px}
-.hdr-sub,.dot-live{font-size:17px}
-.pill{font-size:18px}
-.legend-bar{font-size:18px}
-.tab{font-size:20px}
-.subtab{font-size:18px}
-.ct{font-size:20px}.cs{font-size:17px}.cbg{font-size:17px}
-.kpi-box-title{font-size:20px}
-.kpi-item-lbl,.kpi-row-lbl,.kpi-delta{font-size:15px}
-.kpi-row-val{font-size:18px}
-.kpi-main-val{font-size:24px}
-.mc-lbl,.mc-meta{font-size:15px}
-.mc-val{font-size:30px}
-.mc-unit{font-size:17px}
-table{font-size:18px}
-thead th{font-size:17px}
-tbody td{padding:10px 14px}
-.tg{font-size:15px}
-.ach-name,.ach-pct{font-size:17px}
-.ctype-label{font-size:15px}
-.campus-group-name{font-size:20px}
-.campus-group-sum{font-size:18px}
-.cr-name{font-size:18px}
-.cr-sales,.cr-profit{font-size:18px}
-.cr-margin{font-size:17px}
-.stu-card .name{font-size:18px}
-.stu-card .num{font-size:33px}
-.comment-box .cb-text{font-size:20px}
-.comment-box .cb-label,.comment-box .cb-date{font-size:15px}
-.comment-editor textarea{font-size:20px}
-.fsel,.finput{font-size:18px}
-.fcount,.pag{font-size:18px}
-.pbtn{font-size:17px}
-.admin-sec h3{font-size:21px}
-.atab{font-size:17px}
-.utbl{font-size:18px}
-.period-badge{font-size:18px}
+.mc-val{font-size:36px}
 
 /* ═══════════════════════════════════
    ③ 모바일 반응형 (≤768px)
@@ -1395,8 +1359,8 @@ const RAW=[
 // ============================================================
 const CO={responsive:true,maintainAspectRatio:false,
   plugins:{legend:{labels:{color:'#6b7599',font:{size:11},boxWidth:10,padding:10}}},
-  scales:{x:{grid:{color:'#1d2340'},ticks:{color:'#6b7599',font:{size:11}}},
-          y:{grid:{color:'#1d2340'},ticks:{color:'#6b7599',font:{size:11}}}}};
+  scales:{x:{grid:{color:'#1d2340'},ticks:{color:'#8b98c7',font:{size:20}}},
+          y:{grid:{color:'#1d2340'},ticks:{color:'#8b98c7',font:{size:20}}}}};
 
 function mkLine(id,labels,datasets){
   const ctx=document.getElementById(id);
