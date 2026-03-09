@@ -1,0 +1,3271 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>올림피아드교육 손익실적 대시보드</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;900&display=swap');
+:root{
+  --bg:#0b0e1a; --s1:#111525; --s2:#161b2e; --s3:#1d2340;
+  --border:#242a42; --border2:#2e3655;
+  --c25:#4d96f0; --c26p:#9474f0; --c26a:#22bf85;
+  --loss:#e05555; --yellow:#e6aa10;
+  --text:#e2e8f8; --muted:#6b7599; --muted2:#8892b5;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:auto;overflow-y:auto}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif}
+
+/* ── HEADER ── */
+.hdr{background:linear-gradient(135deg,#0b0e1a,#111525);border-bottom:1px solid var(--border);padding:0 28px;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:300}
+.hdr-l{display:flex;align-items:center;gap:12px}
+.logo{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:16px}
+.hdr-title{font-size:15px;font-weight:700}
+.hdr-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.pill{background:var(--s2);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:12px;color:var(--c25)}
+.dot-live{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--c26a)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--c26a);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ── LEGEND ── */
+.legend-bar{background:var(--s1);border-bottom:1px solid var(--border);padding:7px 28px;display:flex;align-items:center;gap:20px;font-size:12px}
+.leg{display:flex;align-items:center;gap:5px}
+.leg-dot{width:11px;height:11px;border-radius:3px}
+
+/* ── TOP TABS (메인) ── */
+.tabs{background:var(--s1);border-bottom:1px solid var(--border);padding:0 28px;display:flex;gap:2px;overflow-x:auto}
+.tab{padding:11px 16px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;flex-shrink:0}
+.tab:hover{color:var(--text)}
+.tab.on{color:var(--c25);border-color:var(--c25)}
+
+/* ── SUBTABS (사업부 내부) ── */
+.subtabs{display:flex;gap:4px;margin-bottom:18px;border-bottom:1px solid var(--border);padding-bottom:0}
+.subtab{padding:8px 16px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s;white-space:nowrap}
+.subtab:hover{color:var(--text)}
+.subtab.on{color:var(--c26a);border-color:var(--c26a)}
+
+/* ── LAYOUT ── */
+.main{padding:20px 28px;padding-bottom:60px}
+.page{display:none}
+.page.on{display:block}
+.subpage{display:none}
+.subpage.on{display:block}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.g3{display:grid;grid-template-columns:3fr 2fr;gap:14px;margin-bottom:14px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
+.g5{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px}
+.full{margin-bottom:14px}
+
+/* ── CARD ── */
+.card{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:18px 20px}
+.ch{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px}
+.ct{font-size:13px;font-weight:600}
+.cs{font-size:11px;color:var(--muted);margin-top:2px}
+.cbg{font-size:11px;background:var(--s2);border:1px solid var(--border);border-radius:14px;padding:3px 10px;color:var(--muted)}
+.cw{position:relative}
+
+/* ── KPI BOX (통합형) ── */
+.kpi-box{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:18px 22px;margin-bottom:14px}
+.kpi-box-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.kpi-box-title{font-size:13px;font-weight:700}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.kpi-item{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:13px 14px}
+.kpi-item-lbl{font-size:10px;color:var(--muted);letter-spacing:.3px;margin-bottom:8px}
+.kpi-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.kpi-row-lbl{font-size:10px}
+.kpi-row-val{font-size:12px;font-weight:700}
+.kpi-divider{height:1px;background:var(--border);margin:5px 0}
+.kpi-main-row{display:flex;justify-content:space-between;align-items:baseline}
+.kpi-main-val{font-size:16px;font-weight:900}
+.kpi-delta{font-size:10px;text-align:right;margin-top:3px}
+
+/* ── METRIC MINI CARDS ── */
+.mini-cards{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px}
+.mini-card{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:17px 16px;position:relative;overflow:hidden}
+.mini-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px}
+.mini-card.c25::after{background:var(--c25)}
+.mini-card.c26a::after{background:var(--c26a)}
+.mini-card.cy::after{background:var(--yellow)}
+.mini-card.cr::after{background:var(--loss)}
+.mc-lbl{font-size:10px;color:var(--muted);margin-bottom:7px;letter-spacing:.3px}
+.mc-val{font-size:20px;font-weight:700;letter-spacing:-1px;line-height:1}
+.mc-unit{font-size:11px;font-weight:400;color:var(--muted);margin-left:2px}
+.mc-meta{font-size:10px;margin-top:6px}
+
+/* ── CAMPUS HIERARCHY ── */
+.campus-group{margin-bottom:18px}
+.campus-group-hd{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.campus-group-name{font-size:13px;font-weight:700;color:var(--text)}
+.campus-group-sum{font-size:12px;color:var(--muted);margin-left:auto}
+.campus-subtree{display:grid;gap:8px}
+/* 고등/일반 구분 */
+.ctype-block{margin-bottom:10px}
+.ctype-label{font-size:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--muted2);margin-bottom:7px;padding-left:2px}
+.campus-row-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px}
+.campus-row{background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:12px 14px;display:flex;align-items:center;gap:10px;transition:border-color .15s}
+.campus-row:hover{border-color:var(--border2)}
+.cr-name{font-size:12px;font-weight:600;width:110px;flex-shrink:0}
+.cr-sales{font-size:12px;font-weight:600;color:var(--c25);min-width:70px;text-align:right}
+.cr-profit{font-size:12px;font-weight:700;min-width:70px;text-align:right}
+.cr-margin{font-size:11px;min-width:46px;text-align:right}
+.cr-bar-wrap{flex:1;height:5px;background:var(--border);border-radius:3px;overflow:hidden}
+.cr-bar{height:100%;border-radius:3px}
+
+/* ── TABLE ── */
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead th{background:var(--s2);padding:9px 12px;text-align:left;font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.4px;border-bottom:1px solid var(--border);white-space:nowrap}
+thead th.r{text-align:right}
+tbody tr{border-bottom:1px solid var(--border);transition:background .12s}
+tbody tr:hover{background:var(--s2)}
+tbody tr.total-row{background:var(--s3);font-weight:700}
+tbody td{padding:9px 12px;white-space:nowrap}
+tbody td.r{text-align:right;font-variant-numeric:tabular-nums}
+tbody td.indent{padding-left:26px;color:var(--muted2)}
+.tg{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600}
+.tg-ok{background:rgba(52,211,153,.15);color:#22bf85}
+.tg-ng{background:rgba(248,113,113,.15);color:#e05555}
+
+/* ── ACHIEVEMENT BAR ── */
+.ach-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)}
+.ach-row:last-child{border:none}
+.ach-name{font-size:11px;width:90px;flex-shrink:0}
+.ach-bar-bg{flex:1;height:7px;background:var(--border);border-radius:4px;overflow:hidden}
+.ach-bar{height:100%;border-radius:4px;transition:width 1s ease}
+.ach-pct{font-size:11px;font-weight:700;width:48px;text-align:right}
+
+/* ── FILTERS / PAGINATION ── */
+.fbar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+.fsel,.finput{background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:7px 12px;font-size:12px;font-family:inherit;outline:none;cursor:pointer}
+.finput{cursor:text;width:210px}
+.finput::placeholder{color:var(--muted)}
+.fsel:focus,.finput:focus{border-color:var(--c25)}
+.fcount{font-size:12px;color:var(--muted);margin-left:auto}
+.pag{display:flex;align-items:center;justify-content:space-between;padding-top:12px;font-size:11px;color:var(--muted)}
+.pbtns{display:flex;gap:3px}
+.pbtn{width:28px;height:28px;background:var(--s2);border:1px solid var(--border);border-radius:5px;color:var(--text);cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.pbtn:hover,.pbtn.on{background:#2d74e8;border-color:#2d74e8;color:#fff}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+/* ── STUDENTS ── */
+.stu-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.stu-card{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.stu-card .name{font-size:12px;font-weight:600;margin-bottom:8px}
+.stu-card .num{font-size:22px;font-weight:700;color:var(--c25);line-height:1}
+.stu-bar-bg{height:5px;background:var(--border);border-radius:3px;margin-top:8px}
+.stu-bar-fill{height:100%;border-radius:3px}
+
+/* ── 당월/YTD 섹션 구분 ── */
+.period-section-hd{display:flex;align-items:center;gap:10px;margin:24px 0 10px}
+.period-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 16px;border-radius:20px;font-size:12px;font-weight:700;letter-spacing:.3px;white-space:nowrap}
+.period-badge.monthly{background:linear-gradient(135deg,#1e3a5f,#2d74e8);color:#fff}
+.period-badge.ytd{background:linear-gradient(135deg,#0f4c3a,#22bf85);color:#fff}
+.period-line{flex:1;height:1px;background:var(--border2)}
+
+/* ── 코멘트 박스 ── */
+.comment-box{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin:14px 0 0}
+.comment-box .cb-label{font-size:10px;font-weight:700;color:var(--c26a);letter-spacing:.8px;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.comment-box .cb-text{font-size:13px;color:var(--fg);line-height:1.7;white-space:pre-wrap}
+.comment-box .cb-date{font-size:10px;color:var(--muted);margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
+.comment-editor{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin:14px 0 0}
+.comment-editor .ce-hd{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.comment-editor .ce-hd-title{font-size:12px;font-weight:600;color:var(--fg)}
+.comment-editor .ce-hd-badge{font-size:10px;font-weight:600;color:var(--c26a);background:#22bf8518;border:1px solid #22bf8540;border-radius:10px;padding:2px 8px}
+.comment-editor textarea{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--fg);resize:vertical;min-height:72px;font-family:inherit;box-sizing:border-box;outline:none;transition:border-color .15s;line-height:1.6}
+.comment-editor textarea:focus{border-color:var(--c26a)}
+.comment-editor .cb-btns{display:flex;gap:8px;margin-top:10px;justify-content:flex-end;align-items:center}
+.cb-save{background:var(--c26a);color:#0d1117;border:none;border-radius:7px;padding:6px 16px;font-size:11px;font-weight:700;cursor:pointer;transition:filter .15s}
+.cb-save:hover{filter:brightness(1.1)}
+.cb-del{background:var(--s2);color:var(--muted);border:1px solid var(--border);border-radius:7px;padding:6px 14px;font-size:11px;cursor:pointer;transition:border-color .15s}
+.cb-del:hover{border-color:var(--loss);color:var(--loss)}
+
+/* ── 인증 오버레이 ── */
+.auth-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9000;display:flex;align-items:center;justify-content:center}
+.auth-panel{background:var(--bg);border:1px solid var(--border2);border-radius:16px;padding:36px 40px;width:400px;max-width:94vw;position:relative;box-shadow:0 24px 60px rgba(0,0,0,.5)}
+.auth-panel h2{font-size:18px;font-weight:700;margin:0 0 4px}
+.auth-sub{font-size:12px;color:var(--muted);margin-bottom:22px}
+.auth-field{margin-bottom:13px}
+.auth-field label{display:block;font-size:11px;font-weight:600;color:var(--muted);margin-bottom:4px}
+.auth-field input,.auth-field select{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--fg);box-sizing:border-box;outline:none;font-family:inherit}
+.auth-field input:focus{border-color:var(--c26a)}
+.auth-btn-primary{width:100%;padding:11px;background:var(--c26a);color:#0d1117;font-weight:700;font-size:14px;border:none;border-radius:8px;cursor:pointer;margin-top:4px}
+.auth-btn-primary:hover{filter:brightness(1.08)}
+.auth-btn-sec{width:100%;padding:10px;background:var(--s2);color:var(--fg);font-weight:600;font-size:13px;border:1px solid var(--border);border-radius:8px;cursor:pointer;margin-top:8px}
+.auth-err{font-size:11px;color:var(--loss);margin-top:6px;min-height:16px}
+.auth-ok{font-size:11px;color:var(--c26a);margin-top:6px;min-height:16px}
+.auth-links{font-size:11px;color:var(--muted);text-align:center;margin-top:14px}
+.auth-links a{color:var(--c26a);cursor:pointer;text-decoration:none}
+.auth-close{position:absolute;top:14px;right:16px;background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer;line-height:1}
+
+/* ── 관리 페이지 ── */
+#pg-admin{padding:0}
+.admin-sec{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:14px}
+.admin-sec h3{font-size:14px;font-weight:700;margin:0 0 14px;display:flex;align-items:center;gap:8px}
+.atab-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.atab{padding:5px 14px;font-size:11px;font-weight:600;border-radius:6px;cursor:pointer;color:var(--muted);border:1px solid var(--border);background:var(--s2)}
+.atab.on{background:var(--c26a);color:#0d1117;border-color:var(--c26a)}
+.utbl{width:100%;border-collapse:collapse;font-size:12px}
+.utbl th{background:var(--s3);padding:7px 12px;text-align:left;color:var(--muted);font-weight:600;border-bottom:2px solid var(--border2)}
+.utbl td{padding:7px 12px;border-bottom:1px solid var(--border)}
+.rbadge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700}
+.rbadge.admin{background:#7c3aed22;color:#7c3aed}
+.rbadge.viewer{background:#0891b222;color:#0891b2}
+.sbadge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700}
+.sbadge.active{background:#22bf8522;color:#22bf85}
+.sbadge.pending{background:#f59e0b22;color:#f59e0b}
+/* admin-only: CSS로 기본 숨김, applyAuth()에서 관리자 시 표시 */
+.admin-only{display:none}
+
+/* ═══════════════════════════════════
+   ① 색상 밝기 +30% (muted 계열)
+═══════════════════════════════════ */
+:root{
+  --muted:#8b98c7;    /* 기존 #6b7599 → +30% */
+  --muted2:#b1beeb;   /* 기존 #8892b5 → +30% */
+  --text:#f0f4ff;     /* 기존 #e2e8f8 → 약간 밝게 */
+}
+
+/* ═══════════════════════════════════
+   ② 폰트 ×1.5 (데스크톱)
+═══════════════════════════════════ */
+.hdr-title{font-size:23px}
+.hdr-sub,.dot-live{font-size:17px}
+.pill{font-size:18px}
+.legend-bar{font-size:18px}
+.tab{font-size:20px}
+.subtab{font-size:18px}
+.ct{font-size:20px}.cs{font-size:17px}.cbg{font-size:17px}
+.kpi-box-title{font-size:20px}
+.kpi-item-lbl,.kpi-row-lbl,.kpi-delta{font-size:15px}
+.kpi-row-val{font-size:18px}
+.kpi-main-val{font-size:24px}
+.mc-lbl,.mc-meta{font-size:15px}
+.mc-val{font-size:30px}
+.mc-unit{font-size:17px}
+table{font-size:18px}
+thead th{font-size:17px}
+tbody td{padding:10px 14px}
+.tg{font-size:15px}
+.ach-name,.ach-pct{font-size:17px}
+.ctype-label{font-size:15px}
+.campus-group-name{font-size:20px}
+.campus-group-sum{font-size:18px}
+.cr-name{font-size:18px}
+.cr-sales,.cr-profit{font-size:18px}
+.cr-margin{font-size:17px}
+.stu-card .name{font-size:18px}
+.stu-card .num{font-size:33px}
+.comment-box .cb-text{font-size:20px}
+.comment-box .cb-label,.comment-box .cb-date{font-size:15px}
+.comment-editor textarea{font-size:20px}
+.fsel,.finput{font-size:18px}
+.fcount,.pag{font-size:18px}
+.pbtn{font-size:17px}
+.admin-sec h3{font-size:21px}
+.atab{font-size:17px}
+.utbl{font-size:18px}
+.period-badge{font-size:18px}
+
+/* ═══════════════════════════════════
+   ③ 모바일 반응형 (≤768px)
+═══════════════════════════════════ */
+@media(max-width:768px){
+  /* 헤더 */
+  .hdr{padding:0 14px;height:48px}
+  .hdr-title{font-size:14px}
+  .hdr-sub,.dot-live,.pill{font-size:11px}
+  .logo{width:28px;height:28px;font-size:13px}
+  /* 범례 */
+  .legend-bar{padding:6px 14px;gap:10px;font-size:11px;flex-wrap:wrap}
+  /* 탭 */
+  .tabs{padding:0 10px}
+  .tab{padding:8px 10px;font-size:12px}
+  .subtabs{flex-wrap:nowrap;overflow-x:auto}
+  .subtab{padding:7px 10px;font-size:11px;white-space:nowrap}
+  /* 메인 패딩 */
+  .main{padding:12px 10px 60px}
+  /* 그리드 → 1열 */
+  .g2,.g3{grid-template-columns:1fr}
+  .g4{grid-template-columns:repeat(2,1fr)}
+  .g5{grid-template-columns:repeat(2,1fr)}
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .stu-grid{grid-template-columns:repeat(2,1fr)}
+  /* 미니카드 → 2열 */
+  .mini-cards{grid-template-columns:repeat(2,1fr)!important}
+  .mc-val{font-size:20px}
+  .mc-lbl,.mc-meta{font-size:10px}
+  .mc-unit{font-size:11px}
+  /* 카드 패딩 */
+  .card{padding:12px 14px}
+  .kpi-box{padding:12px 14px}
+  .kpi-item{padding:10px 12px}
+  .kpi-main-val{font-size:18px}
+  .kpi-row-val{font-size:13px}
+  .kpi-item-lbl,.kpi-row-lbl,.kpi-delta{font-size:11px}
+  /* 캠퍼스 행 */
+  .campus-row-grid{grid-template-columns:1fr}
+  .cr-name{width:80px;font-size:13px}
+  .cr-sales,.cr-profit{font-size:13px}
+  /* 테이블 */
+  table{font-size:11px}
+  thead th{font-size:10px;padding:7px 8px}
+  tbody td{padding:7px 8px}
+  /* 폰트 되돌리기 */
+  .tab{font-size:12px}
+  .subtab{font-size:11px}
+  .ct{font-size:14px}
+  .cs,.cbg{font-size:11px}
+  .campus-group-name{font-size:14px}
+  .campus-group-sum{font-size:12px}
+  .stu-card .name{font-size:12px}
+  .stu-card .num{font-size:22px}
+  .comment-box .cb-text{font-size:14px}
+  .comment-editor textarea{font-size:14px}
+  .fsel,.finput{font-size:13px}
+  .period-badge{font-size:12px}
+  .legend-bar{font-size:11px}
+  /* 인증 패널 */
+  .auth-panel{padding:24px 20px;width:92vw}
+}
+
+@media(max-width:480px){
+  .g4,.g5{grid-template-columns:1fr}
+  .kpi-grid{grid-template-columns:1fr}
+  .mini-cards{grid-template-columns:repeat(2,1fr)!important}
+  .hdr-sub{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-l">
+    <div class="logo">🏫</div>
+    <div>
+      <div class="hdr-title">올림피아드교육 손익실적 대시보드</div>
+      <div class="hdr-sub">2026년 1월 · 손익계산서 기반 자동 집계</div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <div class="pill">2026. 01 실적</div>
+    <div class="dot-live"><div class="dot"></div>Live</div>
+  </div>
+</div>
+
+<div class="legend-bar" style="justify-content:space-between;display:none">
+  <div style="display:flex;align-items:center;gap:10px">
+    <span style="font-size:11px;color:var(--muted)">범례</span>
+    <div class="leg"><div class="leg-dot" style="background:var(--c25)"></div>25년 실적</div>
+    <div class="leg"><div class="leg-dot" style="background:var(--c26p)"></div>26년 계획</div>
+    <div class="leg"><div class="leg-dot" style="background:var(--c26a)"></div>26년 실적</div>
+  </div>
+  <button onclick="openAuth()" id="authBtn" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:5px 14px;font-size:11px;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:6px">
+    🔑 <span id="authBtnLabel">로그인</span>
+  </button>
+</div>
+
+<div class="tabs" id="mainTabs" style="display:none">
+  <div class="tab on"  onclick="goMain('overview',this)">📊 총괄 개요</div>
+  <div class="tab"     onclick="goMain('dept',this)">🏢 사업부 분석</div>
+  <div class="tab"     onclick="goMain('students',this)">👥 재원생 현황</div>
+  <div class="tab admin-only" id="tab-rawdata" onclick="goMain('rawdata',this)">📋 데이터 로우</div>
+  <div class="tab admin-only" id="tab-admin" onclick="goMain('admin',this)">⚙️ 관리</div>
+</div>
+
+<!-- ══ 로그인 전 랜딩 ══ -->
+<div id="landing-screen" style="display:none;min-height:calc(100vh - 110px);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;gap:32px">
+  <div style="text-align:center">
+    <div style="font-size:52px;margin-bottom:16px">🏫</div>
+    <div style="font-size:22px;font-weight:700;color:var(--fg);margin-bottom:8px">올림피아드교육 손익실적 대시보드</div>
+    <div style="font-size:14px;color:var(--muted);line-height:1.7">매월 손익계산서를 기반으로 캠퍼스별 실적을 한눈에 확인하세요.<br>로그인 후 대시보드에 접근할 수 있습니다.</div>
+  </div>
+  <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
+    <button onclick="openAuth('login')" style="background:var(--c26a);color:#0d1117;border:none;border-radius:10px;padding:12px 32px;font-size:14px;font-weight:700;cursor:pointer;transition:filter .15s" onmouseover="this.style.filter='brightness(1.1)'" onmouseout="this.style.filter=''">🔑 로그인</button>
+    <button onclick="openAuth('signup')" style="background:var(--s1);color:var(--fg);border:1px solid var(--border);border-radius:10px;padding:12px 32px;font-size:14px;font-weight:600;cursor:pointer;transition:border-color .15s" onmouseover="this.style.borderColor='var(--c26a)'" onmouseout="this.style.borderColor='var(--border)'">✏️ 회원가입 신청</button>
+  </div>
+  <div style="font-size:11px;color:var(--muted);text-align:center;opacity:.6">접근 권한이 없으신 경우 관리자에게 문의하세요.</div>
+</div>
+
+<div id="dashboard-wrap" style="display:none">
+<div class="main">
+
+<!-- ═══════════════════════════ 총괄 개요 ═══════════════════════════ -->
+<div class="page on" id="pg-overview">
+
+  <!-- KPI 통합 2열 -->
+  <div class="g2" style="margin-bottom:14px">
+    <!-- 1월 실적 -->
+    <div class="kpi-box">
+      <div class="kpi-box-hd">
+        <div class="kpi-box-title">📅 1월 실적</div>
+        <div class="cbg">단위: 백만원</div>
+      </div>
+      <div class="kpi-grid">
+        <div class="kpi-item">
+          <div class="kpi-item-lbl">매출액</div>
+          <div class="kpi-row"><span class="kpi-row-lbl" style="color:var(--c25)">25년</span><span class="kpi-row-val" style="color:var(--c25)">34.1억</span></div>
+          <div class="kpi-row"><span class="kpi-row-lbl" style="color:var(--c26p)">계획</span><span class="kpi-row-val" style="color:var(--c26p)">29.2억</span></div>
+          <div class="kpi-divider"></div>
+          <div class="kpi-main-row"><span class="kpi-row-lbl" style="color:var(--c26a)">실적</span><span class="kpi-main-val" style="color:var(--c26a)">29.8억</span></div>
+          <div class="kpi-delta" style="color:var(--c26a)">계획比 +2.0%</div>
+        </div>
+        <div class="kpi-item">
+          <div class="kpi-item-lbl">판매관리비</div>
+          <div class="kpi-row"><span class="kpi-row-lbl" style="color:var(--c25)">25년</span><span class="kpi-row-val" style="color:var(--c25)">27.8억</span></div>
+          <div class="kpi-row"><span class="kpi-row-lbl" style="color:var(--c26p)">계획</span><span class="kpi-row-val" style="color:var(--c26p)">25.5억</span></div>
+          <div class="kpi-divider"></div>
+          <div class="kpi-main-row"><span class="kpi-row-lbl" style="color:var(--c26a)">실적</span><span class="kpi-main-val" style="color:var(--c26a)">25.6억</span></div>
+          <div class="kpi-delta" style="color:var(--loss)">매출比 85.9%</div>
+        </div>
+        <div class="kpi-item">
+          <div class="kpi-item-lbl">영업이익</div>
+          <div class="kpi-row"><span class="kpi-row-lbl" style="color:var(--c25)">25년</span><span class="kpi-row-val" style="color:var(--c25)">6.3억</span></div>
+          <div class="kpi-row"><span class="kpi-row-lbl" style="color:var(--c26p)">계획</span><span class="kpi-row-val" style="color:var(--c26p)">3.8억</span></div>
+          <div class="kpi-divider"></div>
+          <div class="kpi-main-row"><span class="kpi-row-lbl" style="color:var(--c26a)">실적</span><span class="kpi-main-val" style="color:var(--c26a)">4.2억</span></div>
+          <div class="kpi-delta" style="color:var(--c26a)">계획比 +11.4%</div>
+        </div>
+        <div class="kpi-item">
+          <div class="kpi-item-lbl">영업이익률</div>
+          <div class="kpi-row"><span class="kpi-row-lbl" style="color:var(--c25)">25년</span><span class="kpi-row-val" style="color:var(--c25)">18.5%</span></div>
+          <div class="kpi-row"><span class="kpi-row-lbl" style="color:var(--c26p)">계획</span><span class="kpi-row-val" style="color:var(--c26p)">13.0%</span></div>
+          <div class="kpi-divider"></div>
+          <div class="kpi-main-row"><span class="kpi-row-lbl" style="color:var(--c26a)">실적</span><span class="kpi-main-val" style="color:var(--c26a)">14.1%</span></div>
+          <div class="kpi-delta" style="color:var(--c26a)">계획比 +1.1%p</div>
+        </div>
+      </div>
+    </div>
+    <!-- YTD -->
+    <div class="kpi-box">
+      <div class="kpi-box-hd">
+        <div class="kpi-box-title">📊 YTD 실적 <span style="font-size:11px;font-weight:400;color:var(--muted)">(1월 누적)</span></div>
+        <div class="cbg">단위: 백만원</div>
+      </div>
+      <div class="kpi-grid">
+        <div class="kpi-item">
+          <div class="kpi-item-lbl">매출액 YTD</div>
+          <div class="kpi-row"><span class="kpi-row-lbl" style="color:var(--c25)">25년</span><span class="kpi-row-val" style="color:var(--c25)">34.1억</span></div>
+          <div class="kpi-row"><span class="kpi-row-lbl" style="color:var(--c26p)">계획</span><span class="kpi-row-val" style="color:var(--c26p)">29.2억</span></div>
+          <div class="kpi-divider"></div>
+          <div class="kpi-main-row"><span class="kpi-row-lbl" style="color:var(--c26a)">실적</span><span class="kpi-main-val" style="color:var(--c26a)">29.8억</span></div>
+          <div class="kpi-delta" style="color:var(--c26a)">계획比 +2.0%</div>
+        </div>
+        <div class="kpi-item">
+          <div class="kpi-item-lbl">판관비 YTD</div>
+          <div class="kpi-row"><span class="kpi-row-lbl" style="color:var(--c25)">25년</span><span class="kpi-row-val" style="color:var(--c25)">27.8억</span></div>
+          <div class="kpi-row"><span class="kpi-row-lbl" style="color:var(--c26p)">계획</span><span class="kpi-row-val" style="color:var(--c26p)">25.5억</span></div>
+          <div class="kpi-divider"></div>
+          <div class="kpi-main-row"><span class="kpi-row-lbl" style="color:var(--c26a)">실적</span><span class="kpi-main-val" style="color:var(--c26a)">25.6억</span></div>
+          <div class="kpi-delta" style="color:var(--loss)">매출比 85.9%</div>
+        </div>
+        <div class="kpi-item">
+          <div class="kpi-item-lbl">영업이익 YTD</div>
+          <div class="kpi-row"><span class="kpi-row-lbl" style="color:var(--c25)">25년</span><span class="kpi-row-val" style="color:var(--c25)">6.3억</span></div>
+          <div class="kpi-row"><span class="kpi-row-lbl" style="color:var(--c26p)">계획</span><span class="kpi-row-val" style="color:var(--c26p)">3.8억</span></div>
+          <div class="kpi-divider"></div>
+          <div class="kpi-main-row"><span class="kpi-row-lbl" style="color:var(--c26a)">실적</span><span class="kpi-main-val" style="color:var(--c26a)">4.2억</span></div>
+          <div class="kpi-delta" style="color:var(--c26a)">계획比 +11.4%</div>
+        </div>
+        <div class="kpi-item">
+          <div class="kpi-item-lbl">이익률 YTD</div>
+          <div class="kpi-row"><span class="kpi-row-lbl" style="color:var(--c25)">25년</span><span class="kpi-row-val" style="color:var(--c25)">18.5%</span></div>
+          <div class="kpi-row"><span class="kpi-row-lbl" style="color:var(--c26p)">계획</span><span class="kpi-row-val" style="color:var(--c26p)">13.0%</span></div>
+          <div class="kpi-divider"></div>
+          <div class="kpi-main-row"><span class="kpi-row-lbl" style="color:var(--c26a)">실적</span><span class="kpi-main-val" style="color:var(--c26a)">14.1%</span></div>
+          <div class="kpi-delta" style="color:var(--c26a)">계획比 +1.1%p</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="g3">
+    <div class="card">
+      <div class="ch">
+        <div><div class="ct">누적 매출 비교</div><div class="cs">월별 누적합계 · 25년 실적 · 26년 계획 · 26년 실적 (백만원)</div></div>
+        <div class="cbg">누적</div>
+      </div>
+      <div class="cw" style="height:250px"><canvas id="c_overall_sales"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="ch"><div><div class="ct">26년 1월 목표달성률</div><div class="cs">사업부별 실적/계획</div></div></div>
+      <div id="ach_list" style="display:flex;flex-direction:column;gap:2px;margin-top:6px"></div>
+    </div>
+  </div>
+
+
+  <div id="cb-ov-s1" class="comment-box" style="display:none">
+    <div class="cb-label"><span>✦</span> COMMENT</div>
+    <div class="cb-text" id="cb-text-ov-s1"></div>
+    <div class="cb-date" id="cb-date-ov-s1"></div>
+  </div>
+  <div id="ce-ov-s1" class="comment-editor">
+    <div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div>
+    <textarea id="ce-text-ov-s1" placeholder="코멘트를 입력하세요..."></textarea>
+    <div class="cb-btns">
+      <button class="cb-del" onclick="deleteComment('ov-s1')">삭제</button>
+      <button class="cb-save" onclick="saveComment('ov-s1')">저장</button>
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="ch"><div><div class="ct">누적 영업이익 비교</div><div class="cs">월별 누적합계 (백만원)</div></div></div>
+      <div class="cw" style="height:220px"><canvas id="c_overall_profit"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="ch"><div><div class="ct">사업부별 매출 구성 (26년 1월 실적)</div></div></div>
+      <div class="cw" style="height:220px"><canvas id="c_dept_pie"></canvas></div>
+    </div>
+  </div>
+
+  <div id="cb-ov-s2" class="comment-box" style="display:none">
+    <div class="cb-label"><span>✦</span> COMMENT</div>
+    <div class="cb-text" id="cb-text-ov-s2"></div>
+    <div class="cb-date" id="cb-date-ov-s2"></div>
+  </div>
+  <div id="ce-ov-s2" class="comment-editor">
+    <div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div>
+    <textarea id="ce-text-ov-s2" placeholder="코멘트를 입력하세요..."></textarea>
+    <div class="cb-btns">
+      <button class="cb-del" onclick="deleteComment('ov-s2')">삭제</button>
+      <button class="cb-save" onclick="saveComment('ov-s2')">저장</button>
+    </div>
+  </div>
+
+</div><!-- /overview -->
+
+<!-- ═══════════════════════════ 사업부 분석 ═══════════════════════════ -->
+<div class="page" id="pg-dept">
+
+  <!-- 사업부 서브탭 -->
+  <div class="subtabs" id="deptSubtabs">
+    <div class="subtab on"  onclick="goDept('hakwon',this)">🏫 학원사업본부</div>
+    <div class="subtab"     onclick="goDept('u2m',this)">📐 U2M사업본부</div>
+    <div class="subtab"     onclick="goDept('mirae',this)">📡 미래교육사업본부</div>
+    <div class="subtab"     onclick="goDept('bghu',this)">🧒 방과후사업본부</div>
+    <div class="subtab"     onclick="goDept('mgmt',this)">🗂 경영기획실</div>
+  </div>
+
+  <!-- ── 학원사업본부 ── -->
+  <div class="subpage on" id="sp-hakwon">
+    <div class="mini-cards" style="grid-template-columns:repeat(4,1fr)">
+      <div class="mini-card c26a">
+        <div class="mc-lbl">학원사업본부 매출</div>
+        <div class="mc-val">15.5<span class="mc-unit">억</span></div>
+        <div class="mc-meta" style="color:var(--c25)">25년比 -1.0억 (-6.3%) &nbsp;|&nbsp; <span style="color:var(--c26p)">계획比 +0.2억 (+1.2%)</span></div>
+      </div>
+      <div class="mini-card cr">
+        <div class="mc-lbl">판매관리비</div>
+        <div class="mc-val">10.9<span class="mc-unit">억</span></div>
+        <div class="mc-meta" style="color:var(--muted)">매출比 70.5%</div>
+      </div>
+      <div class="mini-card c26a">
+        <div class="mc-lbl">영업이익 (공통비제외)</div>
+        <div style="font-size:10px;color:var(--muted);margin-bottom:4px">공통비 포함</div>
+        <div class="mc-val">5.05<span class="mc-unit">억</span></div>
+        <div class="mc-meta" style="color:var(--c26a)">이익률 32.6%</div>
+      </div>
+      <div class="mini-card cy">
+        <div class="mc-lbl">캠퍼스 수</div>
+        <div class="mc-val">4<span class="mc-unit">개</span></div>
+        <div class="mc-meta" style="color:var(--muted)">광진·동대문·성동·중랑</div>
+      </div>
+    </div>
+
+
+    <div class="period-section-hd">
+      <span class="period-badge monthly">📅 당월 (1월)</span>
+      <div class="period-line"></div>
+    </div>
+    <div class="full card">
+      <div class="ch"><div><div class="ct">캠퍼스별 매출·영업이익 비교</div><div class="cs">1월 실적 (백만원)</div></div></div>
+      <div class="cw" style="height:230px"><canvas id="c_hak_campus"></canvas></div>
+    </div>
+  <div id="cb-hak-m1" class="comment-box" style="display:none"><div class="cb-label"><span>✦</span> COMMENT</div><div class="cb-text" id="cb-text-hak-m1"></div><div class="cb-date" id="cb-date-hak-m1"></div></div>
+  <div id="ce-hak-m1" class="comment-editor"><div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div><textarea id="ce-text-hak-m1" placeholder="코멘트를 입력하세요..."></textarea><div class="cb-btns"><button class="cb-del" onclick="deleteComment('hak-m1')">삭제</button><button class="cb-save" onclick="saveComment('hak-m1')">저장</button></div></div>
+
+    <div class="full card">
+      <div class="ch"><div><div class="ct">캠퍼스별 손익 <span style="font-size:11px;font-weight:400;color:var(--muted);margin-left:6px;background:var(--s3);padding:2px 8px;border-radius:10px;border:1px solid var(--border)">공통비 포함</span></div><div class="cs">단위: 백만원 · 25년 실적 / 26년 계획 / 26년 실적</div></div></div>
+      <div id="hakwon_tree"></div>
+    </div>
+  <div id="cb-hak-m2" class="comment-box" style="display:none"><div class="cb-label"><span>✦</span> COMMENT</div><div class="cb-text" id="cb-text-hak-m2"></div><div class="cb-date" id="cb-date-hak-m2"></div></div>
+  <div id="ce-hak-m2" class="comment-editor"><div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div><textarea id="ce-text-hak-m2" placeholder="코멘트를 입력하세요..."></textarea><div class="cb-btns"><button class="cb-del" onclick="deleteComment('hak-m2')">삭제</button><button class="cb-save" onclick="saveComment('hak-m2')">저장</button></div></div>
+
+    <div class="full card">
+      <div class="ch"><div><div class="ct">판매관리비 항목별 분석</div><div class="cs">25년 실적 · 26년 계획 · 26년 실적 · 매출比(%)</div></div></div>
+      <div id="hak_cost_table"></div>
+    </div>
+
+
+  <div id="cb-hak-s1" class="comment-box" style="display:none">
+    <div class="cb-label"><span>✦</span> COMMENT</div>
+    <div class="cb-text" id="cb-text-hak-s1"></div>
+    <div class="cb-date" id="cb-date-hak-s1"></div>
+  </div>
+  <div id="ce-hak-s1" class="comment-editor">
+    <div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div>
+    <textarea id="ce-text-hak-s1" placeholder="코멘트를 입력하세요..."></textarea>
+    <div class="cb-btns">
+      <button class="cb-del" onclick="deleteComment('hak-s1')">삭제</button>
+      <button class="cb-save" onclick="saveComment('hak-s1')">저장</button>
+    </div>
+  </div>
+
+    <div class="period-section-hd">
+      <span class="period-badge ytd">📊 YTD 누적 (1~1월)</span>
+      <div class="period-line"></div>
+    </div>
+    <div class="full card">
+      <div class="ch"><div><div class="ct">YTD 캠퍼스별 손익 누적</div><div class="cs">25년 실적 / 26년 계획 / 26년 실적 누적합계</div></div></div>
+      <div id="hakwon_tree_ytd"><p style="padding:20px;text-align:center;color:var(--muted);font-size:12px;margin:0">1월 기준: 당월 = YTD</p></div>
+    </div>
+
+  <div id="cb-hak-s2" class="comment-box" style="display:none">
+    <div class="cb-label"><span>✦</span> COMMENT</div>
+    <div class="cb-text" id="cb-text-hak-s2"></div>
+    <div class="cb-date" id="cb-date-hak-s2"></div>
+  </div>
+  <div id="ce-hak-s2" class="comment-editor">
+    <div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div>
+    <textarea id="ce-text-hak-s2" placeholder="코멘트를 입력하세요..."></textarea>
+    <div class="cb-btns">
+      <button class="cb-del" onclick="deleteComment('hak-s2')">삭제</button>
+      <button class="cb-save" onclick="saveComment('hak-s2')">저장</button>
+    </div>
+  </div>
+  </div><!-- /sp-hakwon -->
+
+  <!-- ── U2M사업본부 ── -->
+  <div class="subpage" id="sp-u2m">
+    <div class="mini-cards">
+      <div class="mini-card c26a"><div class="mc-lbl">U2M 매출</div><div class="mc-val">3.8<span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--c25)">25년比 -0.05억 (-1.2%) &nbsp;|&nbsp; <span style="color:var(--c26p)">계획比 +0.6억 (+18.9%)</span></div></div>
+      <div class="mini-card cr"><div class="mc-lbl">판매관리비</div><div class="mc-val">3.3<span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--muted)">매출比 88.0%</div></div>
+      <div class="mini-card c26a"><div class="mc-lbl">영업이익 (공통비제외)</div><div style="font-size:10px;color:var(--muted);margin-bottom:4px">공통비 포함</div><div class="mc-val">0.26<span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--c26a)">이익률 6.8%</div></div>
+      <div class="mini-card cy"><div class="mc-lbl">캠퍼스 수</div><div class="mc-val">4<span class="mc-unit">개</span></div><div class="mc-meta" style="color:var(--muted)">미사·송파방이·위례·중계</div></div>
+      <div class="mini-card c26a"><div class="mc-lbl">가맹사업 매출</div><div class="mc-val"><span id="u2m-val-franchise">0.05</span><span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--muted)">교육넷 가맹비수입</div></div>
+    </div>
+
+    <div class="period-section-hd">
+      <span class="period-badge monthly">📅 당월 (1월)</span>
+      <div class="period-line"></div>
+    </div>
+    <div class="full card">
+      <div class="ch"><div><div class="ct">캠퍼스별 매출·영업이익</div><div class="cs">1월 실적 (백만원)</div></div></div>
+      <div class="cw" style="height:230px"><canvas id="c_u2m_bar"></canvas></div>
+    </div>
+  <div id="cb-u2m-m1" class="comment-box" style="display:none"><div class="cb-label"><span>✦</span> COMMENT</div><div class="cb-text" id="cb-text-u2m-m1"></div><div class="cb-date" id="cb-date-u2m-m1"></div></div>
+  <div id="ce-u2m-m1" class="comment-editor"><div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div><textarea id="ce-text-u2m-m1" placeholder="코멘트를 입력하세요..."></textarea><div class="cb-btns"><button class="cb-del" onclick="deleteComment('u2m-m1')">삭제</button><button class="cb-save" onclick="saveComment('u2m-m1')">저장</button></div></div>
+
+    <div class="full card">
+      <div class="ch"><div><div class="ct">캠퍼스별 손익 <span style="font-size:11px;font-weight:400;color:var(--muted);margin-left:6px;background:var(--s3);padding:2px 8px;border-radius:10px;border:1px solid var(--border)">공통비 포함</span></div><div class="cs">단위: 백만원 · 25년 실적 / 26년 계획 / 26년 실적</div></div></div>
+      <div id="u2m_tree"></div>
+    </div>
+  <div id="cb-u2m-m2" class="comment-box" style="display:none"><div class="cb-label"><span>✦</span> COMMENT</div><div class="cb-text" id="cb-text-u2m-m2"></div><div class="cb-date" id="cb-date-u2m-m2"></div></div>
+  <div id="ce-u2m-m2" class="comment-editor"><div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div><textarea id="ce-text-u2m-m2" placeholder="코멘트를 입력하세요..."></textarea><div class="cb-btns"><button class="cb-del" onclick="deleteComment('u2m-m2')">삭제</button><button class="cb-save" onclick="saveComment('u2m-m2')">저장</button></div></div>
+
+    <div class="full card">
+      <div class="ch"><div><div class="ct">판매관리비 항목별 분석</div><div class="cs">25년 실적 · 26년 계획 · 26년 실적 · 매출比(%)</div></div></div>
+      <div id="u2m_cost_table"></div>
+    </div>
+
+      <div id="cb-u2m-s1" class="comment-box" style="display:none">
+    <div class="cb-label"><span>✦</span> COMMENT</div>
+    <div class="cb-text" id="cb-text-u2m-s1"></div>
+    <div class="cb-date" id="cb-date-u2m-s1"></div>
+  </div>
+  <div id="ce-u2m-s1" class="comment-editor">
+    <div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div>
+    <textarea id="ce-text-u2m-s1" placeholder="코멘트를 입력하세요..."></textarea>
+    <div class="cb-btns">
+      <button class="cb-del" onclick="deleteComment('u2m-s1')">삭제</button>
+      <button class="cb-save" onclick="saveComment('u2m-s1')">저장</button>
+    </div>
+  </div>
+
+    <div class="period-section-hd">
+      <span class="period-badge ytd">📊 YTD 누적 (1~1월)</span>
+      <div class="period-line"></div>
+    </div>
+    <div class="full card">
+      <div class="ch"><div><div class="ct">YTD 캠퍼스별 손익 누적</div><div class="cs">25년 실적 / 26년 계획 / 26년 실적 누적합계</div></div></div>
+      <div id="u2m_tree_ytd"><p style="padding:20px;text-align:center;color:var(--muted);font-size:12px;margin:0">1월 기준: 당월 = YTD</p></div>
+    </div>
+
+  <div id="cb-u2m-s2" class="comment-box" style="display:none">
+    <div class="cb-label"><span>✦</span> COMMENT</div>
+    <div class="cb-text" id="cb-text-u2m-s2"></div>
+    <div class="cb-date" id="cb-date-u2m-s2"></div>
+  </div>
+  <div id="ce-u2m-s2" class="comment-editor">
+    <div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div>
+    <textarea id="ce-text-u2m-s2" placeholder="코멘트를 입력하세요..."></textarea>
+    <div class="cb-btns">
+      <button class="cb-del" onclick="deleteComment('u2m-s2')">삭제</button>
+      <button class="cb-save" onclick="saveComment('u2m-s2')">저장</button>
+    </div>
+  </div>
+  </div><!-- /sp-u2m -->
+
+  <!-- ── 미래교육사업본부 ── -->
+  <div class="subpage" id="sp-mirae">
+    <div class="mini-cards">
+      <div class="mini-card c26a"><div class="mc-lbl">미래교육 전체 매출</div><div class="mc-val">3.9<span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--muted)">26년 1월 실적</div></div>
+      <div class="mini-card c26a"><div class="mc-lbl">교재 매출</div><div class="mc-val">1.1<span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--muted)">도서수입 합계</div></div>
+      <div class="mini-card c26a"><div class="mc-lbl">원격 매출</div><div class="mc-val">2.9<span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--muted)">온라인컨텐츠수입 합계</div></div>
+      <div class="mini-card cr"><div class="mc-lbl">판매관리비</div><div class="mc-val">3.5<span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--muted)">매출比 88.5%</div></div>
+      <div class="mini-card c26a"><div class="mc-lbl">영업이익</div><div class="mc-val">0.45<span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--c26a)">이익률 11.5%</div></div>
+    </div>
+
+    <div class="period-section-hd">
+      <span class="period-badge monthly">📅 당월 (1월)</span>
+      <div class="period-line"></div>
+    </div>
+    <!-- 교재·원격 매출 그래프 -->
+    <div class="full card">
+      <div class="ch"><div><div class="ct">교재·원격 매출 구성</div><div class="cs">CC별 각각 비교 (백만원)</div></div></div>
+      <div class="cw" style="height:240px"><canvas id="c_mirae_bar"></canvas></div>
+    </div>
+  <div id="cb-mirae-m1" class="comment-box" style="display:none"><div class="cb-label"><span>✦</span> COMMENT</div><div class="cb-text" id="cb-text-mirae-m1"></div><div class="cb-date" id="cb-date-mirae-m1"></div></div>
+  <div id="ce-mirae-m1" class="comment-editor"><div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div><textarea id="ce-text-mirae-m1" placeholder="코멘트를 입력하세요..."></textarea><div class="cb-btns"><button class="cb-del" onclick="deleteComment('mirae-m1')">삭제</button><button class="cb-save" onclick="saveComment('mirae-m1')">저장</button></div></div>
+
+    <!-- 교재·원격 CC별 상세표 -->
+    <div class="full card">
+      <div class="ch"><div><div class="ct">교재·원격 매출 CC별 상세</div><div class="cs">직영수학 / 직영영어 / FC수학 (단위: 천원)</div></div></div>
+      <div id="mirae_rev_table"></div>
+    </div>
+  <div id="cb-mirae-m2" class="comment-box" style="display:none"><div class="cb-label"><span>✦</span> COMMENT</div><div class="cb-text" id="cb-text-mirae-m2"></div><div class="cb-date" id="cb-date-mirae-m2"></div></div>
+  <div id="ce-mirae-m2" class="comment-editor"><div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div><textarea id="ce-text-mirae-m2" placeholder="코멘트를 입력하세요..."></textarea><div class="cb-btns"><button class="cb-del" onclick="deleteComment('mirae-m2')">삭제</button><button class="cb-save" onclick="saveComment('mirae-m2')">저장</button></div></div>
+
+    <!-- 판매관리비 주요 계정 3년 비교 (맨 아래) -->
+    <div class="full card">
+      <div class="ch"><div><div class="ct">판매관리비 주요 계정</div><div class="cs">25년 실적 · 26년 계획 · 26년 실적 비교 (단위: 천원)</div></div></div>
+      <div id="mirae_cost_detail"></div>
+    </div>
+
+      <div id="cb-mirae-s1" class="comment-box" style="display:none">
+    <div class="cb-label"><span>✦</span> COMMENT</div>
+    <div class="cb-text" id="cb-text-mirae-s1"></div>
+    <div class="cb-date" id="cb-date-mirae-s1"></div>
+  </div>
+  <div id="ce-mirae-s1" class="comment-editor">
+    <div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div>
+    <textarea id="ce-text-mirae-s1" placeholder="코멘트를 입력하세요..."></textarea>
+    <div class="cb-btns">
+      <button class="cb-del" onclick="deleteComment('mirae-s1')">삭제</button>
+      <button class="cb-save" onclick="saveComment('mirae-s1')">저장</button>
+    </div>
+  </div>
+
+    <div class="period-section-hd">
+      <span class="period-badge ytd">📊 YTD 누적 (1~1월)</span>
+      <div class="period-line"></div>
+    </div>
+    <div class="full card">
+      <div class="ch"><div><div class="ct">YTD 교재·원격 매출 누적</div><div class="cs">25년 실적 / 26년 계획 / 26년 실적 누적합계</div></div></div>
+      <div id="mirae_rev_ytd"><p style="padding:20px;text-align:center;color:var(--muted);font-size:12px;margin:0">1월 기준: 당월 = YTD</p></div>
+    </div>
+
+  <div id="cb-mirae-s2" class="comment-box" style="display:none">
+    <div class="cb-label"><span>✦</span> COMMENT</div>
+    <div class="cb-text" id="cb-text-mirae-s2"></div>
+    <div class="cb-date" id="cb-date-mirae-s2"></div>
+  </div>
+  <div id="ce-mirae-s2" class="comment-editor">
+    <div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div>
+    <textarea id="ce-text-mirae-s2" placeholder="코멘트를 입력하세요..."></textarea>
+    <div class="cb-btns">
+      <button class="cb-del" onclick="deleteComment('mirae-s2')">삭제</button>
+      <button class="cb-save" onclick="saveComment('mirae-s2')">저장</button>
+    </div>
+  </div>
+  </div><!-- /sp-mirae -->
+
+  <!-- ── 방과후사업본부 ── -->
+  <div class="subpage" id="sp-bghu">
+    <div class="mini-cards">
+      <div class="mini-card c26a"><div class="mc-lbl">전체 매출</div><div class="mc-val"><span id="bghu-val-total">6.6</span><span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--muted)">26년 1월 실적</div></div>
+      <div class="mini-card c26a"><div class="mc-lbl">수업료</div><div class="mc-val"><span id="bghu-val-suup">5.8</span><span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--muted)">계정: 방과후학교</div></div>
+      <div class="mini-card c26a"><div class="mc-lbl">재료비 매출</div><div class="mc-val"><span id="bghu-val-jae">0.8</span><span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--muted)">계정: 재료비수입</div></div>
+      <div class="mini-card cr"><div class="mc-lbl">판매관리비</div><div class="mc-val">7.1<span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--loss)">매출比 107.2%</div></div>
+      <div class="mini-card cr"><div class="mc-lbl">영업손실</div><div class="mc-val">-0.47<span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--loss)">이익률 -7.2%</div></div>
+    </div>
+    <div class="g2">
+      <div class="card">
+        <div class="ch"><div><div class="ct">방과후 손익 현황</div><div class="cs">1월 실적 (백만원)</div></div></div>
+        <div class="cw" style="height:230px"><canvas id="c_bgh_bar"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="ch"><div><div class="ct">비용 구성</div><div class="cs">항목별 금액</div></div></div>
+        <div class="cw" style="height:230px"><canvas id="c_bgh_cost"></canvas></div>
+      </div>
+    </div>
+  <div id="cb-bghu-m1" class="comment-box" style="display:none"><div class="cb-label"><span>✦</span> COMMENT</div><div class="cb-text" id="cb-text-bghu-m1"></div><div class="cb-date" id="cb-date-bghu-m1"></div></div>
+  <div id="ce-bghu-m1" class="comment-editor"><div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div><textarea id="ce-text-bghu-m1" placeholder="코멘트를 입력하세요..."></textarea><div class="cb-btns"><button class="cb-del" onclick="deleteComment('bghu-m1')">삭제</button><button class="cb-save" onclick="saveComment('bghu-m1')">저장</button></div></div>
+
+    <div class="full card">
+      <div class="ch"><div><div class="ct">판매관리비 주요 계정</div><div class="cs">26년 1월 실적 (단위: 천원)</div></div></div>
+      <div id="bgh_cost_table"></div>
+    </div>
+  <div id="cb-bghu-s2" class="comment-box" style="display:none"><div class="cb-label"><span>✦</span> COMMENT</div><div class="cb-text" id="cb-text-bghu-s2"></div><div class="cb-date" id="cb-date-bghu-s2"></div></div>
+  <div id="ce-bghu-s2" class="comment-editor"><div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div><textarea id="ce-text-bghu-s2" placeholder="코멘트를 입력하세요..."></textarea><div class="cb-btns"><button class="cb-del" onclick="deleteComment('bghu-s2')">삭제</button><button class="cb-save" onclick="saveComment('bghu-s2')">저장</button></div></div>
+
+    <div id="cb-bghu-s1" class="comment-box" style="display:none">
+    <div class="cb-label"><span>✦</span> COMMENT</div>
+    <div class="cb-text" id="cb-text-bghu-s1"></div>
+    <div class="cb-date" id="cb-date-bghu-s1"></div>
+  </div>
+  <div id="ce-bghu-s1" class="comment-editor">
+    <div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div>
+    <textarea id="ce-text-bghu-s1" placeholder="코멘트를 입력하세요..."></textarea>
+    <div class="cb-btns">
+      <button class="cb-del" onclick="deleteComment('bghu-s1')">삭제</button>
+      <button class="cb-save" onclick="saveComment('bghu-s1')">저장</button>
+    </div>
+  </div>
+  </div><!-- /sp-bghu -->
+
+  <!-- ── 경영기획실 ── -->
+  <div class="subpage" id="sp-mgmt">
+    <div class="mini-cards">
+      <div class="mini-card cr"><div class="mc-lbl">매출</div><div class="mc-val">0<span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--muted)">매출 없음</div></div>
+      <div class="mini-card cr"><div class="mc-lbl">판매관리비</div><div class="mc-val">0.40<span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--muted)">경영기획실</div></div>
+      <div class="mini-card cr"><div class="mc-lbl">영업손실</div><div class="mc-val">-0.40<span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--loss)">전액 비용</div></div>
+      <div class="mini-card cy"><div class="mc-lbl">주요 비용</div><div class="mc-val">인건비</div><div class="mc-meta" style="color:var(--muted)">급여·퇴직금</div></div>
+      <div class="mini-card c26a"><div class="mc-lbl">26년 계획</div><div class="mc-val">0.43<span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--c26p)">계획比 93.8%</div></div>
+    </div>
+    <div class="g2">
+      <div class="card">
+        <div class="ch"><div><div class="ct">경영기획실 비용 구성</div><div class="cs">항목별 (백만원)</div></div></div>
+        <div class="cw" style="height:230px"><canvas id="c_mgmt_cost"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="ch"><div><div class="ct">비용 추이</div><div class="cs">25년 · 26년 계획 · 26년 실적</div></div></div>
+        <div class="cw" style="height:230px"><canvas id="c_mgmt_trend"></canvas></div>
+      </div>
+    </div>
+  <div id="cb-mgmt-m1" class="comment-box" style="display:none"><div class="cb-label"><span>✦</span> COMMENT</div><div class="cb-text" id="cb-text-mgmt-m1"></div><div class="cb-date" id="cb-date-mgmt-m1"></div></div>
+  <div id="ce-mgmt-m1" class="comment-editor"><div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div><textarea id="ce-text-mgmt-m1" placeholder="코멘트를 입력하세요..."></textarea><div class="cb-btns"><button class="cb-del" onclick="deleteComment('mgmt-m1')">삭제</button><button class="cb-save" onclick="saveComment('mgmt-m1')">저장</button></div></div>
+
+    <div class="full card">
+      <div class="ch"><div><div class="ct">판매관리비 주요 계정</div><div class="cs">26년 1월 실적 (단위: 천원)</div></div></div>
+      <div id="mgmt_cost_table"></div>
+    </div>
+  <div id="cb-mgmt-s2" class="comment-box" style="display:none"><div class="cb-label"><span>✦</span> COMMENT</div><div class="cb-text" id="cb-text-mgmt-s2"></div><div class="cb-date" id="cb-date-mgmt-s2"></div></div>
+  <div id="ce-mgmt-s2" class="comment-editor"><div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div><textarea id="ce-text-mgmt-s2" placeholder="코멘트를 입력하세요..."></textarea><div class="cb-btns"><button class="cb-del" onclick="deleteComment('mgmt-s2')">삭제</button><button class="cb-save" onclick="saveComment('mgmt-s2')">저장</button></div></div>
+
+    <div id="cb-mgmt-s1" class="comment-box" style="display:none">
+    <div class="cb-label"><span>✦</span> COMMENT</div>
+    <div class="cb-text" id="cb-text-mgmt-s1"></div>
+    <div class="cb-date" id="cb-date-mgmt-s1"></div>
+  </div>
+  <div id="ce-mgmt-s1" class="comment-editor">
+    <div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div>
+    <textarea id="ce-text-mgmt-s1" placeholder="코멘트를 입력하세요..."></textarea>
+    <div class="cb-btns">
+      <button class="cb-del" onclick="deleteComment('mgmt-s1')">삭제</button>
+      <button class="cb-save" onclick="saveComment('mgmt-s1')">저장</button>
+    </div>
+  </div>
+  </div><!-- /sp-mgmt -->
+
+</div><!-- /dept -->
+
+<!-- ═══════════════════════════ 재원생 현황 ═══════════════════════════ -->
+<div class="page" id="pg-students">
+
+  <!-- 월 선택 + KPI 요약 (동적) -->
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+    <span style="font-size:13px;font-weight:600">기준 월</span>
+    <div style="display:flex;gap:4px" id="month_btns">
+      <button class="pbtn on" onclick="setStuMonth(0,this)">1월</button>
+      <button class="pbtn" onclick="setStuMonth(1,this)">2월</button>
+    </div>
+    <span style="font-size:11px;color:var(--muted)" id="stu_month_label">2026년 1월 실적 기준</span>
+  </div>
+
+  <!-- KPI 카드 (동적) -->
+  <div id="stu_kpi_cards" class="mini-cards" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px"></div>
+
+  <!-- 차트 영역 (그래프 먼저) -->
+  <div class="g2" style="margin-bottom:16px">
+    <div class="card">
+      <div class="ch">
+        <div><div class="ct">캠퍼스별 재원생 비교</div><div class="cs" id="stu_bar_label">1월 기준 · 25년 vs 26년 (명)</div></div>
+      </div>
+      <div class="cw" style="height:260px"><canvas id="c_stu_bar"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="ch">
+        <div><div class="ct">캠퍼스 월별 추이</div><div class="cs">25년 전체(1~12월) · 26년 누적 실적 비교</div></div>
+        <select class="fsel" id="stu_campus_sel" onchange="updateStudentTrend()" style="font-size:12px;padding:5px 10px">
+          <option value="광진">광진</option><option value="성동">성동</option>
+          <option value="동대문">동대문</option><option value="중랑">중랑</option>
+          <option value="중계">중계</option><option value="송파방이">송파방이</option>
+          <option value="위례">위례</option><option value="미사">미사</option>
+        </select>
+      </div>
+      <div class="cw" style="height:240px"><canvas id="c_stu_trend"></canvas></div>
+    </div>
+  </div>
+
+
+  <div id="cb-stu-s1" class="comment-box" style="display:none">
+    <div class="cb-label"><span>✦</span> COMMENT</div>
+    <div class="cb-text" id="cb-text-stu-s1"></div>
+    <div class="cb-date" id="cb-date-stu-s1"></div>
+  </div>
+  <div id="ce-stu-s1" class="comment-editor">
+    <div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div>
+    <textarea id="ce-text-stu-s1" placeholder="코멘트를 입력하세요..."></textarea>
+    <div class="cb-btns">
+      <button class="cb-del" onclick="deleteComment('stu-s1')">삭제</button>
+      <button class="cb-save" onclick="saveComment('stu-s1')">저장</button>
+    </div>
+  </div>
+
+  <!-- 수학/영어 분리 차트 -->
+  <div class="g2" style="margin-bottom:16px">
+    <div class="card">
+      <div class="ch"><div><div class="ct" id="stu_math_title">수학 과목별 재원생 (1월)</div><div class="cs">초중 · 영재 · 고등 · 26년 실적 vs 25년 실적</div></div></div>
+      <div class="cw" style="height:230px"><canvas id="c_stu_math"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="ch"><div><div class="ct" id="stu_eng_title">영어 과목별 재원생 (1월)</div><div class="cs">초중 · 고등 · 학원사업본부 캠퍼스</div></div></div>
+      <div class="cw" style="height:230px"><canvas id="c_stu_eng"></canvas></div>
+    </div>
+  </div>
+
+
+  <div id="cb-stu-s2" class="comment-box" style="display:none">
+    <div class="cb-label"><span>✦</span> COMMENT</div>
+    <div class="cb-text" id="cb-text-stu-s2"></div>
+    <div class="cb-date" id="cb-date-stu-s2"></div>
+  </div>
+  <div id="ce-stu-s2" class="comment-editor">
+    <div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div>
+    <textarea id="ce-text-stu-s2" placeholder="코멘트를 입력하세요..."></textarea>
+    <div class="cb-btns">
+      <button class="cb-del" onclick="deleteComment('stu-s2')">삭제</button>
+      <button class="cb-save" onclick="saveComment('stu-s2')">저장</button>
+    </div>
+  </div>
+
+  <!-- 캠퍼스 카드 (그래프 아래) -->
+  <div style="margin-bottom:8px;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.5px">🏫 학원사업본부 캠퍼스별 재원생</div>
+  <div id="stu_hak_cards" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px"></div>
+
+  <div style="margin-bottom:8px;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.5px">📐 U2M사업본부 캠퍼스별 재원생</div>
+  <div id="stu_u2m_cards" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px"></div>
+
+
+  <div id="cb-stu-s3" class="comment-box" style="display:none">
+    <div class="cb-label"><span>✦</span> COMMENT</div>
+    <div class="cb-text" id="cb-text-stu-s3"></div>
+    <div class="cb-date" id="cb-date-stu-s3"></div>
+  </div>
+  <div id="ce-stu-s3" class="comment-editor">
+    <div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div>
+    <textarea id="ce-text-stu-s3" placeholder="코멘트를 입력하세요..."></textarea>
+    <div class="cb-btns">
+      <button class="cb-del" onclick="deleteComment('stu-s3')">삭제</button>
+      <button class="cb-save" onclick="saveComment('stu-s3')">저장</button>
+    </div>
+  </div>
+
+  <!-- 당월 상세표 -->
+  <div class="full card">
+    <div class="ch"><div><div class="ct" id="stu_table_title">캠퍼스별 재원생 상세표 (1월)</div><div class="cs">수학(초중/영재/고등) + 영어(초중/고등) · 전년 대비</div></div></div>
+    <div class="tw"><table>
+      <thead><tr>
+        <th>캠퍼스</th>
+        <th class="r" style="color:var(--c26a)">26년<br>합계</th>
+        <th class="r">수학<br>소계</th>
+        <th class="r" style="color:var(--muted)">└초중</th>
+        <th class="r" style="color:var(--muted)">└영재</th>
+        <th class="r" style="color:var(--muted)">└고등</th>
+        <th class="r">영어<br>소계</th>
+        <th class="r" style="color:var(--muted)">└초중</th>
+        <th class="r" style="color:var(--muted)">└고등</th>
+        <th class="r" style="color:var(--c25)">25년<br>합계</th>
+        <th class="r">YoY<br>증감</th>
+        <th class="r">YoY<br>(%)</th>
+      </tr></thead>
+      <tbody id="stu_table"></tbody>
+    </table></div>
+  </div>
+
+
+  <div id="cb-stu-s4" class="comment-box" style="display:none">
+    <div class="cb-label"><span>✦</span> COMMENT</div>
+    <div class="cb-text" id="cb-text-stu-s4"></div>
+    <div class="cb-date" id="cb-date-stu-s4"></div>
+  </div>
+  <div id="ce-stu-s4" class="comment-editor">
+    <div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div>
+    <textarea id="ce-text-stu-s4" placeholder="코멘트를 입력하세요..."></textarea>
+    <div class="cb-btns">
+      <button class="cb-del" onclick="deleteComment('stu-s4')">삭제</button>
+      <button class="cb-save" onclick="saveComment('stu-s4')">저장</button>
+    </div>
+  </div>
+
+  <!-- YTD 섹션 구분 -->
+  <div class="period-section-hd" style="margin-top:24px">
+    <span class="period-badge ytd">📊 YTD 누적 재원생 (1~<span id="stu_ytd_month_label">1</span>월)</span>
+    <div class="period-line"></div>
+  </div>
+
+  <!-- YTD 상세표 -->
+  <div class="full card">
+    <div class="ch"><div><div class="ct" id="stu_ytd_title">캠퍼스별 재원생 YTD 누적 (1~1월)</div><div class="cs">월별 재원생 합계 누적 · 25년 YTD 대비</div></div></div>
+    <div class="tw"><table>
+      <thead><tr>
+        <th>캠퍼스</th>
+        <th class="r" style="color:var(--c26a)">26년<br>YTD</th>
+        <th class="r" style="color:var(--c25)">25년<br>YTD</th>
+        <th class="r">YoY<br>증감</th>
+        <th class="r">YoY<br>(%)</th>
+        <th class="r" style="color:var(--muted)">월평균<br>26년</th>
+        <th class="r" style="color:var(--muted)">월평균<br>25년</th>
+      </tr></thead>
+      <tbody id="stu_ytd_table"></tbody>
+    </table></div>
+  </div>
+  <div id="cb-stu-s5" class="comment-box" style="display:none">
+    <div class="cb-label"><span>✦</span> COMMENT</div>
+    <div class="cb-text" id="cb-text-stu-s5"></div>
+    <div class="cb-date" id="cb-date-stu-s5"></div>
+  </div>
+  <div id="ce-stu-s5" class="comment-editor">
+    <div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div>
+    <textarea id="ce-text-stu-s5" placeholder="코멘트를 입력하세요..."></textarea>
+    <div class="cb-btns">
+      <button class="cb-del" onclick="deleteComment('stu-s5')">삭제</button>
+      <button class="cb-save" onclick="saveComment('stu-s5')">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ 데이터 로우 ═══════════════════════════ -->
+<div class="page" id="pg-rawdata">
+  <div class="fbar">
+    <select class="fsel" id="f_dept" onchange="filterRaw()"><option value="">전체 사업부</option><option>학원사업본부</option><option value="U2M사업부">U2M사업본부</option><option>미래교육사업부</option><option>방과후사업본부</option><option>경영기획실</option></select>
+    <select class="fsel" id="f_type" onchange="filterRaw()"><option value="">전체 구분</option><option>매출</option><option>판매관리비</option></select>
+    <select class="fsel" id="f_campus" onchange="filterRaw()"><option value="">전체 캠퍼스</option><option>광진</option><option>중계</option><option>성동</option><option>동대문</option><option>중랑</option><option>송파방이</option><option>미사</option><option>위례</option><option>방과후</option><option>교육넷</option><option>본부</option><option>직영</option><option>경영기획실</option></select>
+    <input class="finput" type="text" id="f_search" placeholder="🔍 계정과목 / C/C 검색..." oninput="filterRaw()">
+    <span class="fcount" id="raw_count"></span>
+  </div>
+  <div class="card">
+    <div class="tw"><table><thead><tr>
+      <th>#</th><th>구분</th><th>계정과목</th><th>C/C</th><th>월</th>
+      <th>본부</th><th>캠퍼스</th><th>과목</th><th>학년</th><th class="r">금액</th>
+    </tr></thead><tbody id="raw_body"></tbody></table></div>
+    <div class="pag"><span id="raw_pageinfo"></span><div class="pbtns" id="raw_pbtns"></div></div>
+  </div>
+</div>
+
+
+</div><!-- /main -->
+</div><!-- /dashboard-wrap -->
+
+<!-- ══ 관리자 페이지 ══ -->
+<div class="page" id="pg-admin" style="padding:16px">
+  <div class="admin-sec">
+    <h3>👥 회원 관리</h3>
+    <div class="atab-row">
+      <button class="atab on" id="atab-users"   onclick="showATab('users')">사용자 목록</button>
+      <button class="atab"    id="atab-pending" onclick="showATab('pending')">가입 승인 대기</button>
+      <button class="atab"    id="atab-pwreset" onclick="showATab('pwreset')">비밀번호 초기화</button>
+    </div>
+    <div id="atab-c-users">
+      <table class="utbl"><thead><tr>
+        <th>이름</th><th>이메일</th><th>역할</th><th>상태</th><th>가입일</th><th>최근로그인</th><th>작업</th>
+      </tr></thead><tbody id="adminUserBody"></tbody></table>
+    </div>
+    <div id="atab-c-pending" style="display:none">
+      <table class="utbl"><thead><tr>
+        <th>이름</th><th>이메일</th><th>요청역할</th><th>신청일</th><th>작업</th>
+      </tr></thead><tbody id="adminPendingBody"></tbody></table>
+    </div>
+    <div id="atab-c-pwreset" style="display:none;max-width:380px">
+      <div class="auth-field"><label>이메일</label><input type="email" id="rtEmail" placeholder="초기화할 계정 이메일"></div>
+      <div class="auth-field"><label>임시 비밀번호</label><input type="text" id="rtPw" placeholder="새 임시 비밀번호"></div>
+      <button class="auth-btn-primary" style="margin-top:0" onclick="adminResetPw()">초기화</button>
+      <div class="auth-err" id="rtMsg"></div>
+    </div>
+  </div>
+  <div class="admin-sec">
+    <h3>📤 손익계산서 로우 업로드</h3>
+    <p style="font-size:12px;color:var(--muted);margin:0 0 14px">매월 손익계산서 엑셀의 <strong style="color:var(--fg)">로우</strong> 시트를 업로드하면 모든 수치가 자동으로 갱신됩니다. 여러 달치를 누적 업로드할 수 있습니다.</p>
+
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px">
+      <input type="file" id="xlsxFile" accept=".xlsx" style="display:none" onchange="handleXlsxUpload(event)">
+      <button class="auth-btn-primary" style="width:auto;padding:9px 22px" onclick="document.getElementById('xlsxFile').click()">📂 엑셀 파일 선택 (.xlsx)</button>
+      <span id="uploadMsg" style="font-size:11px"></span>
+    </div>
+
+    <div style="background:var(--s2);border-radius:8px;padding:12px 16px;font-size:11px;color:var(--muted);display:flex;gap:20px;flex-wrap:wrap">
+      <span>마지막 업로드: <strong id="lastUploadEl" style="color:var(--fg)">-</strong></span>
+      <span>누적 월: <strong id="dataRangeEl" style="color:var(--c26a)">-</strong></span>
+      <span>총 row 수: <strong id="rowCountEl" style="color:var(--fg)">-</strong></span>
+    </div>
+
+    <!-- 업로드된 데이터 요약 미리보기 -->
+    <div id="uploadPreview" style="display:none;margin-top:14px">
+      <div style="font-size:12px;font-weight:600;margin-bottom:8px">📊 집계 요약 (전체 누적)</div>
+      <div id="uploadSummary" style="overflow-x:auto"></div>
+    </div>
+  </div>
+
+  <div class="admin-sec">
+    <h3>📅 재원생 데이터 입력</h3>
+    <p style="font-size:12px;color:var(--muted);margin:0 0 12px">재원생 수는 손익계산서에 없으므로 직접 입력하거나 <strong style="color:var(--fg)">캠퍼스별매출현황</strong> 엑셀 파일을 업로드합니다.</p>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+      <input type="file" id="stuXlsxFile" accept=".xlsx" style="display:none" onchange="handleStuXlsxUpload(event)">
+      <button class="auth-btn-primary" style="width:auto;padding:9px 22px" onclick="document.getElementById('stuXlsxFile').click()">📂 캠퍼스별매출현황 업로드</button>
+      <span id="stuUploadMsg" style="font-size:11px"></span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+      <span style="font-size:12px;font-weight:600">입력 월</span>
+      <div style="display:flex;gap:4px" id="admin_month_btns">
+        <button class="atab on" onclick="setAdminMonth(1,this)">1월</button>
+        <button class="atab" onclick="setAdminMonth(2,this)">2월</button>
+        <button class="atab" onclick="setAdminMonth(3,this)">3월</button>
+        <button class="atab" onclick="setAdminMonth(4,this)">4월</button>
+        <button class="atab" onclick="setAdminMonth(5,this)">5월</button>
+        <button class="atab" onclick="setAdminMonth(6,this)">6월</button>
+      </div>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="utbl">
+        <thead><tr>
+          <th>캠퍼스</th>
+          <th style="color:var(--c26a)">26년 합계</th>
+          <th>수학소계</th><th style="color:var(--muted)">└초중</th><th style="color:var(--muted)">└영재</th><th style="color:var(--muted)">└고등</th>
+          <th style="color:var(--c26p)">영어소계</th><th style="color:var(--muted)">└초중</th><th style="color:var(--muted)">└고등</th>
+          <th style="color:var(--c25)">25년(참고)</th>
+        </tr></thead>
+        <tbody id="adminStuBody"></tbody>
+      </table>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:12px;align-items:center">
+      <button class="auth-btn-primary" style="width:auto;padding:9px 22px" onclick="saveAdminStuData()">💾 저장</button>
+      <span id="adminStuMsg" style="font-size:11px;color:var(--muted)"></span>
+    </div>
+  </div>
+  <div class="admin-sec">
+    <h3>💬 코멘트 현황</h3>
+    <div id="commentStatusList"></div>
+  </div>
+</div>
+
+<!-- ══ 인증 모달 ══ -->
+<div class="auth-overlay" id="authOverlay" style="display:none">
+  <div class="auth-panel">
+    <button class="auth-close" onclick="closeAuth()">✕</button>
+
+    <!-- 로그인 -->
+    <div id="av-login">
+      <h2>🔑 로그인</h2>
+      <p class="auth-sub">올림피아드교육 손익 대시보드</p>
+      <div class="auth-field"><label>이메일</label><input type="email" id="liEmail" placeholder="example@olympiad.ac"></div>
+      <div class="auth-field"><label>비밀번호</label><input type="password" id="liPw" placeholder="비밀번호" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <div class="auth-err" id="liErr"></div>
+      <button class="auth-btn-primary" onclick="doLogin()">로그인</button>
+      <div class="auth-links">계정이 없으신가요? <a onclick="av('signup')">회원가입 신청</a> &nbsp;|&nbsp; <a onclick="av('forgot')">비밀번호 찾기</a></div>
+    </div>
+
+    <!-- 회원가입 -->
+    <div id="av-signup" style="display:none">
+      <h2>📝 회원가입 신청</h2>
+      <p class="auth-sub">관리자 승인 후 이용 가능합니다</p>
+      <div class="auth-field"><label>이름</label><input type="text" id="suName" placeholder="실명"></div>
+      <div class="auth-field"><label>이메일</label><input type="email" id="suEmail" placeholder="example@olympiad.ac"></div>
+      <div class="auth-field"><label>비밀번호 (8자 이상)</label><input type="password" id="suPw"></div>
+      <div class="auth-field"><label>역할</label>
+        <select id="suRole"><option value="viewer">뷰어 (보기 전용)</option><option value="admin">관리자</option></select>
+      </div>
+      <div class="auth-err" id="suErr"></div>
+      <button class="auth-btn-primary" onclick="doSignup()">가입 신청</button>
+      <div class="auth-links"><a onclick="av('login')">← 로그인으로</a></div>
+    </div>
+
+    <!-- 비밀번호 찾기 -->
+    <div id="av-forgot" style="display:none">
+      <h2>🔒 비밀번호 찾기</h2>
+      <p class="auth-sub">등록된 이메일을 입력하세요</p>
+      <div class="auth-field"><label>이메일</label><input type="email" id="fgEmail"></div>
+      <div class="auth-err" id="fgErr"></div>
+      <button class="auth-btn-primary" onclick="doForgot()">확인</button>
+      <div class="auth-links"><a onclick="av('login')">← 로그인으로</a></div>
+    </div>
+
+    <!-- 비밀번호 변경 -->
+    <div id="av-changepw" style="display:none">
+      <h2>🔄 비밀번호 변경</h2>
+      <p class="auth-sub"></p>
+      <div class="auth-field"><label>현재 비밀번호</label><input type="password" id="cpOld"></div>
+      <div class="auth-field"><label>새 비밀번호</label><input type="password" id="cpNew"></div>
+      <div class="auth-field"><label>새 비밀번호 확인</label><input type="password" id="cpNew2"></div>
+      <div class="auth-err" id="cpErr"></div>
+      <button class="auth-btn-primary" onclick="doChangePw()">변경</button>
+      <div class="auth-links"><a onclick="closeAuth()">취소</a></div>
+    </div>
+
+    <!-- 내 계정 메뉴 -->
+    <div id="av-menu" style="display:none">
+      <h2>👤 내 계정</h2>
+      <p class="auth-sub" id="menuInfo"></p>
+      <button class="auth-btn-sec" onclick="av('changepw')">비밀번호 변경</button>
+      <button class="auth-btn-primary" style="background:var(--loss);margin-top:8px" onclick="doLogout()">로그아웃</button>
+      <div class="auth-links"><a onclick="closeAuth()">닫기</a></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const M=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+const C25='#4d96f0', C26P='#9474f0', C26A='#22bf85';
+
+// 총괄 3년 데이터
+const OV={
+  yr25s:[3405.75,3318.62,3087.16,3189.54,3411.73,3174.85,3412.74,3372.74,3019.91,2842.92,3310.19,2851.69],
+  yr26ps:[2923.91,2648.04,2737.86,2885.37,3071.69,2891.40,3010.78,3161.34,2920.83,2652.01,3113.57,2847.12],
+  yr26as:[2982.94,0,0,0,0,0,0,0,0,0,0,0],
+  yr25c:[2777.79,3083.33,3028.58,2809.51,2898.91,3198.10,2982.56,3053.83,3108.52,2850.99,3323.62,3672.24],
+  yr26pc:[2545.90,2560.10,2623.87,2656.06,2700.71,2723.91,2675.17,2824.19,2708.72,2497.39,2664.80,2581.58],
+  yr26ac:[2561.98,0,0,0,0,0,0,0,0,0,0,0],
+};
+OV.yr25p=OV.yr25s.map((s,i)=>s-OV.yr25c[i]);
+OV.yr26pp=OV.yr26ps.map((s,i)=>s-OV.yr26pc[i]);
+OV.yr26ap=OV.yr26as.map((s,i)=>s-OV.yr26ac[i]);
+
+// 손익계산서 실적 (1월, 단위: 원)
+const PL={
+  '광진고등수학':{sales:109900700,cost:76014538,profit:33886162},
+  '광진고등영어':{sales:31492000,cost:14655777,profit:16836223},
+  '광진영재':{sales:121166300,cost:75618153,profit:45548147},
+  '광진수학':{sales:248296400,cost:154516020,profit:93780380},
+  '광진영어':{sales:86538200,cost:62844472,profit:23693728},
+  '동대문고등수학':{sales:62967100,cost:34032282,profit:28934818},
+  '동대문고등영어':{sales:8851100,cost:9499847,profit:-648747},
+  '동대문수학':{sales:253630900,cost:157345434,profit:96285466},
+  '동대문영어':{sales:33331100,cost:29557680,profit:3773420},
+  '성동고등수학':{sales:67250300,cost:41259780,profit:25990520},
+  '성동고등영어':{sales:19447500,cost:9032451,profit:10415049},
+  '성동수학':{sales:224052600,cost:135219032,profit:88833568},
+  '성동영어':{sales:49659700,cost:49879424,profit:-219724},
+  '중랑고등수학':{sales:49681900,cost:33812400,profit:15869500},
+  '중랑고등영어':{sales:19463900,cost:7031577,profit:12432323},
+  '중랑수학':{sales:106311100,cost:82849720,profit:23461380},
+  '중랑영어':{sales:57491900,cost:53877820,profit:3614080},
+  '학원본부':{sales:0,cost:18191200,profit:-18191200},
+  '미사수학':{sales:67143300,cost:62568400,profit:4574900},
+  '송파방이수학':{sales:123160000,cost:112780000,profit:10380000},
+  '위례수학':{sales:60430000,cost:33548000,profit:26882000},
+  '중계수학':{sales:127217800,cost:112063400,profit:15154400},
+  '가맹사업교육넷':{sales:4533123,cost:35740000,profit:-31206877},
+  '방과후사업본부':{sales:659568919,cost:706753273,profit:-47184354},
+  '직영수학':{sales:66188000,cost:180836400,profit:-114648400},
+  '직영영어':{sales:27356000,cost:12763200,profit:14592800},
+  'FC수학':{sales:297817840,cost:152900000,profit:144917840},
+  '경영기획실':{sales:0,cost:40151742,profit:-40151742},
+};
+
+// 재원생 데이터 (출처: 202601_올피_손익실적분석 실측값 - 25년 12개월 전체)
+// 25년 수학합계 = 수학소계행(행90), 영어합계 = 영어행(행101) 등
+const STU={
+  '광진':{
+    // 25년 수학: 행90 [875,858,891,868,849,857,819,796,811,734,675,667]
+    // 25년 영어: 행101 [274,260,286,286,280,275,270,261,281,269,268,257]
+    yr25:{합계:[1149,1118,1177,1154,1129,1132,1089,1057,1092,1003,943,924],
+          수학:{소계:[875,858,891,868,849,857,819,796,811,734,675,667],초중:[675,672,0,0,0,0,0,0,0,0,0,0],영재:[86,90,0,0,0,0,0,0,0,0,0,0],대입:[207,189,0,0,0,0,0,0,0,0,0,0]},
+          영어:{소계:[274,260,286,286,280,275,270,261,281,269,268,257],초중:[202,185,0,0,0,0,0,0,0,0,0,0],대입:[82,81,0,0,0,0,0,0,0,0,0,0]}},
+    yr26a:{합계:[1146,1103,null,null,null,null,null,null,null,null,null,null],
+           수학:{소계:[870,839,null,null,null,null,null,null,null,null,null,null],초중:[637,613,null,null,null,null,null,null,null,null,null,null],영재:[88,85,null,null,null,null,null,null,null,null,null,null],대입:[145,141,null,null,null,null,null,null,null,null,null,null]},
+           영어:{소계:[276,264,null,null,null,null,null,null,null,null,null,null],초중:[185,178,null,null,null,null,null,null,null,null,null,null],대입:[91,86,null,null,null,null,null,null,null,null,null,null]}},
+  },
+  '성동':{
+    // 25년 수학: 행122 [610,599,642,636,618,623,605,597,622,609,576,586]
+    // 25년 영어: 행133 [252,238,267,259,257,252,235,228,248,237,223,218]
+    yr25:{합계:[862,837,909,895,875,875,840,825,870,846,799,804],
+          수학:{소계:[610,599,642,636,618,623,605,597,622,609,576,586],초중:[518,512,0,0,0,0,0,0,0,0,0,0],영재:[0,0,0,0,0,0,0,0,0,0,0,0],대입:[108,100,0,0,0,0,0,0,0,0,0,0]},
+          영어:{소계:[252,238,267,259,257,252,235,228,248,237,223,218],초중:[200,185,0,0,0,0,0,0,0,0,0,0],대입:[56,54,0,0,0,0,0,0,0,0,0,0]}},
+    yr26a:{합계:[801,763,null,null,null,null,null,null,null,null,null,null],
+           수학:{소계:[597,569,null,null,null,null,null,null,null,null,null,null],초중:[514,493,null,null,null,null,null,null,null,null,null,null],영재:[0,0,null,null,null,null,null,null,null,null,null,null],대입:[83,76,null,null,null,null,null,null,null,null,null,null]},
+           영어:{소계:[204,194,null,null,null,null,null,null,null,null,null,null],초중:[155,147,null,null,null,null,null,null,null,null,null,null],대입:[49,47,null,null,null,null,null,null,null,null,null,null]}},
+  },
+  '동대문':{
+    // 25년 수학: 행154 [817,788,833,828,802,794,793,765,782,773,700,739]
+    // 25년 영어: 행165 [137,132,157,160,159,151,140,139,138,140,132,131]
+    yr25:{합계:[954,920,990,988,961,945,933,904,920,913,832,870],
+          수학:{소계:[817,788,833,828,802,794,793,765,782,773,700,739],초중:[769,734,0,0,0,0,0,0,0,0,0,0],영재:[0,0,0,0,0,0,0,0,0,0,0,0],대입:[66,60,0,0,0,0,0,0,0,0,0,0]},
+          영어:{소계:[137,132,157,160,159,151,140,139,138,140,132,131],초중:[108,103,0,0,0,0,0,0,0,0,0,0],대입:[30,30,0,0,0,0,0,0,0,0,0,0]}},
+    yr26a:{합계:[889,872,null,null,null,null,null,null,null,null,null,null],
+           수학:{소계:[754,738,null,null,null,null,null,null,null,null,null,null],초중:[660,644,null,null,null,null,null,null,null,null,null,null],영재:[0,0,null,null,null,null,null,null,null,null,null,null],대입:[94,94,null,null,null,null,null,null,null,null,null,null]},
+           영어:{소계:[135,134,null,null,null,null,null,null,null,null,null,null],초중:[108,109,null,null,null,null,null,null,null,null,null,null],대입:[27,25,null,null,null,null,null,null,null,null,null,null]}},
+  },
+  '중랑':{
+    // 25년 수학: 행186 [378,353,385,378,367,362,348,347,360,345,321,333]
+    // 25년 영어: 행197 [291,282,302,298,282,286,245,232,245,240,233,218]
+    yr25:{합계:[669,635,687,676,649,648,593,579,605,585,554,551],
+          수학:{소계:[378,353,385,378,367,362,348,347,360,345,321,333],초중:[290,281,0,0,0,0,0,0,0,0,0,0],영재:[0,0,0,0,0,0,0,0,0,0,0,0],대입:[98,78,0,0,0,0,0,0,0,0,0,0]},
+          영어:{소계:[291,282,302,298,282,286,245,232,245,240,233,218],초중:[207,206,0,0,0,0,0,0,0,0,0,0],대입:[93,85,0,0,0,0,0,0,0,0,0,0]}},
+    yr26a:{합계:[591,558,null,null,null,null,null,null,null,null,null,null],
+           수학:{소계:[357,335,null,null,null,null,null,null,null,null,null,null],초중:[287,273,null,null,null,null,null,null,null,null,null,null],영재:[0,0,null,null,null,null,null,null,null,null,null,null],대입:[70,62,null,null,null,null,null,null,null,null,null,null]},
+           영어:{소계:[234,223,null,null,null,null,null,null,null,null,null,null],초중:[182,177,null,null,null,null,null,null,null,null,null,null],대입:[52,46,null,null,null,null,null,null,null,null,null,null]}},
+  },
+  '중계':{
+    // 25년: 행212 [273,273,297,293,275,280,277,268,269,260,239,241]
+    yr25:{합계:[273,273,297,293,275,280,277,268,269,260,239,241],
+          수학:{소계:[273,273,297,293,275,280,277,268,269,260,239,241],초중:[303,297,0,0,0,0,0,0,0,0,0,0],영재:[0,0,0,0,0,0,0,0,0,0,0,0],대입:[0,0,0,0,0,0,0,0,0,0,0,0]},
+          영어:{소계:[0,0,0,0,0,0,0,0,0,0,0,0],초중:[0,0,0,0,0,0,0,0,0,0,0,0],대입:[0,0,0,0,0,0,0,0,0,0,0,0]}},
+    yr26a:{합계:[232,223,null,null,null,null,null,null,null,null,null,null],
+           수학:{소계:[232,223,null,null,null,null,null,null,null,null,null,null],초중:[232,223,null,null,null,null,null,null,null,null,null,null],영재:[0,0,null,null,null,null,null,null,null,null,null,null],대입:[0,0,null,null,null,null,null,null,null,null,null,null]},
+           영어:{소계:[0,0,null,null,null,null,null,null,null,null,null,null],초중:[0,0,null,null,null,null,null,null,null,null,null,null],대입:[0,0,null,null,null,null,null,null,null,null,null,null]}},
+  },
+  '송파방이':{
+    // 25년: 행225 [238,241,262,265,264,268,267,265,279,272,249,254]
+    yr25:{합계:[238,241,262,265,264,268,267,265,279,272,249,254],
+          수학:{소계:[238,241,262,265,264,268,267,265,279,272,249,254],초중:[246,255,0,0,0,0,0,0,0,0,0,0],영재:[0,0,0,0,0,0,0,0,0,0,0,0],대입:[0,0,0,0,0,0,0,0,0,0,0,0]},
+          영어:{소계:[0,0,0,0,0,0,0,0,0,0,0,0],초중:[0,0,0,0,0,0,0,0,0,0,0,0],대입:[0,0,0,0,0,0,0,0,0,0,0,0]}},
+    yr26a:{합계:[251,240,null,null,null,null,null,null,null,null,null,null],
+           수학:{소계:[251,240,null,null,null,null,null,null,null,null,null,null],초중:[251,240,null,null,null,null,null,null,null,null,null,null],영재:[0,0,null,null,null,null,null,null,null,null,null,null],대입:[0,0,null,null,null,null,null,null,null,null,null,null]},
+           영어:{소계:[0,0,null,null,null,null,null,null,null,null,null,null],초중:[0,0,null,null,null,null,null,null,null,null,null,null],대입:[0,0,null,null,null,null,null,null,null,null,null,null]}},
+  },
+  '위례':{
+    // 25년: 행251 [116,111,114,109,102,104,98,99,97,96,95,91]
+    yr25:{합계:[116,111,114,109,102,104,98,99,97,96,95,91],
+          수학:{소계:[116,111,114,109,102,104,98,99,97,96,95,91],초중:[116,111,0,0,0,0,0,0,0,0,0,0],영재:[0,0,0,0,0,0,0,0,0,0,0,0],대입:[0,0,0,0,0,0,0,0,0,0,0,0]},
+          영어:{소계:[0,0,0,0,0,0,0,0,0,0,0,0],초중:[0,0,0,0,0,0,0,0,0,0,0,0],대입:[0,0,0,0,0,0,0,0,0,0,0,0]}},
+    yr26a:{합계:[80,76,null,null,null,null,null,null,null,null,null,null],
+           수학:{소계:[80,76,null,null,null,null,null,null,null,null,null,null],초중:[80,76,null,null,null,null,null,null,null,null,null,null],영재:[0,0,null,null,null,null,null,null,null,null,null,null],대입:[0,0,null,null,null,null,null,null,null,null,null,null]},
+           영어:{소계:[0,0,null,null,null,null,null,null,null,null,null,null],초중:[0,0,null,null,null,null,null,null,null,null,null,null],대입:[0,0,null,null,null,null,null,null,null,null,null,null]}},
+  },
+  '미사':{
+    // 25년: 행238 [181,169,178,179,168,175,165,162,172,162,138,146]
+    yr25:{합계:[181,169,178,179,168,175,165,162,172,162,138,146],
+          수학:{소계:[181,169,178,179,168,175,165,162,172,162,138,146],초중:[192,176,0,0,0,0,0,0,0,0,0,0],영재:[0,0,0,0,0,0,0,0,0,0,0,0],대입:[0,0,0,0,0,0,0,0,0,0,0,0]},
+          영어:{소계:[0,0,0,0,0,0,0,0,0,0,0,0],초중:[0,0,0,0,0,0,0,0,0,0,0,0],대입:[0,0,0,0,0,0,0,0,0,0,0,0]}},
+    yr26a:{합계:[148,140,null,null,null,null,null,null,null,null,null,null],
+           수학:{소계:[148,140,null,null,null,null,null,null,null,null,null,null],초중:[148,140,null,null,null,null,null,null,null,null,null,null],영재:[0,0,null,null,null,null,null,null,null,null,null,null],대입:[0,0,null,null,null,null,null,null,null,null,null,null]},
+           영어:{소계:[0,0,null,null,null,null,null,null,null,null,null,null],초중:[0,0,null,null,null,null,null,null,null,null,null,null],대입:[0,0,null,null,null,null,null,null,null,null,null,null]}},
+  },
+};
+
+const RAW=[
+  {구분:'매출',계정:'교습비수입',cc:'광진고등수학',월:'1월',본부:'학원사업본부',캠퍼스:'광진',과목:'수학',학년:'고등',금액:109900700},
+  {구분:'매출',계정:'교습비수입',cc:'광진고등영어',월:'1월',본부:'학원사업본부',캠퍼스:'광진',과목:'영어',학년:'고등',금액:31492000},
+  {구분:'매출',계정:'교습비수입',cc:'광진영재',월:'1월',본부:'학원사업본부',캠퍼스:'광진',과목:'영재',학년:'영재',금액:121166300},
+  {구분:'매출',계정:'교습비수입',cc:'광진수학',월:'1월',본부:'학원사업본부',캠퍼스:'광진',과목:'수학',학년:'중등/초등',금액:248296400},
+  {구분:'매출',계정:'교습비수입',cc:'광진영어',월:'1월',본부:'학원사업본부',캠퍼스:'광진',과목:'영어',학년:'중등/초등',금액:86538200},
+  {구분:'매출',계정:'교습비수입',cc:'동대문고등수학',월:'1월',본부:'학원사업본부',캠퍼스:'동대문',과목:'수학',학년:'고등',금액:62967100},
+  {구분:'매출',계정:'교습비수입',cc:'동대문고등영어',월:'1월',본부:'학원사업본부',캠퍼스:'동대문',과목:'영어',학년:'고등',금액:8851100},
+  {구분:'매출',계정:'교습비수입',cc:'동대문수학',월:'1월',본부:'학원사업본부',캠퍼스:'동대문',과목:'수학',학년:'중등/초등',금액:253630900},
+  {구분:'매출',계정:'교습비수입',cc:'동대문영어',월:'1월',본부:'학원사업본부',캠퍼스:'동대문',과목:'영어',학년:'중등/초등',금액:33331100},
+  {구분:'매출',계정:'교습비수입',cc:'성동고등수학',월:'1월',본부:'학원사업본부',캠퍼스:'성동',과목:'수학',학년:'고등',금액:67250300},
+  {구분:'매출',계정:'교습비수입',cc:'성동고등영어',월:'1월',본부:'학원사업본부',캠퍼스:'성동',과목:'영어',학년:'고등',금액:19447500},
+  {구분:'매출',계정:'교습비수입',cc:'성동수학',월:'1월',본부:'학원사업본부',캠퍼스:'성동',과목:'수학',학년:'중등/초등',금액:224052600},
+  {구분:'매출',계정:'교습비수입',cc:'성동영어',월:'1월',본부:'학원사업본부',캠퍼스:'성동',과목:'영어',학년:'중등/초등',금액:49659700},
+  {구분:'매출',계정:'교습비수입',cc:'중랑고등수학',월:'1월',본부:'학원사업본부',캠퍼스:'중랑',과목:'수학',학년:'고등',금액:49681900},
+  {구분:'매출',계정:'교습비수입',cc:'중랑고등영어',월:'1월',본부:'학원사업본부',캠퍼스:'중랑',과목:'영어',학년:'고등',금액:19463900},
+  {구분:'매출',계정:'교습비수입',cc:'중랑수학',월:'1월',본부:'학원사업본부',캠퍼스:'중랑',과목:'수학',학년:'중등/초등',금액:106311100},
+  {구분:'매출',계정:'교습비수입',cc:'중랑영어',월:'1월',본부:'학원사업본부',캠퍼스:'중랑',과목:'영어',학년:'중등/초등',금액:57491900},
+  {구분:'매출',계정:'U2M수업료',cc:'미사수학',월:'1월',본부:'U2M사업부',캠퍼스:'미사',과목:'수학',학년:'혼합',금액:67143300},
+  {구분:'매출',계정:'U2M수업료',cc:'송파방이수학',월:'1월',본부:'U2M사업부',캠퍼스:'송파방이',과목:'수학',학년:'혼합',금액:123160000},
+  {구분:'매출',계정:'U2M수업료',cc:'위례수학',월:'1월',본부:'U2M사업부',캠퍼스:'위례',과목:'수학',학년:'혼합',금액:60430000},
+  {구분:'매출',계정:'U2M수업료',cc:'중계수학',월:'1월',본부:'U2M사업부',캠퍼스:'중계',과목:'수학',학년:'혼합',금액:127217800},
+  {구분:'매출',계정:'가맹비수입',cc:'가맹사업(교육넷)',월:'1월',본부:'U2M사업부',캠퍼스:'교육넷',과목:'-',학년:'-',금액:4533123},
+  {구분:'매출',계정:'방과후학교',cc:'방과후사업본부',월:'1월',본부:'방과후사업본부',캠퍼스:'방과후',과목:'방과후',학년:'초등',금액:659568919},
+  {구분:'매출',계정:'미래교육수업료',cc:'직영수학',월:'1월',본부:'미래교육사업부',캠퍼스:'직영',과목:'수학',학년:'혼합',금액:66188000},
+  {구분:'매출',계정:'미래교육수업료',cc:'직영영어',월:'1월',본부:'미래교육사업부',캠퍼스:'직영',과목:'영어',학년:'혼합',금액:27356000},
+  {구분:'매출',계정:'도서수입',cc:'FC수학',월:'1월',본부:'미래교육사업부',캠퍼스:'FC',과목:'수학',학년:'혼합',금액:297817840},
+];
+
+// ============================================================
+// CHART UTILITIES
+// ============================================================
+const CO={responsive:true,maintainAspectRatio:false,
+  plugins:{legend:{labels:{color:'#6b7599',font:{size:11},boxWidth:10,padding:10}}},
+  scales:{x:{grid:{color:'#1d2340'},ticks:{color:'#6b7599',font:{size:11}}},
+          y:{grid:{color:'#1d2340'},ticks:{color:'#6b7599',font:{size:11}}}}};
+
+function mkLine(id,labels,datasets){
+  const ctx=document.getElementById(id);
+  if(!ctx)return;
+  return new Chart(ctx.getContext('2d'),{type:'line',data:{labels,datasets},
+    options:{...CO,elements:{line:{tension:.35},point:{radius:3,hoverRadius:6}}}});
+}
+function mkBar(id,labels,datasets,opts={}){
+  const ctx=document.getElementById(id);
+  if(!ctx)return;
+  return new Chart(ctx.getContext('2d'),{type:'bar',data:{labels,datasets},options:{...CO,...opts}});
+}
+function mkDoughnut(id,labels,data,colors){
+  const ctx=document.getElementById(id);
+  if(!ctx)return;
+  return new Chart(ctx.getContext('2d'),{type:'doughnut',
+    data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:0,hoverOffset:6}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'62%',
+      plugins:{legend:{position:'bottom',labels:{color:'#6b7599',font:{size:11},boxWidth:8,padding:8}}}}});
+}
+// 26년 실적을 항상 첫 번째(앞)로: datasets 순서 = [26a, 25년, 26계획]
+function dsLine(label,data,color,dashed=false){
+  return{label,data,borderColor:color,backgroundColor:color+'18',fill:false,
+    borderWidth:2,borderDash:dashed?[5,3]:[],
+    pointRadius:3,pointHoverRadius:6,tension:.35};
+}
+function dsBar(label,data,color){
+  return{label,data,backgroundColor:color+'cc',borderRadius:4,borderSkipped:false};
+}
+function cumSum(arr){let a=0;return arr.map(v=>{a+=v;return Math.round(a*10)/10});}
+const fm=v=>v==null?'-':Math.abs(v)>=1e8?(v/1e8).toFixed(1)+'억':(v/1e6).toFixed(1)+'M';
+const fp=v=>v==null?'-':v.toFixed(1)+'%';
+
+// ============================================================
+// OVERVIEW
+// ============================================================
+function initOverview(){
+  // 누적 매출: 26년 실적 맨 앞
+  mkLine('c_overall_sales', M, [
+    dsLine('26년 실적',  cumSum(OV.yr26as).map((v,i)=>OV.yr26as[i]>0?v:null), C26A),
+    dsLine('25년 실적',  cumSum(OV.yr25s),  C25),
+    dsLine('26년 계획',  cumSum(OV.yr26ps), C26P, true),
+  ]);
+  // 누적 영업이익: 26년 실적 맨 앞
+  mkLine('c_overall_profit', M, [
+    dsLine('26년 실적',  cumSum(OV.yr26ap).map((v,i)=>OV.yr26ap[i]!==0?v:null), C26A),
+    dsLine('25년 실적',  cumSum(OV.yr25p),  C25),
+    dsLine('26년 계획',  cumSum(OV.yr26pp), C26P, true),
+  ]);
+  // 사업부 파이
+  mkDoughnut('c_dept_pie',
+    ['학원사업본부','U2M사업본부','방과후사업본부','미래교육사업부'],
+    [1549.5,382.5,659.6,391.4],
+    ['#2d74e8','#6a28d9','#e08c00','#0ea872']);
+  // 목표달성률
+  const depts=[
+    {name:'학원사업본부',plan:1525.0,actual:1549.5},
+    {name:'U2M사업본부',plan:329.8,actual:382.5},
+    {name:'미래교육사업부',plan:365.8,actual:391.4},
+    {name:'방과후사업본부',plan:703.3,actual:659.6},
+  ];
+  const el=document.getElementById('ach_list');
+  depts.forEach(({name,plan,actual})=>{
+    const pct=plan>0?(actual/plan*100):0;
+    const color=pct>=100?C26A:pct>=90?C25:'#f87171';
+    el.innerHTML+=`<div class="ach-row">
+      <div class="ach-name">${name}</div>
+      <div class="ach-bar-bg"><div class="ach-bar" style="width:${Math.min(pct,100).toFixed(0)}%;background:${color}"></div></div>
+      <div class="ach-pct" style="color:${color}">${pct.toFixed(1)}%</div>
+    </div>`;
+  });
+}
+
+// ============================================================
+// DEPT: 학원사업본부
+// ============================================================
+function initHakwon(){
+  const campuses=['광진','동대문','성동','중랑'];
+  const campusSales=campuses.map(c=>{
+    const keys=Object.keys(PL).filter(k=>k.startsWith(c)&&k!=='학원본부');
+    return keys.reduce((s,k)=>s+PL[k].sales,0)/1e6;
+  });
+  const campusProfit=campuses.map(c=>{
+    const keys=Object.keys(PL).filter(k=>k.startsWith(c)&&k!=='학원본부');
+    return keys.reduce((s,k)=>s+PL[k].profit,0)/1e6;
+  });
+  mkBar('c_hak_campus',campuses,[
+    dsBar('매출',campusSales,C26A),
+    dsBar('영업이익',campusProfit,C25),
+  ]);
+
+  // ── 판매관리비 캠퍼스별 상세 데이터 ──
+  // 구조: {캠퍼스명: {sales:{yr25,yr26p,yr26a}, staff:{...}, instr:{...}, vehicle:{...}, rent:{...}, bldg:{...}, adv:{...}, other:{...}, total:{...}}}
+  // yr25·yr26p는 판관비 합계만 확보 → 항목비율은 26년실적 기준 배분 (근사)
+  // yr26a는 1월_손익계산서 실제값
+
+  // 26년 실적: 항목별 실측값
+  const CAMP_COST_26A = {
+    '광진':    {sales:597393600, staff:35540068, instr:233149851, vehicle:45530521, rent:43897438, bldg:13638900, adv:3857241,  other:26532790, total:402146809},
+    '동대문':  {sales:358780200, staff:28516834, instr:126546150, vehicle:38871680, rent:24686501, bldg:2663100,  adv:681215,   other:19458641, total:241424121},
+    '성동':    {sales:360410100, staff:26745673, instr:120950160, vehicle:39600100, rent:32946200, bldg:6153444,  adv:892963,   other:19267531, total:246556071},
+    '중랑':    {sales:232948800, staff:16972593, instr:102310980, vehicle:24485770, rent:19556740, bldg:4718999,  adv:1417042,  other:15236929, total:184699053},
+    '미사':    {sales:67143300,  staff:5033415,  instr:30059390,  vehicle:11565330, rent:526170,   bldg:2403968,  adv:6647071,  other:8485861,  total:64721205},
+    '송파방이':{sales:123244100, staff:9774552,  instr:62309360,  vehicle:14420440, rent:11961800, bldg:4785000,  adv:4872899,  other:8497549,  total:116621600},
+    '위례':    {sales:60397100,  staff:5208053,  instr:19692740,  vehicle:0,        rent:415400,   bldg:2182170,  adv:26840,    other:7819765,  total:35344968},
+    '중계':    {sales:127233500, staff:10585041, instr:64678060,  vehicle:17274550, rent:408700,   bldg:5104030,  adv:223219,   other:17753982, total:116027582},
+  };
+
+  // 25년 실적·26년 계획: 판관비 합계만 확보, 항목별은 26실적 비율로 배분
+  const CAMP_TOTALS = {
+    '광진':    {s25:630852400, c25:389377603, s26p:560900387, c26p:385447642},
+    '동대문':  {s25:393337500, c25:220750046, s26p:363026232, c26p:210148348},
+    '성동':    {s25:378861700, c25:238955493, s26p:368627692, c26p:385447642},
+    '중랑':    {s25:250284400, c25:192016967, s26p:232477545, c26p:178589126},
+    '미사':    {s25:81503700,  c25:64782794,  s26p:77379744,  c26p:59312055},
+    '송파방이':{s25:109712900, c25:103044177, s26p:105952944, c26p:98752033},
+    '위례':    {s25:52005300,  c25:46068779,  s26p:14926128,  c26p:32368284},
+    '중계':    {s25:139538800, c25:132720088, s26p:119532913, c26p:100786617},
+  };
+
+  // 항목별 25년·26년계획: 26실적 비율로 배분 (추정값 — 합계는 실제값)
+  // YoY는 항목별로 계산하지 않고 합계 행에서만 표시 (배분 추정값으로 YoY 계산 시 모두 같은 값 나오는 버그 방지)
+  function buildCampRow(camp) {
+    const a26 = CAMP_COST_26A[camp];
+    const tot = CAMP_TOTALS[camp];
+    const t26a = a26.total;
+    const ratio = k => t26a > 0 ? a26[k] / t26a : 0;
+    const scale = (base, k) => Math.round(base * ratio(k));
+    return {
+      sales:   {yr25:tot.s25,  yr26p:tot.s26p,  yr26a:a26.sales},
+      staff:   {yr25:scale(tot.c25,'staff'),   yr26p:scale(tot.c26p,'staff'),   yr26a:a26.staff},
+      instr:   {yr25:scale(tot.c25,'instr'),   yr26p:scale(tot.c26p,'instr'),   yr26a:a26.instr},
+      vehicle: {yr25:scale(tot.c25,'vehicle'), yr26p:scale(tot.c26p,'vehicle'), yr26a:a26.vehicle},
+      rent:    {yr25:scale(tot.c25,'rent'),    yr26p:scale(tot.c26p,'rent'),    yr26a:a26.rent},
+      bldg:    {yr25:scale(tot.c25,'bldg'),    yr26p:scale(tot.c26p,'bldg'),    yr26a:a26.bldg},
+      adv:     {yr25:scale(tot.c25,'adv'),     yr26p:scale(tot.c26p,'adv'),     yr26a:a26.adv},
+      other:   {yr25:scale(tot.c25,'other'),   yr26p:scale(tot.c26p,'other'),   yr26a:a26.other},
+      total:   {yr25:tot.c25,  yr26p:tot.c26p,  yr26a:a26.total},
+    };
+  }
+
+  const DOTS=['#e05555','#e08c00','#e6c910','#22bf85','#4d96f0','#9474f0','#bf7be0','#6b7280'];
+  const dot=(i,sz=7)=>`<span style="display:inline-block;width:${sz}px;height:${sz}px;border-radius:50%;background:${DOTS[i%DOTS.length]};margin-right:6px;flex-shrink:0;vertical-align:middle"></span>`;
+
+  function renderCostTable(containerId, camps) {
+    const M = 1e6;
+    const thS='padding:5px 10px;text-align:right;font-size:11px;font-weight:600;white-space:nowrap;vertical-align:bottom';
+    const thL='padding:5px 10px;text-align:left;font-size:11px;font-weight:600;white-space:nowrap;vertical-align:bottom';
+
+    // 26실적+매출比 단일 셀
+    function cell26(val, sales, bold){
+      const pct=sales>0?(val/sales*100).toFixed(1)+'%':'-';
+      return `<td style="padding:4px 10px;text-align:right;white-space:nowrap;vertical-align:top;${bold?'font-weight:700;':''}color:var(--c26a)">
+        <div style="font-size:12px">${(val/M).toFixed(1)}</div>
+        <div style="font-size:12px;color:var(--muted);font-weight:400;margin-top:1px">${pct}</div>
+      </td>`;
+    }
+    // 3열 셀 (25실적/26계획/26실적 + 매출比)
+    function cells3(yr25, yr26p, yr26a, s25, s26p, s26a, bold){
+      const f=(v,s,c)=>{
+        const pct=s>0?(v/s*100).toFixed(1)+'%':'-';
+        return `<td style="padding:4px 10px;text-align:right;white-space:nowrap;vertical-align:top;${bold?'font-weight:700;':''}${c?`color:${c};`:''}">
+          <div style="font-size:12px">${(v/M).toFixed(1)}</div>
+          <div style="font-size:12px;color:var(--muted);font-weight:400;margin-top:1px">${pct}</div>
+        </td>`;
+      };
+      return f(yr25,s25,null)+f(yr26p,s26p,null)+f(yr26a,s26a,'var(--c26a)');
+    }
+
+
+    const ITEMS=[
+      {key:'staff',  label:'직원인건비', desc:'직원급여·상여·퇴직금·복리후생비', indent:true},
+      {key:'instr',  label:'강사비',     desc:'강사비(일반)·야간강사·보조교사', indent:true},
+      {key:'vehicle',label:'차량운행비', desc:'차량유지비·유류비·차량임차료', indent:true},
+      {key:'rent',   label:'지급임차료', desc:'임차료(건물)·임차료(임대물품)'},
+      {key:'bldg',   label:'건물관리비', desc:'건물관리비·수도광열비'},
+      {key:'adv',    label:'광고선전비', desc:'광고선전비'},
+      {key:'other',  label:'그외',       desc:'통신비·운반비·소모품비·수수료·보험료·세금과공과·기업업무추진비 등'},
+    ];
+
+    let html='<div style="overflow-x:auto">';
+    for(const camp of camps){
+      const d=buildCampRow(camp);
+      let rows='';
+      let di=0;
+
+      // 인건비 소계
+      const laborTotal = {
+        yr25:  ['staff','instr','vehicle'].reduce((s,k)=>s+d[k].yr25,  0),
+        yr26p: ['staff','instr','vehicle'].reduce((s,k)=>s+d[k].yr26p, 0),
+        yr26a: ['staff','instr','vehicle'].reduce((s,k)=>s+d[k].yr26a, 0),
+      };
+      rows+=`<tr style="background:rgba(77,150,240,0.07);border-bottom:1px solid var(--border)">
+        <td style="padding:4px 10px;font-size:12px;font-weight:600;display:flex;align-items:center">${dot(di++)}인건비 소계</td>
+        <td style="padding:4px 10px;font-size:11px;color:var(--muted)">직원인건비+강사비+차량운행비</td>
+        ${cells3(laborTotal.yr25,laborTotal.yr26p,laborTotal.yr26a,d.sales.yr25,d.sales.yr26p,d.sales.yr26a,true)}
+      </tr>`;
+      // 인건비 세부
+      for(const item of ITEMS.filter(i=>i.indent)){
+        const v=d[item.key];
+        rows+=`<tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:3px 10px 3px 26px;font-size:11px;color:var(--muted)">↳ ${item.label}</td>
+          <td style="padding:3px 10px;font-size:10px;color:var(--muted)">${item.desc||''}</td>
+          ${cells3(v.yr25,v.yr26p,v.yr26a,d.sales.yr25,d.sales.yr26p,d.sales.yr26a,false)}
+        </tr>`;
+      }
+      // 나머지 항목
+      for(const item of ITEMS.filter(i=>!i.indent)){
+        const v=d[item.key];
+        rows+=`<tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:4px 10px;font-size:12px;display:flex;align-items:center">${dot(di++)}${item.label}</td>
+          <td style="padding:4px 10px;font-size:10px;color:var(--muted)">${item.desc||''}</td>
+          ${cells3(v.yr25||0,v.yr26p||0,v.yr26a||0,d.sales.yr25,d.sales.yr26p,d.sales.yr26a,false)}
+        </tr>`;
+      }
+      // 합계 — 실제 YoY 표시
+      const tot=d.total;
+      rows+=`<tr style="background:var(--s2);border-top:2px solid var(--border2)">
+        <td style="padding:5px 10px;font-size:12px;font-weight:700;display:flex;align-items:center">${dot(di++)}합계</td>
+        <td></td>
+        ${cells3(tot.yr25,tot.yr26p,tot.yr26a,d.sales.yr25,d.sales.yr26p,d.sales.yr26a,true)}
+      </tr>`;
+
+      html+=`<div style="margin-bottom:24px">
+        <div style="padding:6px 10px 4px;font-size:12px;font-weight:700;border-bottom:2px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <span style="background:var(--s3);border:1px solid var(--border);border-radius:6px;padding:2px 10px">${camp}</span>
+          <span style="font-size:11px;font-weight:400;color:var(--muted)">
+            매출 <span style="color:var(--c25)">${(d.sales.yr25/M).toFixed(1)}</span> /
+            <span style="color:var(--c26p)">${(d.sales.yr26p/M).toFixed(1)}</span> /
+            <span style="color:var(--c26a)">${(d.sales.yr26a/M).toFixed(1)}</span>
+          </span>
+          <span style="margin-left:auto;font-size:10px;color:var(--muted)">※ 25년 실적은 합계 기준 비율 추정값</span>
+        </div>
+        <table style="width:100%;border-collapse:collapse">
+          <thead><tr style="background:var(--s3)">
+            <th style="${thL}">항목</th>
+            <th style="${thL};color:var(--muted);font-weight:400;min-width:160px">세부내용</th>
+            <th style="${thS};color:var(--c25)">25년 실적<br><span style="font-size:10px;font-weight:400;color:var(--muted)">매출比</span></th>
+            <th style="${thS};color:var(--c26p)">26년 계획<br><span style="font-size:10px;font-weight:400;color:var(--muted)">매출比</span></th>
+            <th style="${thS};color:var(--c26a)">26년 실적<br><span style="font-size:10px;font-weight:400;color:var(--muted)">매출比</span></th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`;
+    }
+    html+='</div>';
+    document.getElementById(containerId).innerHTML=html;
+  }
+
+  renderCostTable('hak_cost_table', ['광진','동대문','성동','중랑']);
+  renderCostTable('u2m_cost_table', ['미사','송파방이','위례','중계']);
+
+  // 계층 트리 렌더링
+  renderHakwonTree();
+}
+
+// ── 공통: 3년 비교 트리 렌더러 ──
+// ── CC별 3년 손익 데이터 ──
+const CC3Y = {
+  // { s:매출, p2:영업이익(공통비 제외) }
+  '광진수학':   {
+    yr25: {s:516182000, p2:182480847},
+    yr26p:{s:446757706, p2:140313106},
+    yr26a:{s:479363400, p2:164896780},
+  },
+  '광진영어':   {
+    yr25: {s:114670400, p2:31932576},
+    yr26p:{s:114142681, p2:27234676},
+    yr26a:{s:118030200, p2:28918314},
+  },
+  '동대문수학': {
+    yr25: {s:345011600, p2:151559496},
+    yr26p:{s:317956889, p2:140795202},
+    yr26a:{s:316598000, p2:115510141},
+  },
+  '동대문영어': {
+    yr25: {s:48325900,  p2:-42967},
+    yr26p:{s:45069343,  p2:5181523},
+    yr26a:{s:42182200,  p2:1845938},
+  },
+  '성동수학':   {
+    yr25: {s:295293000, p2:113075035},
+    yr26p:{s:294767378, p2:140313106},
+    yr26a:{s:291302900, p2:105808922},
+  },
+  '성동영어':   {
+    yr25: {s:83568700,  p2:7725673},
+    yr26p:{s:73860314,  p2:27234676},
+    yr26a:{s:69107200,  p2:8045107},
+  },
+  '중랑수학':   {
+    yr25: {s:159531900, p2:38472577},
+    yr26p:{s:156403629, p2:43457310},
+    yr26a:{s:155993000, p2:34562626},
+  },
+  '중랑영어':   {
+    yr25: {s:90752500,  p2:4898606},
+    yr26p:{s:76073917,  p2:5733616},
+    yr26a:{s:76955800,  p2:13687124},
+  },
+};
+
+
+function renderCC3YTree(containerId, groupDef, dataObj){
+  // groupDef: [{name, color, emoji, ccs:[key,...]}]
+  // dataObj:  { key: {yr25:{s,p2}, yr26p:{s,p2}, yr26a:{s,p2}} }
+
+  const M = 1e6;
+  const fx  = v => Math.round(v/M).toLocaleString();      // 백만원 단위 정수 (M 표시 없음)
+  const fp2 = v => v==null ? '-' : v.toFixed(1)+'%';
+  const fd  = v => (v>=0?'+':'')+Math.round(v/M).toLocaleString();
+  const mg  = (p,s) => s>0 ? (p/s*100).toFixed(1)+'%' : '-';
+  const pc  = p => p>=0 ? 'var(--c26a)' : 'var(--loss)';
+  const ac  = v => v==null?'var(--muted)': v>=100?'var(--c26a)': v>=80?'var(--yellow)':'var(--loss)';
+  const ach = (a,b) => b!==0 ? a/b*100 : null;
+  const ccLbl = cc => cc
+    .replace(/수학$/, '<span style="font-size:10px;font-weight:400;color:#4d96f0;margin-left:2px">수학</span>')
+    .replace(/영어$/, '<span style="font-size:10px;font-weight:400;color:#9474f0;margin-left:2px">영어</span>');
+
+  // 열 헤더 (매출·영업이익 각 5열씩)
+  const subHd = color => `
+    <th style="padding:4px 8px;text-align:right;color:var(--c25)">25년실적</th>
+    <th style="padding:4px 8px;text-align:right;color:var(--c26p)">26년계획</th>
+    <th style="padding:4px 8px;text-align:right;color:${color};font-weight:700">26년실적</th>
+    <th style="padding:4px 8px;text-align:right;color:var(--muted)">계획비</th>
+    <th style="padding:4px 8px;text-align:right;color:var(--muted)">증감액</th>`;
+
+  let html = '';
+  groupDef.forEach(({name, color, emoji='📍', ccs, groups}) => {
+    // groups 있으면 ccs는 groups에서 합산
+    const allCcs = groups ? groups.flatMap(g=>g.ccs) : ccs;
+
+    // 그룹 합계
+    const tot = yr => allCcs.reduce((a,k)=>{
+      const d=dataObj[k]?.[yr]||{s:0,p2:0};
+      return {s:a.s+d.s, p2:a.p2+d.p2};
+    },{s:0,p2:0});
+    const T25=tot('yr25'), T26p=tot('yr26p'), T26a=tot('yr26a');
+
+    html += `
+    <div style="border-left:3px solid ${color};padding:0 0 0 14px;margin-bottom:24px">
+      <!-- 그룹 타이틀 + 요약 -->
+      <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:10px">
+        <span style="font-size:13px;font-weight:700;color:${color}">${emoji} ${name}</span>
+        <span style="font-size:11px;color:var(--muted)">
+          매출: <b style="color:var(--c25)">${fx(T25.s)}</b> →
+                <b style="color:var(--c26p)">${fx(T26p.s)}</b> →
+                <b style="color:var(--c26a)">${fx(T26a.s)}</b>
+        </span>
+        <span style="font-size:11px;color:var(--muted)">
+          영업이익: <b style="color:${pc(T25.p2)}">${fx(T25.p2)}</b> →
+                    <b style="color:var(--c26p)">${fx(T26p.p2)}</b> →
+                    <b style="color:${pc(T26a.p2)}">${fx(T26a.p2)}</b>
+        </span>
+      </div>
+
+      <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:11.5px;min-width:860px">
+        <thead>
+          <tr style="background:var(--s3)">
+            <th rowspan="2" style="padding:7px 10px;text-align:left;color:var(--muted);font-weight:600;border-bottom:2px solid var(--border2);min-width:110px">CC</th>
+            <th colspan="5" style="padding:6px 0;text-align:center;color:#4d96f0;font-weight:600;border-left:2px solid var(--border2);border-bottom:1px solid var(--border)">💰 매출</th>
+            <th colspan="5" style="padding:6px 0;text-align:center;color:#22bf85;font-weight:600;border-left:2px solid var(--border2);border-bottom:1px solid var(--border)">📈 영업이익</th>
+          </tr>
+          <tr style="background:var(--s3);font-size:10.5px">
+            ${subHd('#4d96f0')}
+            ${subHd('#22bf85')}
+          </tr>
+          <!-- 구분선 -->
+          <tr><td colspan="11" style="padding:0;border-bottom:2px solid var(--border2)"></td></tr>
+        </thead>
+        <tbody>`;
+
+    // CC 데이터 행 빌더
+    const buildCcRow = (cc) => {
+      const d = dataObj[cc]; if(!d) return '';
+      const {yr25:d25, yr26p:d26p, yr26a:d26a} = d;
+      const sAch=ach(d26a.s,d26p.s), sDiff=d26a.s-d25.s;
+      const pAch=ach(d26a.p2,d26p.p2), pDiff=d26a.p2-d25.p2;
+      return `<tr style="border-bottom:1px solid var(--border)"
+          onmouseover="this.style.background='var(--s3)'" onmouseout="this.style.background=''">
+        <td style="padding:9px 10px 9px 22px;font-weight:600">${ccLbl(cc)}</td>
+        <td style="padding:9px 8px;text-align:right;color:var(--c25);border-left:2px solid var(--border2)">${fx(d25.s)}</td>
+        <td style="padding:9px 8px;text-align:right;color:var(--c26p)">${fx(d26p.s)}</td>
+        <td style="padding:9px 8px;text-align:right;color:#4d96f0;font-weight:700">${fx(d26a.s)}</td>
+        <td style="padding:9px 8px;text-align:right;color:${ac(sAch)};font-weight:600">${fp2(sAch)}</td>
+        <td style="padding:9px 8px;text-align:right;color:${sDiff>=0?'var(--c26a)':'var(--loss)'};font-weight:600">${fd(sDiff)}</td>
+        <td style="padding:9px 8px;text-align:right;color:${pc(d25.p2)};border-left:2px solid var(--border2)">${fx(d25.p2)}<span style="font-size:9px;color:var(--muted);margin-left:2px">(${mg(d25.p2,d25.s)})</span></td>
+        <td style="padding:9px 8px;text-align:right;color:${pc(d26p.p2)}">${fx(d26p.p2)}<span style="font-size:9px;color:var(--muted);margin-left:2px">(${mg(d26p.p2,d26p.s)})</span></td>
+        <td style="padding:9px 8px;text-align:right;color:${pc(d26a.p2)};font-weight:700">${fx(d26a.p2)}<span style="font-size:9px;color:var(--muted);margin-left:2px">(${mg(d26a.p2,d26a.s)})</span></td>
+        <td style="padding:9px 8px;text-align:right;color:${ac(pAch)};font-weight:600">${fp2(pAch)}</td>
+        <td style="padding:9px 8px;text-align:right;color:${pDiff>=0?'var(--c26a)':'var(--loss)'};font-weight:600">${fd(pDiff)}</td>
+      </tr>`;
+    };
+
+    let bodyRows = '';
+    if(groups){
+      groups.forEach(({label, color:gc, ccs:gccs}) => {
+        const gSum = yr => gccs.reduce((a,k)=>({
+          s:a.s+(dataObj[k]?.[yr]?.s||0), p2:a.p2+(dataObj[k]?.[yr]?.p2||0)
+        }),{s:0,p2:0});
+        const g25=gSum('yr25'), g26p=gSum('yr26p'), g26a=gSum('yr26a');
+        bodyRows += `<tr style="background:${gc}18;border-top:2px solid ${gc}55">
+          <td colspan="11" style="padding:7px 10px;font-size:11.5px;font-weight:700;color:${gc}">${label}
+            <span style="font-weight:400;color:var(--muted);margin-left:10px;font-size:10px">
+              매출 <b style="color:var(--c25)">${fx(g25.s)}</b> → <b style="color:var(--c26p)">${fx(g26p.s)}</b> → <b style="color:${pc(g26a.s)}">${fx(g26a.s)}</b> &nbsp;|&nbsp;
+              영업이익 <b style="color:${pc(g25.p2)}">${fx(g25.p2)}</b> → <b style="color:var(--c26p)">${fx(g26p.p2)}</b> → <b style="color:${pc(g26a.p2)}">${fx(g26a.p2)}</b>
+            </span>
+          </td>
+        </tr>`;
+        gccs.forEach(cc => { bodyRows += buildCcRow(cc); });
+      });
+    } else {
+      allCcs.forEach(cc => { bodyRows += buildCcRow(cc); });
+    }
+
+    // 소계 행
+    const tSach=ach(T26a.s,T26p.s), tSdiff=T26a.s-T25.s;
+    const tPach=ach(T26a.p2,T26p.p2), tPdiff=T26a.p2-T25.p2;
+    bodyRows += `<tr style="background:var(--s3);font-weight:700;border-top:2px solid var(--border2)">
+      <td style="padding:8px 10px;color:${color}">합계</td>
+      <td style="padding:8px;text-align:right;color:var(--c25);border-left:2px solid var(--border2)">${fx(T25.s)}</td>
+      <td style="padding:8px;text-align:right;color:var(--c26p)">${fx(T26p.s)}</td>
+      <td style="padding:8px;text-align:right;color:#4d96f0">${fx(T26a.s)}</td>
+      <td style="padding:8px;text-align:right;color:${ac(tSach)}">${fp2(tSach)}</td>
+      <td style="padding:8px;text-align:right;color:${tSdiff>=0?'var(--c26a)':'var(--loss)'}">${fd(tSdiff)}</td>
+      <td style="padding:8px;text-align:right;color:${pc(T25.p2)};border-left:2px solid var(--border2)">${fx(T25.p2)}<span style="font-size:9px;color:var(--muted);margin-left:2px">(${mg(T25.p2,T25.s)})</span></td>
+      <td style="padding:8px;text-align:right;color:${pc(T26p.p2)}">${fx(T26p.p2)}<span style="font-size:9px;color:var(--muted);margin-left:2px">(${mg(T26p.p2,T26p.s)})</span></td>
+      <td style="padding:8px;text-align:right;color:${pc(T26a.p2)}">${fx(T26a.p2)}<span style="font-size:9px;color:var(--muted);margin-left:2px">(${mg(T26a.p2,T26a.s)})</span></td>
+      <td style="padding:8px;text-align:right;color:${ac(tPach)}">${fp2(tPach)}</td>
+      <td style="padding:8px;text-align:right;color:${tPdiff>=0?'var(--c26a)':'var(--loss)'}">${fd(tPdiff)}</td>
+    </tr>`;
+
+    html += bodyRows + `</tbody></table></div></div>`;
+  });
+
+  document.getElementById(containerId).innerHTML = html;
+}
+
+// ── 학원사업본부 렌더 ──
+function renderHakwonTree(){
+  renderCC3YTree('hakwon_tree', [
+    {name:'학원사업본부', color:'#2d74e8', emoji:'🏫',
+     ccs:['광진수학','광진영어','동대문수학','동대문영어','성동수학','성동영어','중랑수학','중랑영어'],
+     groups:[
+       {label:'📍 광진', color:'#2d74e8', ccs:['광진수학','광진영어']},
+       {label:'📍 동대문', color:'#0ea872', ccs:['동대문수학','동대문영어']},
+       {label:'📍 성동', color:'#e08c00', ccs:['성동수학','성동영어']},
+       {label:'📍 중랑', color:'#9474f0', ccs:['중랑수학','중랑영어']},
+     ]
+    },
+  ], CC3Y);
+}
+
+// ── U2M CC별 3년 손익 데이터 ──
+const CC3Y_U2M = {
+  '중계수학':     { yr25:{s:139538800,p2:232848},    yr26p:{s:119532913,p2:14774135}, yr26a:{s:127233500,p2:11205918} },
+  '송파방이수학': { yr25:{s:109712900,p2:1298570},   yr26p:{s:105952944,p2:2748780},  yr26a:{s:123244100,p2:6622500}  },
+  '위례수학':     { yr25:{s:52005300, p2:3361098},   yr26p:{s:14926128, p2:-17442157},yr26a:{s:60397100, p2:25052131} },
+  '미사수학':     { yr25:{s:81503700, p2:0},         yr26p:{s:77379744, p2:15369930}, yr26a:{s:67070300, p2:2349095}  },
+};
+
+// ── U2M사업부 렌더 ──
+function renderU2mTree(){
+  renderCC3YTree('u2m_tree', [
+    {name:'U2M사업부', color:'#6a28d9', emoji:'🏢', ccs:['중계수학','송파방이수학','위례수학','미사수학']},
+  ], CC3Y_U2M);
+}
+
+// ============================================================
+// DEPT: U2M
+// ============================================================
+function initU2m(){
+  const names=['미사수학','송파방이수학','위례수학','중계수학','가맹사업교육넷'];
+  const labels=names.map(n=>n.replace('수학','').replace('교육넷','(교육넷)'));
+  mkBar('c_u2m_bar',labels,[
+    dsBar('매출',names.map(n=>PL[n].sales/1e6),C26A),
+    dsBar('영업이익',names.map(n=>PL[n].profit/1e6),C25),
+  ]);
+  renderU2mTree();
+}
+
+// ============================================================
+// DEPT: 미래교육사업본부
+// ============================================================
+function initMirae(){
+  // ── 매출 데이터 (26년 1월 실적)
+  const MIRAE = {
+    직영수학: {book:7511600,   online:58672500,  total:66184100},
+    직영영어: {book:886200,    online:26538400,  total:27424600},
+    FC수학:   {book:96586840,  online:201166300, total:297753140},
+  };
+  const CCS = ['직영수학','직영영어','FC수학'];
+  const COLORS = {'직영수학':'#2d74e8','직영영어':'#9474f0','FC수학':'#0ea872'};
+
+  const fk = v => Math.round(v/1000).toLocaleString();
+  const fm = v => (v/1e6).toFixed(1);
+  const fp = (v,t) => t>0 ? (v/t*100).toFixed(1)+'%' : '-';
+  const fyoy = (a,b) => {
+    if(!b) return '-';
+    const r = (a-b)/b*100;
+    return `<span style="color:${r>=0?'var(--c26a)':'var(--loss)'}">${r>=0?'+':''}${r.toFixed(1)}%</span>`;
+  };
+  const thS2 = 'padding:6px 10px;text-align:right;font-size:11px;font-weight:600;color:var(--muted)';
+  const thL2 = 'padding:6px 10px;text-align:left;font-size:11px;font-weight:600;color:var(--muted)';
+
+  // ── 그래프: 교재·원격 각각 그룹 막대 (CC × 유형)
+  (function(){
+    const ctx = document.getElementById('c_mirae_bar');
+    if(!ctx) return;
+    // 레이블: CC명, 각 CC에 교재/원격 두 막대
+    const labels = CCS;
+    new Chart(ctx.getContext('2d'), {
+      type:'bar',
+      data:{
+        labels,
+        datasets:[
+          {
+            label:'교재 (도서수입)',
+            data: CCS.map(c=>MIRAE[c].book/1e6),
+            backgroundColor: CCS.map(c=>COLORS[c]+'99'),
+            borderColor:     CCS.map(c=>COLORS[c]),
+            borderWidth:1,
+            borderRadius:4,
+          },
+          {
+            label:'원격 (온라인컨텐츠)',
+            data: CCS.map(c=>MIRAE[c].online/1e6),
+            backgroundColor: CCS.map(c=>COLORS[c]+'dd'),
+            borderColor:     CCS.map(c=>COLORS[c]),
+            borderWidth:1,
+            borderRadius:4,
+          },
+        ]
+      },
+      options:{
+        responsive:true, maintainAspectRatio:false,
+        plugins:{legend:{labels:{color:'#6b7599',font:{size:11},boxWidth:10,padding:10}}},
+        scales:{
+          x:{grid:{color:'#1d2340'}, ticks:{color:'#6b7599',font:{size:11}}},
+          y:{grid:{color:'#1d2340'}, ticks:{color:'#6b7599',font:{size:11}}},
+        }
+      }
+    });
+  })();
+
+  // ── 교재·원격 CC별 상세표
+  const totalBook   = CCS.reduce((s,c)=>s+MIRAE[c].book,0);
+  const totalOnline = CCS.reduce((s,c)=>s+MIRAE[c].online,0);
+  const totalAll    = CCS.reduce((s,c)=>s+MIRAE[c].total,0);
+
+  let revRows = '';
+  for(const cc of CCS){
+    const d = MIRAE[cc];
+    const col = COLORS[cc];
+    revRows += `<tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:5px 10px;font-size:12px;font-weight:600;color:${col}">${cc}</td>
+      <td style="padding:5px 10px;text-align:right;font-size:12px">${fk(d.book)}</td>
+      <td style="padding:5px 10px;text-align:right;font-size:11px;color:var(--muted)">${fp(d.book,d.total)}</td>
+      <td style="padding:5px 10px;text-align:right;font-size:12px">${fk(d.online)}</td>
+      <td style="padding:5px 10px;text-align:right;font-size:11px;color:var(--muted)">${fp(d.online,d.total)}</td>
+      <td style="padding:5px 10px;text-align:right;font-size:12px;font-weight:600;color:${col}">${fk(d.total)}</td>
+    </tr>`;
+  }
+  revRows += `<tr style="background:var(--s2);font-weight:700;border-top:2px solid var(--border2)">
+    <td style="padding:6px 10px;font-size:12px">합계</td>
+    <td style="padding:6px 10px;text-align:right;font-size:12px">${fk(totalBook)}</td>
+    <td style="padding:6px 10px;text-align:right;font-size:11px;color:var(--muted)">${fp(totalBook,totalAll)}</td>
+    <td style="padding:6px 10px;text-align:right;font-size:12px">${fk(totalOnline)}</td>
+    <td style="padding:6px 10px;text-align:right;font-size:11px;color:var(--muted)">${fp(totalOnline,totalAll)}</td>
+    <td style="padding:6px 10px;text-align:right;font-size:12px;color:var(--c26a)">${fk(totalAll)}</td>
+  </tr>`;
+
+  document.getElementById('mirae_rev_table').innerHTML = `
+    <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">
+      <thead><tr style="background:var(--s3)">
+        <th style="${thL2}">CC</th>
+        <th style="${thS2}">교재(천원)</th><th style="${thS2}">비중</th>
+        <th style="${thS2}">원격(천원)</th><th style="${thS2}">비중</th>
+        <th style="${thS2}">합계(천원)</th>
+      </tr></thead>
+      <tbody>${revRows}</tbody>
+    </table></div>`;
+
+  // ── 판매관리비 주요 계정 3년 비교표
+  // 매출: 25실적=395,956,280 / 26계획=365,832,491 / 26실적=391,361,840
+  const SALES3 = {yr25:395956280, yr26p:365832491, yr26a:391361840};
+  // 판관비 합계: 25실적=316,746,208 / 26계획=352,592,308 / 26실적=346,470,397
+  const COST3 = [
+    {label:'인건비',         yr25:87016914,  yr26p:96864599,  yr26a:95182780,  color:'#e05555'},
+    {label:'프로그램사용료', yr25:98086345,  yr26p:109186755, yr26a:107290992, color:'#e08c00'},
+    {label:'판매장려금',     yr25:52060083,  yr26p:57951711,  yr26a:56945520,  color:'#e6c910'},
+    {label:'광고선전비',     yr25:156124,    yr26p:173792,    yr26a:170775,    color:'#22bf85'},
+    {label:'외주용역비',     yr25:42733309,  yr26p:47569428,  yr26a:46743500,  color:'#4d96f0'},
+    {label:'기타',           yr25:36693434,  yr26p:40846022,  yr26a:40136830,  color:'#9474f0'},
+    {label:'합계',           yr25:316746208, yr26p:352592308, yr26a:346470397, color:null, bold:true},
+  ];
+
+  const pcS = (v,s) => s>0?`<div style="font-size:10px;color:var(--muted)">${(v/s*100).toFixed(1)}%</div>`:'';
+
+  let cRows = '';
+  for(const row of COST3){
+    const bStyle = row.bold ? 'font-weight:700;background:var(--s2);' : '';
+    const btop   = row.bold ? 'border-top:2px solid var(--border2);' : 'border-bottom:1px solid var(--border);';
+    const dot    = row.color && !row.bold
+      ? `<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${row.color};margin-right:6px;vertical-align:middle"></span>`
+      : '';
+    cRows += `<tr style="${bStyle}${btop}">
+      <td style="padding:5px 10px;font-size:12px;${bStyle}">${dot}${row.label}</td>
+      <td style="padding:5px 10px;text-align:right;font-size:12px;color:var(--c25);${bStyle}">
+        ${fk(row.yr25)}${pcS(row.yr25, SALES3.yr25)}
+      </td>
+      <td style="padding:5px 10px;text-align:right;font-size:12px;color:var(--c26p);${bStyle}">
+        ${fk(row.yr26p)}${pcS(row.yr26p, SALES3.yr26p)}
+      </td>
+      <td style="padding:5px 10px;text-align:right;font-size:12px;color:var(--c26a);${bStyle}">
+        ${fk(row.yr26a)}${pcS(row.yr26a, SALES3.yr26a)}
+      </td>
+    </tr>`;
+  }
+
+  // 참고 매출행
+  const salesRefRow = `<tr style="background:var(--s3);border-bottom:1px solid var(--border)">
+    <td style="padding:4px 10px;font-size:11px;color:var(--muted)">▶ 참고: 매출</td>
+    <td style="padding:4px 10px;text-align:right;font-size:11px;color:var(--c25)">${fk(SALES3.yr25)}</td>
+    <td style="padding:4px 10px;text-align:right;font-size:11px;color:var(--c26p)">${fk(SALES3.yr26p)}</td>
+    <td style="padding:4px 10px;text-align:right;font-size:11px;color:var(--c26a)">${fk(SALES3.yr26a)}</td>
+  </tr>`;
+
+  document.getElementById('mirae_cost_detail').innerHTML = `
+    <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">
+      <thead>
+        <tr style="background:var(--s3)">
+          <th style="${thL2}">항목</th>
+          <th style="${thS2};color:var(--c25)">25년 실적<br><span style="font-size:10px;font-weight:400">매출比</span></th>
+          <th style="${thS2};color:var(--c26p)">26년 계획<br><span style="font-size:10px;font-weight:400">매출比</span></th>
+          <th style="${thS2};color:var(--c26a)">26년 실적<br><span style="font-size:10px;font-weight:400">매출比</span></th>
+        </tr>
+        ${salesRefRow}
+      </thead>
+      <tbody>${cRows}</tbody>
+    </table></div>`;
+}
+
+// ============================================================
+// DEPT: 방과후
+// ============================================================
+function initBgh(){
+  mkBar('c_bgh_bar',['방과후사업본부'],[
+    dsBar('매출',[PL['방과후사업본부'].sales/1e6],C26A),
+    dsBar('비용',[PL['방과후사업본부'].cost/1e6],'#f87171'),
+    dsBar('영업이익',[PL['방과후사업본부'].profit/1e6],C25),
+  ]);
+  mkDoughnut('c_bgh_cost',
+    ['인건비','임대료','소모품비','기타'],
+    [428.0,120.0,40.0,(PL['방과후사업본부'].cost/1e6-428.0-120.0-40.0)].map(v=>Math.max(v,0)),
+    ['#2d74e8','#6a28d9','#e08c00','#6b7280']);
+  renderDeptCostTable('bgh_cost_table', [
+    {label:'인건비 (직원)', desc:'직원급여·상여·퇴직금·복리후생비', yr25:40076,  yr26p:45433,  yr26a:41884},
+    {label:'인건비 (강사)', desc:'강사비(일반)·보조교사',           yr25:404874, yr26p:502014, yr26a:523217},
+    {label:'소모품비',      desc:'소모품비(일반)·교구재비',         yr25:73478,  yr26p:81019,  yr26a:85029},
+    {label:'도서인쇄비',   desc:'교재구입·교재제작',               yr25:31629,  yr26p:54013,  yr26a:34980},
+    {label:'그외',         desc:'임차료·수수료·광고·운반비 등',    yr25:28118,  yr26p:29886,  yr26a:21644},
+  ], Math.round(PL['방과후사업본부'].sales/1e3));
+}
+
+// ============================================================
+// DEPT: 경영기획실
+// ============================================================
+function initMgmt(){
+  mkDoughnut('c_mgmt_cost',
+    ['인건비','운영비','기타'],
+    [25.8,10.4,(PL['경영기획실'].cost/1e6-25.8-10.4)].map(v=>Math.max(v,0)),
+    ['#2d74e8','#0ea872','#6b7280']);
+  mkLine('c_mgmt_trend',M,[
+    dsLine('26년 실적',[PL['경영기획실'].cost/1e6,...Array(11).fill(null)],C26A),
+    dsLine('25년 실적',[19.17,23.72,38.21,28.49,24.42,30.61,45.79,33.12,37.71,43.14,65.71,99.65],C25),
+    dsLine('26년 계획',[97.66,100.43,105.80,100.45,91.96,88.31,91.31,100.58,107.21,87.91,106.03,102.64],C26P,true),
+  ]);
+  renderDeptCostTable('mgmt_cost_table', [
+    {label:'인건비', desc:'직원급여·상여·퇴직금·복리후생비', yr25:100120, yr26p:47844, yr26a:24012},
+    {label:'그외',   desc:'임차료·감가상각·수수료·행사비 등', yr25:18261, yr26p:12577, yr26a:16153},
+  ], 0);
+}
+
+// ── 사업부 단위 판관비 테이블 (방과후·경영기획실용) ──
+// items: [{label, desc, yr26a}], salesK: 매출(천원), 0이면 매출比 컬럼 숨김
+function renderDeptCostTable(containerId, items, salesK){
+  const tot25  = items.reduce((s,i)=>s+(i.yr25||0), 0);
+  const tot26p = items.reduce((s,i)=>s+(i.yr26p||0), 0);
+  const tot26a = items.reduce((s,i)=>s+(i.yr26a||0), 0);
+  const DOTS=['#e05555','#e08c00','#e6c910','#22bf85','#4d96f0','#9474f0'];
+  const dot = i => `<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${DOTS[i%DOTS.length]};margin-right:6px;flex-shrink:0;vertical-align:middle"></span>`;
+  const thS='padding:6px 12px;text-align:right;font-size:11px;font-weight:600;color:var(--muted);white-space:nowrap';
+  const thL='padding:6px 12px;text-align:left;font-size:11px;font-weight:600;color:var(--muted)';
+  const showSales = salesK > 0;
+
+  const cell = (v, base, color) => {
+    const pct = (base>0 && v>0) ? `<div style="font-size:11px;color:var(--muted);margin-top:1px">${(v/base*100).toFixed(1)}%</div>` : '';
+    return `<td style="padding:5px 12px;text-align:right;white-space:nowrap;${color?'color:'+color+';':''}">
+      <div style="font-size:12px">${v>0?v.toLocaleString('ko-KR'):'-'}</div>${pct}
+    </td>`;
+  };
+  const cellPlain = (v, color) =>
+    `<td style="padding:5px 12px;text-align:right;white-space:nowrap;font-size:12px;${color?'color:'+color+';':'color:var(--muted);'}">
+      ${v>0?v.toLocaleString('ko-KR'):'-'}
+    </td>`;
+
+  let rows = items.map((it,i)=>`
+    <tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:6px 12px;font-size:12px;display:flex;align-items:center;white-space:nowrap">${dot(i)}${it.label}</td>
+      <td style="padding:6px 12px;font-size:10px;color:var(--muted)">${it.desc||''}</td>
+      ${cellPlain(it.yr25||0, null)}
+      ${cellPlain(it.yr26p||0, null)}
+      ${cell(it.yr26a||0, showSales?salesK:tot26a, 'var(--c26a)')}
+    </tr>`).join('');
+
+  rows += `<tr style="background:var(--s2);border-top:2px solid var(--border2);font-weight:700">
+    <td style="padding:6px 12px;font-size:12px">합계</td>
+    <td></td>
+    ${cellPlain(tot25, null)}
+    ${cellPlain(tot26p, null)}
+    ${cell(tot26a, showSales?salesK:0, 'var(--c26a)')}
+  </tr>`;
+
+  const header = `<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">
+    <thead><tr style="background:var(--s3)">
+      <th style="${thL}">항목</th>
+      <th style="${thL};font-weight:400;min-width:160px">세부내용</th>
+      <th style="${thS};color:var(--c25)">25년 실적<br><span style="font-size:10px;font-weight:400">(천원)</span></th>
+      <th style="${thS};color:var(--c26p)">26년 계획<br><span style="font-size:10px;font-weight:400">(천원)</span></th>
+      <th style="${thS};color:var(--c26a)">26년 실적<br><span style="font-size:10px;font-weight:400;color:var(--muted)">${showSales?'매출比':'판관비比'}</span></th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table></div>`;
+
+  document.getElementById(containerId).innerHTML = header;
+}
+
+// ── 공통 PL 테이블 생성 ──
+function buildPLTable(items){
+  let rows='';
+  items.forEach(({name,key})=>{
+    const d=PL[key]||{sales:0,cost:0,profit:0};
+    const m=d.sales>0?(d.profit/d.sales*100):0;
+    rows+=`<tr>
+      <td style="font-weight:600">${name}</td>
+      <td class="r" style="color:var(--c26a)">${d.sales.toLocaleString()}</td>
+      <td class="r" style="color:#e05555">${d.cost.toLocaleString()}</td>
+      <td class="r" style="color:${d.profit>=0?'var(--c26a)':'var(--loss)'}; font-weight:700">${d.profit.toLocaleString()}</td>
+      <td class="r" style="color:${m>=0?'var(--c26a)':'var(--loss)'}">${m.toFixed(1)}%</td>
+      <td><span class="tg ${d.profit>=0?'tg-ok':'tg-ng'}">${d.profit>=0?'흑자':'적자'}</span></td>
+    </tr>`;
+  });
+  // 합계
+  const tot=items.reduce((acc,{key})=>{
+    const d=PL[key]||{sales:0,cost:0,profit:0};
+    acc.s+=d.sales; acc.c+=d.cost; acc.p+=d.profit; return acc;
+  },{s:0,c:0,p:0});
+  const tm=tot.s>0?(tot.p/tot.s*100):0;
+  rows+=`<tr class="total-row">
+    <td>합계</td>
+    <td class="r" style="color:var(--c26a)">${tot.s.toLocaleString()}</td>
+    <td class="r" style="color:#e05555">${tot.c.toLocaleString()}</td>
+    <td class="r" style="color:${tm>=0?'var(--c26a)':'var(--loss)'}">${tot.p.toLocaleString()}</td>
+    <td class="r" style="color:${tm>=0?'var(--c26a)':'var(--loss)'}">${tm.toFixed(1)}%</td>
+    <td><span class="tg ${tm>=0?'tg-ok':'tg-ng'}">${tm>=0?'흑자':'적자'}</span></td>
+  </tr>`;
+  return `<div class="tw"><table><thead><tr>
+    <th>구분</th><th class="r">매출</th><th class="r">판관비</th>
+    <th class="r">영업이익</th><th class="r">이익률</th><th>상태</th>
+  </tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+// ============================================================
+// STUDENTS
+// ============================================================
+let stuBarChart=null, stuTrendChart=null, stuMathChart=null, stuEngChart=null;
+let stuMonthIdx=0;
+
+const CAMPS_HAK=['광진','성동','동대문','중랑'];
+const CAMPS_U2M=['중계','송파방이','위례','미사'];
+const CAMPS_ALL=[...CAMPS_HAK,...CAMPS_U2M];
+
+function getStu(campus,month){
+  const s=STU[campus];
+  return {
+    a26: s.yr26a['합계'][month]||0,
+    a25: s.yr25['합계'][month]||0,
+    ms26: s.yr26a['수학']['소계'][month]||0,
+    mc26: s.yr26a['수학']['초중'][month]||0,
+    mg26: s.yr26a['수학']['영재'][month]||0,
+    md26: s.yr26a['수학']['대입'][month]||0,
+    es26: s.yr26a['영어']['소계'][month]||0,
+    ec26: s.yr26a['영어']['초중'][month]||0,
+    ed26: s.yr26a['영어']['대입'][month]||0,
+    ms25: s.yr25['수학']['소계'][month]||0,
+    mc25: s.yr25['수학']['초중'][month]||0,
+    mg25: s.yr25['수학']['영재'][month]||0,
+    md25: s.yr25['수학']['대입'][month]||0,
+    es25: s.yr25['영어']['소계'][month]||0,
+    ec25: s.yr25['영어']['초중'][month]||0,
+    ed25: s.yr25['영어']['대입'][month]||0,
+  };
+}
+
+function setStuMonth(idx,btn){
+  stuMonthIdx=idx;
+  const mn=idx===0?'1':'2';
+  document.querySelectorAll('#month_btns .pbtn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById('stu_month_label').textContent=`2026년 ${mn}월 실적 기준`;
+  document.getElementById('stu_math_title').textContent=`수학 과목별 재원생 (${mn}월)`;
+  document.getElementById('stu_eng_title').textContent=`영어 과목별 재원생 (${mn}월)`;
+  renderStuKpi(idx);renderStuCards(idx);renderStuBar(idx);renderStuMathEng(idx);renderStuTable(idx);
+}
+
+function renderStuCards(month){
+  const hakEl=document.getElementById('stu_hak_cards');
+  hakEl.innerHTML=CAMPS_HAK.map(c=>{
+    const d=getStu(c,month);
+    const diff=d.a26-d.a25;
+    const pct=d.a25>0?((diff/d.a25)*100).toFixed(1):'0';
+    const maxBar=Math.max(...CAMPS_HAK.map(x=>getStu(x,month).a26));
+    const barW=maxBar>0?(d.a26/maxBar*100).toFixed(0):0;
+    return `<div style="background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div style="font-size:13px;font-weight:700">📍 ${c}</div>
+        <div style="font-size:10px;color:${diff>=0?'var(--c26a)':'var(--loss)'}">${diff>=0?'▲':'▼'}${Math.abs(diff)}명 (${Math.abs(pct)}%)</div>
+      </div>
+      <div style="font-size:26px;font-weight:900;color:var(--c26a);line-height:1;margin-bottom:3px">${d.a26.toLocaleString()}<span style="font-size:11px;font-weight:400;color:var(--muted);margin-left:3px">명</span></div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:9px">25년 ${d.a25.toLocaleString()}명</div>
+      <div style="height:4px;background:var(--border);border-radius:2px;margin-bottom:10px;overflow:hidden"><div style="height:100%;width:${barW}%;background:var(--c26a)"></div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+        <div style="background:var(--s3);border-radius:7px;padding:8px 10px">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:2px">수학</div>
+          <div style="font-size:15px;font-weight:700;color:var(--c25)">${d.ms26}<span style="font-size:10px;color:var(--muted);margin-left:2px">명</span></div>
+          <div style="font-size:10px;color:var(--muted);margin-top:3px;line-height:1.5">초중 ${d.mc26}${d.mg26?` / 영재 ${d.mg26}`:''}${d.md26?` / 고등 ${d.md26}`:''}</div>
+        </div>
+        <div style="background:var(--s3);border-radius:7px;padding:8px 10px">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:2px">영어</div>
+          <div style="font-size:15px;font-weight:700;color:var(--c26p)">${d.es26||'-'}<span style="font-size:10px;color:var(--muted);margin-left:2px">${d.es26?'명':''}</span></div>
+          <div style="font-size:10px;color:var(--muted);margin-top:3px;line-height:1.5">${d.es26?`초중 ${d.ec26} / 고등 ${d.ed26}`:'영어반 없음'}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  const u2mEl=document.getElementById('stu_u2m_cards');
+  u2mEl.innerHTML=CAMPS_U2M.map(c=>{
+    const d=getStu(c,month);
+    const diff=d.a26-d.a25;
+    const pct=d.a25>0?((diff/d.a25)*100).toFixed(1):'0';
+    const maxBar=Math.max(...CAMPS_U2M.map(x=>getStu(x,month).a26));
+    const barW=maxBar>0?(d.a26/maxBar*100).toFixed(0):0;
+    return `<div style="background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div style="font-size:13px;font-weight:700">📍 ${c}</div>
+        <div style="font-size:10px;color:${diff>=0?'var(--c26a)':'var(--loss)'}">${diff>=0?'▲':'▼'}${Math.abs(diff)}명 (${Math.abs(pct)}%)</div>
+      </div>
+      <div style="font-size:26px;font-weight:900;color:var(--c26a);line-height:1;margin-bottom:3px">${d.a26.toLocaleString()}<span style="font-size:11px;font-weight:400;color:var(--muted);margin-left:3px">명</span></div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:9px">25년 ${d.a25.toLocaleString()}명</div>
+      <div style="height:4px;background:var(--border);border-radius:2px;margin-bottom:10px;overflow:hidden"><div style="height:100%;width:${barW}%;background:var(--c26a)"></div></div>
+      <div style="background:var(--s3);border-radius:7px;padding:8px 10px">
+        <div style="font-size:10px;color:var(--muted);margin-bottom:2px">수학 (고등 포함)</div>
+        <div style="font-size:15px;font-weight:700;color:var(--c25)">${d.ms26}<span style="font-size:10px;color:var(--muted);margin-left:2px">명</span></div>
+        <div style="font-size:10px;color:var(--muted);margin-top:3px">25년 ${d.ms25}명</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderStuKpi(month){
+  const mn = month===0?'1':'2';
+  const tot26 = CAMPS_ALL.reduce((s,c)=>s+getStu(c,month).a26, 0);
+  const tot25 = CAMPS_ALL.reduce((s,c)=>s+getStu(c,month).a25, 0);
+  const diff = tot26-tot25;
+  const pct  = tot25>0?(diff/tot25*100).toFixed(1):0;
+  const math26 = CAMPS_ALL.reduce((s,c)=>s+(getStu(c,month).ms26||0), 0);
+  const math25 = CAMPS_ALL.reduce((s,c)=>s+(getStu(c,month).ms25||0), 0);
+  const eng26  = CAMPS_ALL.reduce((s,c)=>s+(getStu(c,month).es26||0), 0);
+  const eng25  = CAMPS_ALL.reduce((s,c)=>s+(getStu(c,month).es25||0), 0);
+  const mDiff = math26-math25; const eDiff = eng26-eng25;
+  const mPct  = math25>0?(mDiff/math25*100).toFixed(1):0;
+  const ePct  = eng25>0?(eDiff/eng25*100).toFixed(1):0;
+  // YTD: 1월~현재 월 누적
+  let ytd26=0, ytd25=0;
+  CAMPS_ALL.forEach(c=>{
+    const s=STU[c];
+    for(let i=0;i<=month;i++){ytd26+=(s.yr26a['합계'][i]??0); ytd25+=(s.yr25['합계'][i]??0);}
+  });
+  const ytdDiff=ytd26-ytd25;
+  const ytdPct=ytd25>0?(ytdDiff/ytd25*100).toFixed(1):0;
+  // 최다 감소 캠퍼스
+  let worstC='', worstD=0;
+  CAMPS_ALL.forEach(c=>{const d=getStu(c,month).a26-getStu(c,month).a25; if(d<worstD){worstD=d;worstC=c;}});
+  document.getElementById('stu_kpi_cards').innerHTML=`
+    <div class="mini-card c26a"><div class="mc-lbl">전체 재원생 (${mn}월)</div><div class="mc-val">${tot26.toLocaleString()}<span class="mc-unit">명</span></div><div class="mc-meta" style="color:${diff>=0?'var(--c26a)':'var(--loss)'}">${diff>=0?'▲':'▼'} 25년比 ${diff}명 (${pct}%)</div></div>
+    <div class="mini-card cy"><div class="mc-lbl">수학 합계 (${mn}월)</div><div class="mc-val">${math26.toLocaleString()}<span class="mc-unit">명</span></div><div class="mc-meta" style="color:${mDiff>=0?'var(--c26a)':'var(--loss)'}">${mDiff>=0?'▲':'▼'} 25년比 ${mDiff}명 (${mPct}%)</div></div>
+    <div class="mini-card cy"><div class="mc-lbl">영어 합계 (${mn}월)</div><div class="mc-val">${eng26.toLocaleString()}<span class="mc-unit">명</span></div><div class="mc-meta" style="color:${eDiff>=0?'var(--c26a)':'var(--loss)'}">${eDiff>=0?'▲':'▼'} 25년比 ${eDiff}명 (${ePct}%)</div></div>
+    <div class="mini-card cr"><div class="mc-lbl">YoY 최다 감소</div><div class="mc-val">${worstC||'-'}<span class="mc-unit" style="font-size:13px"> (${worstD}명)</span></div><div class="mc-meta" style="color:var(--loss)">${mn}월 기준</div></div>`;
+}
+
+function renderStuBar(month){
+  if(stuBarChart){stuBarChart.destroy();stuBarChart=null;}
+  stuBarChart=mkBar('c_stu_bar',CAMPS_ALL,[
+    dsBar('25년 실적',CAMPS_ALL.map(c=>getStu(c,month).a25),C25),
+    dsBar('26년 실적',CAMPS_ALL.map(c=>getStu(c,month).a26),C26A),
+  ]);
+  const mn=month===0?'1':'2';
+  document.getElementById('stu_bar_label').textContent=`${mn}월 기준 · 25년 vs 26년 실적 (명)`;
+}
+
+function renderStuMathEng(month){
+  if(stuMathChart){stuMathChart.destroy();stuMathChart=null;}
+  stuMathChart=mkBar('c_stu_math',CAMPS_HAK,[
+    {label:'26년 초중',data:CAMPS_HAK.map(c=>getStu(c,month).mc26),backgroundColor:'#22bf85cc',borderRadius:3,borderSkipped:false,stack:'26'},
+    {label:'26년 영재',data:CAMPS_HAK.map(c=>getStu(c,month).mg26),backgroundColor:'#9474f0cc',borderRadius:3,borderSkipped:false,stack:'26'},
+    {label:'26년 고등',data:CAMPS_HAK.map(c=>getStu(c,month).md26),backgroundColor:'#e6aa10cc',borderRadius:3,borderSkipped:false,stack:'26'},
+    {label:'25년 초중',data:CAMPS_HAK.map(c=>getStu(c,month).mc25),backgroundColor:'#4d96f044',borderRadius:3,borderSkipped:false,stack:'25'},
+    {label:'25년 영재',data:CAMPS_HAK.map(c=>getStu(c,month).mg25),backgroundColor:'#9474f044',borderRadius:3,borderSkipped:false,stack:'25'},
+    {label:'25년 고등',data:CAMPS_HAK.map(c=>getStu(c,month).md25),backgroundColor:'#e6aa1044',borderRadius:3,borderSkipped:false,stack:'25'},
+  ],{plugins:{legend:{labels:{color:'#6b7599',font:{size:10},boxWidth:8,padding:8}}}});
+
+  if(stuEngChart){stuEngChart.destroy();stuEngChart=null;}
+  stuEngChart=mkBar('c_stu_eng',CAMPS_HAK,[
+    {label:'26년 초중',data:CAMPS_HAK.map(c=>getStu(c,month).ec26),backgroundColor:'#22bf85cc',borderRadius:3,borderSkipped:false,stack:'26'},
+    {label:'26년 고등',data:CAMPS_HAK.map(c=>getStu(c,month).ed26),backgroundColor:'#e6aa10cc',borderRadius:3,borderSkipped:false,stack:'26'},
+    {label:'25년 초중',data:CAMPS_HAK.map(c=>getStu(c,month).ec25),backgroundColor:'#4d96f044',borderRadius:3,borderSkipped:false,stack:'25'},
+    {label:'25년 고등',data:CAMPS_HAK.map(c=>getStu(c,month).ed25),backgroundColor:'#9474f044',borderRadius:3,borderSkipped:false,stack:'25'},
+  ],{plugins:{legend:{labels:{color:'#6b7599',font:{size:10},boxWidth:8,padding:8}}}});
+}
+
+function renderStuTable(month){
+  const mn=month===0?'1월':'2월';
+  document.getElementById('stu_table_title').textContent=`캠퍼스별 재원생 상세표 (${mn})`;
+  let html=''; let tot26=0,tot25=0;
+  CAMPS_ALL.forEach(c=>{
+    const d=getStu(c,month);
+    const diff=d.a26-d.a25;
+    const pct=d.a25>0?(diff/d.a25*100).toFixed(1):'0';
+    const dc=diff<0?'var(--loss)':diff>0?'var(--c26a)':'var(--muted)';
+    tot26+=d.a26; tot25+=d.a25;
+    html+=`<tr>
+      <td style="font-weight:600">📍 ${c}</td>
+      <td class="r" style="color:var(--c26a);font-weight:700;font-size:13px">${d.a26}</td>
+      <td class="r" style="color:var(--c25)">${d.ms26}</td>
+      <td class="r" style="color:var(--muted);font-size:11px">${d.mc26||'-'}</td>
+      <td class="r" style="color:var(--muted);font-size:11px">${d.mg26||'-'}</td>
+      <td class="r" style="color:var(--muted);font-size:11px">${d.md26||'-'}</td>
+      <td class="r" style="color:var(--c26p)">${d.es26||'-'}</td>
+      <td class="r" style="color:var(--muted);font-size:11px">${d.ec26||'-'}</td>
+      <td class="r" style="color:var(--muted);font-size:11px">${d.ed26||'-'}</td>
+      <td class="r" style="color:var(--c25)">${d.a25}</td>
+      <td class="r" style="color:${dc};font-weight:600">${diff>0?'+':''}${diff}</td>
+      <td class="r" style="color:${dc}">${diff>0?'+':''}${pct}%</td>
+    </tr>`;
+  });
+  const td=tot26-tot25;
+  const tp=tot25>0?(td/tot25*100).toFixed(1):'0';
+  html+=`<tr class="total-row">
+    <td>합계</td>
+    <td class="r" style="color:var(--c26a)">${tot26.toLocaleString()}</td>
+    <td class="r" colspan="4"></td><td class="r" colspan="3"></td>
+    <td class="r" style="color:var(--c25)">${tot25.toLocaleString()}</td>
+    <td class="r" style="color:var(--loss);font-weight:700">${td}</td>
+    <td class="r" style="color:var(--loss)">${tp}%</td>
+  </tr>`;
+  document.getElementById('stu_table').innerHTML=html;
+
+  // ── YTD 상세표 ──
+  const mnNum = month+1; // 1월=1, 2월=2 ...
+  document.getElementById('stu_ytd_month_label').textContent=mnNum;
+  document.getElementById('stu_ytd_title').textContent=`캠퍼스별 재원생 YTD 누적 (1~${mnNum}월)`;
+
+  let ytdHtml=''; let ytdTot26=0, ytdTot25=0;
+  CAMPS_ALL.forEach(c=>{
+    const s=STU[c];
+    // 1월~현재월 누적합
+    let ytd26=0, ytd25=0;
+    for(let i=0;i<=month;i++){
+      ytd26 += (s.yr26a?.['합계']?.[i] ?? 0);
+      ytd25 += (s.yr25?.['합계']?.[i]  ?? 0);
+    }
+    const diff=ytd26-ytd25;
+    const pct=ytd25>0?(diff/ytd25*100).toFixed(1):'0';
+    const dc=diff<0?'var(--loss)':diff>0?'var(--c26a)':'var(--muted)';
+    const avg26=(ytd26/mnNum).toFixed(0);
+    const avg25=(ytd25/mnNum).toFixed(0);
+    ytdTot26+=ytd26; ytdTot25+=ytd25;
+    ytdHtml+=`<tr>
+      <td style="font-weight:600">📍 ${c}</td>
+      <td class="r" style="color:var(--c26a);font-weight:700;font-size:13px">${ytd26.toLocaleString()}</td>
+      <td class="r" style="color:var(--c25)">${ytd25.toLocaleString()}</td>
+      <td class="r" style="color:${dc};font-weight:600">${diff>0?'+':''}${diff.toLocaleString()}</td>
+      <td class="r" style="color:${dc}">${diff>0?'+':''}${pct}%</td>
+      <td class="r" style="color:var(--muted);font-size:11px">${Number(avg26).toLocaleString()}</td>
+      <td class="r" style="color:var(--muted);font-size:11px">${Number(avg25).toLocaleString()}</td>
+    </tr>`;
+  });
+  const ytdD=ytdTot26-ytdTot25;
+  const ytdP=ytdTot25>0?(ytdD/ytdTot25*100).toFixed(1):'0';
+  ytdHtml+=`<tr class="total-row">
+    <td>합계</td>
+    <td class="r" style="color:var(--c26a)">${ytdTot26.toLocaleString()}</td>
+    <td class="r" style="color:var(--c25)">${ytdTot25.toLocaleString()}</td>
+    <td class="r" style="color:var(--loss);font-weight:700">${ytdD>0?'+':''}${ytdD.toLocaleString()}</td>
+    <td class="r" style="color:var(--loss)">${ytdD>0?'+':''}${ytdP}%</td>
+    <td class="r" style="color:var(--muted)">${(ytdTot26/mnNum).toFixed(0)}</td>
+    <td class="r" style="color:var(--muted)">${(ytdTot25/mnNum).toFixed(0)}</td>
+  </tr>`;
+  document.getElementById('stu_ytd_table').innerHTML=ytdHtml;
+}
+
+function updateStudentTrend(){
+  const c=document.getElementById('stu_campus_sel').value;
+  const s=STU[c];
+  const months=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  if(stuTrendChart){stuTrendChart.destroy();stuTrendChart=null;}
+  const ctx=document.getElementById('c_stu_trend');
+  if(!ctx)return;
+
+  // 25년 합계 (12개월 전체, 0은 null로 처리하지 않음)
+  const data25 = months.map((_,i) => s.yr25['합계'][i] ?? 0);
+  // 26년 실적 (입력된 값만, null은 null 유지 → 차트에서 선이 끊김)
+  const data26 = months.map((_,i) => s.yr26a['합계'][i]);
+  // 26년 마지막 실적 월 인덱스
+  const lastActual = data26.reduce((last, v, i) => v != null ? i : last, -1);
+
+  const datasets = [
+    // 25년 실적 (회색 실선, 12개월 전체)
+    {
+      label: '25년 실적',
+      data: data25,
+      borderColor: '#4d96f099',
+      backgroundColor: 'transparent',
+      borderWidth: 2,
+      borderDash: [],
+      pointRadius: 3,
+      pointBackgroundColor: '#4d96f088',
+      tension: 0.35,
+      fill: false,
+    },
+    // 26년 실적 (녹색 굵은 실선, null이면 끊김)
+    {
+      label: '26년 실적',
+      data: data26,
+      borderColor: '#22bf85',
+      backgroundColor: '#22bf8520',
+      borderWidth: 3,
+      pointRadius: 5,
+      pointBackgroundColor: '#22bf85',
+      pointBorderColor: '#fff',
+      pointBorderWidth: 2,
+      tension: 0.35,
+      fill: false,
+      spanGaps: false,
+    },
+  ];
+
+  stuTrendChart = new Chart(ctx.getContext('2d'), {
+    type: 'line',
+    data: { labels: months, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'top',
+          labels: { color: '#6b7599', font: { size: 11 }, boxWidth: 12, padding: 12 }
+        },
+        tooltip: {
+          callbacks: {
+            label(item) {
+              const v = item.raw;
+              if(v == null) return `${item.dataset.label}: -`;
+              return `${item.dataset.label}: ${v}명`;
+            },
+            afterBody(items) {
+              const idx = items[0].dataIndex;
+              const v25 = data25[idx] || 0;
+              const v26 = data26[idx];
+              if(v26 == null) return [];
+              const diff = v26 - v25;
+              const pct = v25 > 0 ? (diff/v25*100).toFixed(1) : '0';
+              return [`전년比: ${diff >= 0 ? '+' : ''}${diff}명 (${diff >= 0 ? '+' : ''}${pct}%)`];
+            }
+          }
+        },
+        // 26년 실적 마지막 점에 "현재" 레이블 표시
+        annotation: undefined
+      },
+      scales: {
+        x: { grid: { color: '#1d2340' }, ticks: { color: '#6b7599', font: { size: 10 } } },
+        y: {
+          grid: { color: '#1d2340' },
+          ticks: { color: '#6b7599', font: { size: 11 } },
+          title: { display: true, text: '재원생 (명)', color: '#6b7599', font: { size: 10 } }
+        }
+      }
+    }
+  });
+
+  // 마지막 실적 월 강조 주석 (canvas에 직접)
+  if(lastActual >= 0) {
+    const origDraw = stuTrendChart.draw.bind(stuTrendChart);
+    stuTrendChart.draw = function() {
+      origDraw();
+      const chart = stuTrendChart;
+      const meta = chart.getDatasetMeta(1);
+      if(!meta.data[lastActual]) return;
+      const pt = meta.data[lastActual];
+      const ctx2 = chart.ctx;
+      ctx2.save();
+      ctx2.fillStyle = '#22bf85';
+      ctx2.font = 'bold 10px sans-serif';
+      ctx2.textAlign = 'center';
+      ctx2.fillText(`▲ ${data26[lastActual]}명`, pt.x, pt.y - 10);
+      ctx2.restore();
+    };
+    stuTrendChart.draw();
+  }
+}
+
+function initStudents(){
+  renderStuKpi(0);renderStuCards(0);renderStuBar(0);renderStuMathEng(0);renderStuTable(0);updateStudentTrend();
+}
+
+// ============================================================
+// RAW DATA
+// ============================================================
+let rawF=[...RAW],rawPg=1;
+const RPS=12;
+function filterRaw(){
+  const d=document.getElementById('f_dept').value,t=document.getElementById('f_type').value,
+        c=document.getElementById('f_campus').value,q=document.getElementById('f_search').value.toLowerCase();
+  rawF=RAW.filter(r=>(!d||r.본부===d)&&(!t||r.구분===t)&&(!c||r.캠퍼스===c)&&
+    (!q||(r.계정||'').toLowerCase().includes(q)||(r.cc||'').toLowerCase().includes(q)));
+  rawPg=1;renderRaw();
+}
+function renderRaw(){
+  const st=(rawPg-1)*RPS;
+  document.getElementById('raw_body').innerHTML=rawF.slice(st,st+RPS).map((r,i)=>`
+    <tr><td style="color:var(--muted)">${st+i+1}</td>
+      <td><span class="tg ${r.구분==='매출'?'tg-ok':'tg-ng'}">${r.구분}</span></td>
+      <td>${r.계정||'-'}</td><td style="color:var(--muted)">${r.cc||'-'}</td>
+      <td>${r.월||'-'}</td><td>${r.본부||'-'}</td><td>${r.캠퍼스||'-'}</td>
+      <td>${r.과목||'-'}</td><td>${r.학년||'-'}</td>
+      <td class="r" style="color:${r.구분==='매출'?C25:'var(--muted)'};font-weight:600">${r.금액.toLocaleString()}</td>
+    </tr>`).join('');
+  const tp=Math.ceil(rawF.length/RPS);
+  document.getElementById('raw_count').textContent=`${rawF.length}건`;
+  document.getElementById('raw_pageinfo').textContent=`${rawPg}/${tp} 페이지`;
+  const btns=document.getElementById('raw_pbtns');
+  btns.innerHTML='';
+  for(let p=1;p<=tp;p++) btns.innerHTML+=`<button class="pbtn${p===rawPg?' on':''}" onclick="rawPg=${p};renderRaw()">${p}</button>`;
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+const inited={};
+function goMain(id,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('#mainTabs .tab').forEach(t=>t.classList.remove('on'));
+  document.getElementById('pg-'+id).classList.add('on');
+  el.classList.add('on');
+  if(!inited[id]){
+    inited[id]=true;
+    if(id==='students') initStudents();
+    if(id==='rawdata')  renderRaw();
+    if(id==='dept'){ initHakwon(); }
+  }
+}
+function goDept(id,el){
+  document.querySelectorAll('#pg-dept .subpage').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('#deptSubtabs .subtab').forEach(t=>t.classList.remove('on'));
+  document.getElementById('sp-'+id).classList.add('on');
+  el.classList.add('on');
+  if(!inited['dept_'+id]){
+    inited['dept_'+id]=true;
+    if(id==='u2m')   initU2m();
+    if(id==='mirae') initMirae();
+    if(id==='bghu')  initBgh();
+    if(id==='mgmt')  initMgmt();
+  }
+}
+
+// INIT
+initOverview();
+
+// ============================================================
+// AUTH SYSTEM
+// ============================================================
+const UKEY='olymp_users', SKEY='olymp_session';
+// 세션: sessionStorage 사용 → 새로고침 유지, 창 닫으면 로그아웃
+const getSession=()=>{ try{return JSON.parse(sessionStorage.getItem(SKEY)||'null');}catch{return null;} };
+const saveSession=s=>{ try{sessionStorage.setItem(SKEY,JSON.stringify(s));}catch{} };
+const clearSession=()=>{ try{sessionStorage.removeItem(SKEY);}catch{} };
+// 사용자: localStorage (없으면 빈 배열)
+const getUsers=()=>{try{return JSON.parse(localStorage.getItem(UKEY)||'[]')}catch{return[]}};
+const saveUsers=u=>{try{localStorage.setItem(UKEY,JSON.stringify(u));}catch{}};
+
+// 기본 관리자 계정 초기화
+(function(){
+  const u=getUsers();
+  if(!u.find(x=>x.email==='admin@olympiad.co.kr')){
+    u.push({name:'관리자',email:'admin@olympiad.co.kr',pw:'Admin1234!',role:'admin',status:'active',joinDate:new Date().toISOString().slice(0,10),lastLogin:'-'});
+    saveUsers(u);
+  }
+})();
+
+function openAuth(view){
+  const s=getSession();
+  av(view||(s?'menu':'login'));
+  document.getElementById('authOverlay').style.display='flex';
+}
+function closeAuth(){ document.getElementById('authOverlay').style.display='none'; }
+function av(view){
+  ['login','signup','forgot','changepw','menu'].forEach(v=>{
+    document.getElementById('av-'+v).style.display=v===view?'':'none';
+  });
+  if(view==='menu'){
+    const s=getSession();
+    if(s) document.getElementById('menuInfo').textContent=`${s.name} (${s.role==='admin'?'관리자':'뷰어'}) · ${s.email}`;
+  }
+}
+
+function doLogin(){
+  const email=document.getElementById('liEmail').value.trim();
+  const pw=document.getElementById('liPw').value;
+  const err=document.getElementById('liErr');
+  const users=getUsers();
+  const u=users.find(x=>x.email===email&&x.pw===pw);
+  if(!u){err.textContent='이메일 또는 비밀번호가 올바르지 않습니다.';return;}
+  if(u.status!=='active'){err.textContent='승인 대기 중인 계정입니다.';return;}
+  u.lastLogin=new Date().toISOString().slice(0,10);
+  saveUsers(users);
+  saveSession({email:u.email,name:u.name,role:u.role});
+  closeAuth();
+  applyAuth();
+}
+
+function doSignup(){
+  const name=document.getElementById('suName').value.trim();
+  const email=document.getElementById('suEmail').value.trim();
+  const pw=document.getElementById('suPw').value;
+  const role=document.getElementById('suRole').value;
+  const err=document.getElementById('suErr');
+  if(!name||!email||!pw){err.textContent='모든 항목을 입력하세요.';return;}
+  if(pw.length<8){err.textContent='비밀번호는 8자 이상이어야 합니다.';return;}
+  const users=getUsers();
+  if(users.find(x=>x.email===email)){err.textContent='이미 등록된 이메일입니다.';return;}
+  users.push({name,email,pw,role,status:'pending',joinDate:new Date().toISOString().slice(0,10),lastLogin:'-'});
+  saveUsers(users);
+  err.style.color='var(--c26a)';
+  err.textContent='가입 신청 완료. 관리자 승인 후 이용 가능합니다.';
+}
+
+function doForgot(){
+  const email=document.getElementById('fgEmail').value.trim();
+  const err=document.getElementById('fgErr');
+  const u=getUsers().find(x=>x.email===email);
+  if(!u){err.textContent='등록된 이메일이 아닙니다.';return;}
+  err.style.color='var(--c26a)';
+  err.textContent=`임시 비밀번호: ${u.pw}`;
+}
+
+function doChangePw(){
+  const old=document.getElementById('cpOld').value;
+  const nw=document.getElementById('cpNew').value;
+  const nw2=document.getElementById('cpNew2').value;
+  const err=document.getElementById('cpErr');
+  const s=getSession(); if(!s)return;
+  const users=getUsers();
+  const u=users.find(x=>x.email===s.email);
+  if(!u||u.pw!==old){err.textContent='현재 비밀번호가 올바르지 않습니다.';return;}
+  if(nw.length<8){err.textContent='새 비밀번호는 8자 이상이어야 합니다.';return;}
+  if(nw!==nw2){err.textContent='비밀번호가 일치하지 않습니다.';return;}
+  u.pw=nw; saveUsers(users);
+  err.style.color='var(--c26a)'; err.textContent='비밀번호가 변경됐습니다.';
+}
+
+function doLogout(){ clearSession(); closeAuth(); applyAuth(); }
+
+function applyAuth(){
+  const s=getSession();
+  const isAdmin=s&&s.role==='admin';
+  const loggedIn=!!s;
+
+  // 헤더 버튼
+  document.getElementById('authBtnLabel').textContent=s?s.name:'로그인';
+
+  // 랜딩 ↔ 대시보드 전환
+  const landing=document.getElementById('landing-screen');
+  const dash=document.getElementById('dashboard-wrap');
+  const tabs=document.getElementById('mainTabs');
+  const legend=document.querySelector('.legend-bar');
+  if(loggedIn){
+    landing.style.display='none';
+    dash.style.display='block';
+    tabs.style.display='flex';
+    if(legend) legend.style.display='flex';
+  } else {
+    landing.style.display='flex';
+    dash.style.display='none';
+    tabs.style.display='none';
+    if(legend) legend.style.display='none';
+  }
+
+  // admin-only 요소 (탭 포함)
+  document.querySelectorAll('.admin-only').forEach(el=>{
+    if(!isAdmin){
+      if(el.classList.contains('tab')&&el.classList.contains('on')){
+        el.classList.remove('on');
+        document.querySelector('#mainTabs .tab:not(.admin-only)')?.classList.add('on');
+        document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+        document.getElementById('pg-overview')?.classList.add('on');
+      }
+      el.style.display='none';
+      return;
+    }
+    el.style.display=el.classList.contains('tab')?'inline-flex':'block';
+  });
+
+  loadComments();
+}
+
+// 개발/테스트용: 관리자로 강제 로그인
+function devAdminLogin(){
+  saveSession({email:'admin@olympiad.co.kr',name:'관리자',role:'admin'});
+  applyAuth();
+}
+
+// ============================================================
+// COMMENT SYSTEM
+// ============================================================
+const CKEY='olymp_comments';
+const SECTION_LABELS={
+  'ov-s1':'총괄개요 · KPI/매출',
+  'ov-s2':'총괄개요 · 누적이익/파이',
+  'hak-m1':'학원사업본부 · 당월 · 캠퍼스매출차트',
+  'hak-m2':'학원사업본부 · 당월 · 손익트리',
+  'hak-s1':'학원사업본부 · 당월 · 판관비분석',
+  'hak-s2':'학원사업본부 · YTD',
+  'u2m-m1':'U2M · 당월 · 캠퍼스매출차트',
+  'u2m-m2':'U2M · 당월 · 손익트리',
+  'u2m-s1':'U2M · 당월 · 판관비분석',
+  'u2m-s2':'U2M · YTD',
+  'mirae-m1':'미래교육 · 당월 · 매출구성차트',
+  'mirae-m2':'미래교육 · 당월 · CC별상세',
+  'mirae-s1':'미래교육 · 당월 · 판관비분석',
+  'mirae-s2':'미래교육 · YTD',
+  'bghu-m1':'방과후 · 손익차트',
+  'bghu-s2':'방과후 · 판관비주요계정',
+  'bghu-s1':'방과후 · 손익상세표',
+  'mgmt-m1':'경영기획실 · 비용차트',
+  'mgmt-s2':'경영기획실 · 판관비주요계정',
+  'mgmt-s1':'경영기획실 · 비용상세표',
+  'stu-s1':'재원생 · 비교차트',
+  'stu-s2':'재원생 · 과목별차트',
+  'stu-s3':'재원생 · 캠퍼스카드',
+  'stu-s4':'재원생 · 당월상세표',
+  'stu-s5':'재원생 · YTD',
+};
+const getComments=()=>{try{return JSON.parse(localStorage.getItem(CKEY)||'{}')}catch{return{}}};
+const saveComments=c=>localStorage.setItem(CKEY,JSON.stringify(c));
+
+function loadComments(){
+  const comments=getComments();
+  Object.keys(SECTION_LABELS).forEach(sid=>{
+    const box=document.getElementById('cb-'+sid);
+    const ed=document.getElementById('ce-'+sid);
+    if(!box)return;
+    const c=comments[sid];
+    if(c&&c.text){
+      document.getElementById('cb-text-'+sid).textContent=c.text;
+      document.getElementById('cb-date-'+sid).textContent=`${c.author||''} · ${c.date||''}`;
+      box.style.display='block';
+    } else {
+      box.style.display='none';
+    }
+    // 편집기: 관리자만 표시
+    if(ed){
+      const s=getSession();
+      const isAdmin=s&&s.role==='admin';
+      ed.style.display=isAdmin?'block':'none';
+      if(isAdmin&&c&&c.text) document.getElementById('ce-text-'+sid).value=c.text||'';
+    }
+  });
+}
+
+function saveComment(sid){
+  const text=document.getElementById('ce-text-'+sid).value.trim();
+  if(!text){deleteComment(sid);return;}
+  const s=getSession();
+  const comments=getComments();
+  comments[sid]={text,author:s?.name||'관리자',date:new Date().toLocaleDateString('ko-KR')};
+  saveComments(comments); loadComments(); renderCommentStatus();
+}
+function deleteComment(sid){
+  const comments=getComments(); delete comments[sid];
+  saveComments(comments); loadComments(); renderCommentStatus();
+}
+
+// ============================================================
+// ADMIN PAGE
+// ============================================================
+function showATab(tab){
+  ['users','pending','pwreset'].forEach(t=>{
+    document.getElementById('atab-c-'+t).style.display=t===tab?'':'none';
+    const btn=document.getElementById('atab-'+t);
+    if(btn){btn.classList.toggle('on',t===tab);}
+  });
+  if(tab==='users')renderUserTable();
+  if(tab==='pending')renderPendingTable();
+}
+
+// ── 관리자 월별 재원생 입력 ──
+let adminMonthIdx = 1; // 1 = 2월 (0-based index)
+
+function setAdminMonth(month, btn){
+  adminMonthIdx = month - 1; // 1월=0, 2월=1 ...
+  document.querySelectorAll('#admin_month_btns .atab').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  renderAdminStuInput();
+}
+
+function renderAdminStuInput(){
+  const idx = adminMonthIdx;
+  const CAMPS = ['광진','성동','동대문','중랑','중계','송파방이','미사','위례'];
+  let html = '';
+  CAMPS.forEach(c => {
+    const s = STU[c];
+    if(!s) return;
+    const get = (obj, key) => {
+      const v = obj?.[key]?.[idx];
+      return (v===null||v===undefined) ? '' : v;
+    };
+    const a25 = s.yr25?.['합계']?.[idx] ?? '-';
+    html += `<tr>
+      <td style="font-weight:600">📍 ${c}</td>
+      <td><input type="number" class="stu-input" data-camp="${c}" data-key="합계" value="${get(s.yr26a,'합계')}" style="width:70px;background:var(--s2);border:1px solid var(--c26a);border-radius:5px;padding:4px 7px;font-size:12px;color:var(--c26a);font-weight:700;text-align:right"></td>
+      <td><input type="number" class="stu-input" data-camp="${c}" data-key="수학.소계" value="${get(s.yr26a?.수학,'소계')}" style="width:65px;background:var(--s2);border:1px solid var(--border);border-radius:5px;padding:4px 7px;font-size:12px;text-align:right"></td>
+      <td><input type="number" class="stu-input" data-camp="${c}" data-key="수학.초중" value="${get(s.yr26a?.수학,'초중')}" style="width:60px;background:var(--s2);border:1px solid var(--border);border-radius:5px;padding:4px 7px;font-size:11px;text-align:right"></td>
+      <td><input type="number" class="stu-input" data-camp="${c}" data-key="수학.영재" value="${get(s.yr26a?.수학,'영재')}" style="width:55px;background:var(--s2);border:1px solid var(--border);border-radius:5px;padding:4px 7px;font-size:11px;text-align:right"></td>
+      <td><input type="number" class="stu-input" data-camp="${c}" data-key="수학.대입" value="${get(s.yr26a?.수학,'대입')}" style="width:55px;background:var(--s2);border:1px solid var(--border);border-radius:5px;padding:4px 7px;font-size:11px;text-align:right"></td>
+      <td><input type="number" class="stu-input" data-camp="${c}" data-key="영어.소계" value="${get(s.yr26a?.영어,'소계')}" style="width:65px;background:var(--s2);border:1px solid var(--border);border-radius:5px;padding:4px 7px;font-size:12px;text-align:right"></td>
+      <td><input type="number" class="stu-input" data-camp="${c}" data-key="영어.초중" value="${get(s.yr26a?.영어,'초중')}" style="width:60px;background:var(--s2);border:1px solid var(--border);border-radius:5px;padding:4px 7px;font-size:11px;text-align:right"></td>
+      <td><input type="number" class="stu-input" data-camp="${c}" data-key="영어.대입" value="${get(s.yr26a?.영어,'대입')}" style="width:55px;background:var(--s2);border:1px solid var(--border);border-radius:5px;padding:4px 7px;font-size:11px;text-align:right"></td>
+      <td style="text-align:right;color:var(--c25);font-size:12px;font-weight:600">${a25}</td>
+    </tr>`;
+  });
+  document.getElementById('adminStuBody').innerHTML = html;
+}
+
+function saveAdminStuData(){
+  const idx = adminMonthIdx;
+  const msg = document.getElementById('adminStuMsg');
+
+  document.querySelectorAll('#adminStuBody .stu-input').forEach(inp => {
+    const camp = inp.dataset.camp;
+    const keyPath = inp.dataset.key.split('.');
+    const val = inp.value === '' ? null : Number(inp.value);
+    const s = STU[camp];
+    if(!s) return;
+
+    if(keyPath.length === 1){
+      // 합계
+      if(!s.yr26a) s.yr26a = {};
+      if(!s.yr26a['합계']) s.yr26a['합계'] = Array(12).fill(null);
+      s.yr26a['합계'][idx] = val;
+    } else {
+      // 수학.소계, 영어.초중 등
+      const [cat, sub] = keyPath;
+      if(!s.yr26a) s.yr26a = {};
+      if(!s.yr26a[cat]) s.yr26a[cat] = {};
+      if(!s.yr26a[cat][sub]) s.yr26a[cat][sub] = Array(12).fill(null);
+      s.yr26a[cat][sub][idx] = val;
+    }
+  });
+
+  // localStorage에 저장
+  const saved = {};
+  Object.keys(STU).forEach(c => { saved[c] = STU[c].yr26a; });
+  localStorage.setItem('olymp_stu26', JSON.stringify(saved));
+
+  // 재원생 탭 강제 리렌더
+  const stuInited = inited['students'];
+  if(stuInited){
+    inited['students'] = false; // 리셋해서 다음 방문시 재초기화
+    renderStuTable(stuMonthIdx ?? 0);
+  }
+
+  msg.style.color = 'var(--c26a)';
+  msg.textContent = `✓ ${adminMonthIdx+1}월 데이터 저장 완료 (${new Date().toLocaleTimeString('ko-KR')})`;
+  setTimeout(() => msg.textContent = '', 3000);
+}
+
+function handleStuXlsxUpload(event){
+  const file = event.target.files[0]; if(!file) return;
+  const msg = document.getElementById('stuUploadMsg');
+  msg.style.color='var(--muted)'; msg.textContent='파싱 중...';
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      if(typeof XLSX==='undefined'){ msg.style.color='var(--loss)'; msg.textContent='SheetJS 로드 실패'; return; }
+      const wb = XLSX.read(new Uint8Array(e.target.result), {type:'array'});
+
+      // 캠퍼스 열 매핑: col4=광진, col5=성동, col6=동대문, col7=중랑, col8=중계, col9=송파방이, col10=위례, col11=미사
+      const CAMP_COLS = ['광진','성동','동대문','중랑','중계','송파방이','위례','미사'];
+      let processedMonths = [];
+
+      wb.SheetNames.forEach(sheetName=>{
+        const m = sheetName.match(/전년대비\((\d+)월\)/);
+        if(!m) return;
+        const monthIdx = parseInt(m[1]) - 1; // 0-based
+
+        const ws = wb.Sheets[sheetName];
+        const rows = XLSX.utils.sheet_to_json(ws, {header:1});
+
+        // 인원 섹션 시작 행 찾기 (col[0]==='인원')
+        const inRow = rows.findIndex(r=>r && r[0]==='인원');
+        if(inRow === -1) return;
+
+        // 인원 2026년 행들 (inRow~inRow+7)
+        const rM초중 = rows[inRow]   || []; // 수학 초중
+        const rM영재 = rows[inRow+1] || []; // 수학 영재
+        const rM대입 = rows[inRow+2] || []; // 수학 대입
+        const rM소계 = rows[inRow+3] || []; // 수학 소계
+        const rE초중 = rows[inRow+4] || []; // 영어 초중
+        const rE대입 = rows[inRow+5] || []; // 영어 대입
+        const rE소계 = rows[inRow+6] || []; // 영어 소계
+        const rTot  = rows[inRow+7] || []; // 합계
+
+        CAMP_COLS.forEach((camp, ci)=>{
+          const col = 4 + ci;
+          const s = STU[camp];
+          if(!s) return;
+          if(!s.yr26a) s.yr26a = {};
+
+          const toN = v => (v===null||v===undefined||v==='') ? null : Number(v)||0;
+
+          if(!s.yr26a['합계']) s.yr26a['합계'] = Array(12).fill(null);
+          s.yr26a['합계'][monthIdx] = toN(rTot[col]);
+
+          const setV = (cat, sub, val)=>{
+            if(!s.yr26a[cat]) s.yr26a[cat] = {};
+            if(!s.yr26a[cat][sub]) s.yr26a[cat][sub] = Array(12).fill(null);
+            s.yr26a[cat][sub][monthIdx] = toN(val);
+          };
+          setV('수학','소계', rM소계[col]);
+          setV('수학','초중', rM초중[col]);
+          setV('수학','영재', rM영재[col]);
+          setV('수학','대입', rM대입[col]);
+          setV('영어','소계', rE소계[col]);
+          setV('영어','초중', rE초중[col]);
+          setV('영어','대입', rE대입[col]);
+        });
+
+        processedMonths.push(parseInt(m[1]));
+      });
+
+      if(!processedMonths.length){
+        msg.style.color='var(--loss)'; msg.textContent='전년대비(N월) 시트를 찾을 수 없습니다';
+        return;
+      }
+
+      // localStorage 저장
+      const saved = {};
+      Object.keys(STU).forEach(c=>{ saved[c] = STU[c].yr26a; });
+      localStorage.setItem('olymp_stu26', JSON.stringify(saved));
+
+      // 재원생 탭 리렌더
+      renderAdminStuInput();
+      if(inited['students']){ inited['students']=false; renderStuTable(stuMonthIdx??0); }
+
+      msg.style.color='var(--c26a)';
+      msg.textContent=`✓ ${processedMonths.sort((a,b)=>a-b).map(m=>m+'월').join(', ')} 재원생 데이터 적용 완료`;
+    }catch(err){ msg.style.color='var(--loss)'; msg.textContent='오류: '+err.message; console.error(err); }
+  };
+  reader.readAsArrayBuffer(file);
+  event.target.value='';
+}
+
+// 저장된 데이터 복원
+(function loadSavedStuData(){
+  try {
+    const saved = JSON.parse(localStorage.getItem('olymp_stu26') || 'null');
+    if(!saved) return;
+    Object.keys(saved).forEach(c => {
+      if(STU[c]) STU[c].yr26a = saved[c];
+    });
+  } catch(e){}
+})();
+
+function renderAdminPage(){
+  renderUserTable();
+  renderCommentStatus();
+  renderAdminStuInput();
+  renderUploadSummary();
+}
+
+function renderUserTable(){
+  const tbody=document.getElementById('adminUserBody'); if(!tbody)return;
+  const users=getUsers().filter(u=>u.status==='active');
+  tbody.innerHTML=users.map(u=>`<tr>
+    <td>${u.name}</td><td>${u.email}</td>
+    <td><span class="rbadge ${u.role}">${u.role==='admin'?'관리자':'뷰어'}</span></td>
+    <td><span class="sbadge active">활성</span></td>
+    <td>${u.joinDate||'-'}</td><td>${u.lastLogin||'-'}</td>
+    <td>
+      <button onclick="toggleRole('${u.email}')" style="font-size:10px;padding:3px 8px;background:var(--s3);border:1px solid var(--border);border-radius:4px;cursor:pointer;color:var(--fg)">역할변경</button>
+      ${u.email!=='admin@olympiad.co.kr'?`<button onclick="removeUser('${u.email}')" style="font-size:10px;padding:3px 8px;background:var(--s3);border:1px solid var(--border2);border-radius:4px;cursor:pointer;color:var(--loss);margin-left:4px">삭제</button>`:''}
+    </td>
+  </tr>`).join('');
+}
+
+function renderPendingTable(){
+  const tbody=document.getElementById('adminPendingBody'); if(!tbody)return;
+  const users=getUsers().filter(u=>u.status==='pending');
+  tbody.innerHTML=users.length?users.map(u=>`<tr>
+    <td>${u.name}</td><td>${u.email}</td>
+    <td><span class="rbadge ${u.role}">${u.role==='admin'?'관리자':'뷰어'}</span></td>
+    <td>${u.joinDate||'-'}</td>
+    <td>
+      <button onclick="approveUser('${u.email}')" style="font-size:10px;padding:3px 8px;background:#22bf8522;border:1px solid var(--c26a);border-radius:4px;cursor:pointer;color:var(--c26a)">승인</button>
+      <button onclick="rejectUser('${u.email}')" style="font-size:10px;padding:3px 8px;background:var(--s3);border:1px solid var(--border2);border-radius:4px;cursor:pointer;color:var(--loss);margin-left:4px">거절</button>
+    </td>
+  </tr>`).join('')
+  :`<tr><td colspan="5" style="padding:20px;text-align:center;color:var(--muted)">대기 중인 가입 신청이 없습니다</td></tr>`;
+}
+
+function approveUser(email){const u=getUsers();const x=u.find(v=>v.email===email);if(x){x.status='active';saveUsers(u);renderPendingTable();renderUserTable();}}
+function rejectUser(email){saveUsers(getUsers().filter(x=>x.email!==email));renderPendingTable();}
+function toggleRole(email){const u=getUsers();const x=u.find(v=>v.email===email);if(x){x.role=x.role==='admin'?'viewer':'admin';saveUsers(u);renderUserTable();}}
+function removeUser(email){if(!confirm(`${email} 계정을 삭제할까요?`))return;saveUsers(getUsers().filter(x=>x.email!==email));renderUserTable();}
+function adminResetPw(){
+  const email=document.getElementById('rtEmail').value.trim();
+  const pw=document.getElementById('rtPw').value.trim();
+  const msg=document.getElementById('rtMsg');
+  const u=getUsers();const x=u.find(v=>v.email===email);
+  if(!x){msg.textContent='해당 이메일의 계정이 없습니다.';return;}
+  x.pw=pw;saveUsers(u);msg.style.color='var(--c26a)';msg.textContent='비밀번호가 초기화됐습니다.';
+}
+
+function renderCommentStatus(){
+  const el=document.getElementById('commentStatusList'); if(!el)return;
+  const comments=getComments();
+  el.innerHTML=Object.entries(SECTION_LABELS).map(([sid,label])=>{
+    const c=comments[sid];
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:12px;font-weight:600">${label}</span>
+      <span style="font-size:11px;color:${c?'var(--c26a)':'var(--muted)'}">${c?`"${c.text.slice(0,40)}..." · ${c.date}`:'코멘트 없음'}</span>
+    </div>`;
+  }).join('');
+}
+
+// ============================================================
+// ============================================================
+// EXCEL 업로드 — 로우 시트 파싱 → 대시보드 자동 갱신
+// ============================================================
+
+// 계정과목 → 판관비 카테고리
+function costCat(acct){
+  if(!acct) return 'other';
+  if(['급여','상여금','퇴직금','복리후생','교육훈련'].some(k=>acct.includes(k))) return 'staff';
+  if(['강사비','강사퇴직'].some(k=>acct.includes(k))) return 'instr';
+  if(['차량운행','차량유지'].some(k=>acct.includes(k))) return 'vehicle';
+  if(acct.includes('지급임차료')) return 'rent';
+  if(['건물관리','청소용역','수선비','수도광열'].some(k=>acct.includes(k))) return 'bldg';
+  if(acct.includes('광고선전비')) return 'adv';
+  return 'other';
+}
+
+const MONTH_IDX={'1월':0,'2월':1,'3월':2,'4월':3,'5월':4,'6월':5,'7월':6,'8월':7,'9월':8,'10월':9,'11월':10,'12월':11};
+
+// 업로드된 로우 데이터 저장소 (월별 누적)
+let RAW_DB = [];  // [{t,a,cc,m,d,cp,s,gr,v}, ...]
+
+function loadRawDB(){
+  try{ RAW_DB = JSON.parse(localStorage.getItem('olymp_raw')||'[]'); }
+  catch{ RAW_DB = []; }
+}
+function saveRawDB(){ localStorage.setItem('olymp_raw', JSON.stringify(RAW_DB)); }
+
+function handleXlsxUpload(event){
+  const file = event.target.files[0]; if(!file) return;
+  const msg = document.getElementById('uploadMsg');
+  msg.style.color='var(--muted)'; msg.textContent='파싱 중...';
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      if(typeof XLSX==='undefined'){ msg.style.color='var(--loss)'; msg.textContent='SheetJS 로드 실패'; return; }
+      const wb = XLSX.read(new Uint8Array(e.target.result), {type:'array'});
+
+      // 로우 시트 찾기
+      const sheetName = wb.SheetNames.find(s=>s==='로우') || wb.SheetNames[wb.SheetNames.length-1];
+      const ws = wb.Sheets[sheetName];
+      const rows = XLSX.utils.sheet_to_json(ws, {header:1});
+      const header = rows[0];  // [구분, 계정과목, C/C, 월, 본부, 캠퍼스, 과목, 학년, 금액]
+
+      let newRows = 0;
+      const newMonths = new Set();
+
+      rows.slice(1).forEach(r=>{
+        if(!r[8] && r[8]!==0) return;
+        const month = r[3];
+        if(!month) return;
+        newMonths.add(month);
+        // 같은 월 기존 데이터 제거 후 교체
+        newRows++;
+      });
+
+      // 업로드된 월의 기존 데이터 제거
+      const uploadedMonths = [...newMonths];
+      RAW_DB = RAW_DB.filter(r => !uploadedMonths.includes(r.m));
+
+      // 새 데이터 추가
+      rows.slice(1).forEach(r=>{
+        if(!r[8] && r[8]!==0) return;
+        if(!r[3]) return;
+        RAW_DB.push({t:r[0],a:r[1],cc:r[2],m:r[3],d:r[4],cp:r[5],s:r[6],gr:r[7],v:Number(r[8])});
+      });
+
+      saveRawDB();
+      localStorage.setItem('olymp_lastUpload', new Date().toISOString());
+
+      // 대시보드 데이터 갱신
+      applyRawToDashboard();
+
+      msg.style.color='var(--c26a)';
+      msg.textContent=`✓ ${uploadedMonths.join(', ')} 데이터 ${newRows}건 적용 완료`;
+      renderAdminPage();
+
+    }catch(err){ msg.style.color='var(--loss)'; msg.textContent='오류: '+err.message; console.error(err); }
+  };
+  reader.readAsArrayBuffer(file);
+  // input 초기화 (같은 파일 재업로드 가능)
+  event.target.value='';
+}
+
+function applyRawToDashboard(){
+  if(!RAW_DB.length) return;
+
+  const sum = (filter) => RAW_DB.filter(filter).reduce((s,r)=>s+r.v, 0);
+  const CAMPS_LIST = ['광진','성동','동대문','중랑','중계','송파방이','미사','위례'];
+
+  // ── 1. 월별 총괄 매출·판관비 갱신 (OV 데이터) ──
+  const months = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  months.forEach((mn,mi)=>{
+    const hasMon = RAW_DB.some(r=>r.m===mn);
+    if(!hasMon) return;
+    // 총 매출
+    OV.yr26as[mi] = sum(r=>r.m===mn && r.t==='매출') / 1e6;
+    OV.yr26ac[mi] = sum(r=>r.m===mn && r.t==='판매관리비') / 1e6;
+  });
+  OV.yr26ap = OV.yr26as.map((s,i)=>s - OV.yr26ac[i]);
+
+  // ── 2. 사업부별 PL 갱신 ──
+  const deptMap = {
+    '학원사업본부':'학원사업본부','U2M사업부':'U2M사업부',
+    '미래교육사업부':'미래교육사업부','방과후사업본부':'방과후사업본부','경영기획실':'경영기획실'
+  };
+  const plKeys = Object.keys(PL);
+  plKeys.forEach(k=>{
+    // dept 이름 매핑
+    const dName = Object.keys(deptMap).find(d=>k.includes(d.replace('사업부','').replace('사업본부','').replace('기획실','')))||null;
+    if(!dName) return;
+    const hasCurrent = RAW_DB.some(r=>r.d===dName);
+    if(!hasCurrent) return;
+    PL[k].sales = sum(r=>r.d===dName && r.t==='매출');
+    PL[k].cost  = sum(r=>r.d===dName && r.t==='판매관리비');
+    PL[k].profit = PL[k].sales - PL[k].cost;
+  });
+
+  // ── 3. 캠퍼스별 판관비 상세 갱신 ──
+  CAMPS_LIST.forEach(camp=>{
+    const hasCamp = RAW_DB.some(r=>r.cp===camp);
+    if(!hasCamp) return;
+    const a = CAMP_COST_26A[camp];
+    if(!a) return;
+    a.sales   = sum(r=>r.cp===camp && r.t==='매출');
+    a.staff   = sum(r=>r.cp===camp && r.t==='판매관리비' && costCat(r.a)==='staff');
+    a.instr   = sum(r=>r.cp===camp && r.t==='판매관리비' && costCat(r.a)==='instr');
+    a.vehicle = sum(r=>r.cp===camp && r.t==='판매관리비' && costCat(r.a)==='vehicle');
+    a.rent    = sum(r=>r.cp===camp && r.t==='판매관리비' && costCat(r.a)==='rent');
+    a.bldg    = sum(r=>r.cp===camp && r.t==='판매관리비' && costCat(r.a)==='bldg');
+    a.adv     = sum(r=>r.cp===camp && r.t==='판매관리비' && costCat(r.a)==='adv');
+    a.other   = sum(r=>r.cp===camp && r.t==='판매관리비' && costCat(r.a)==='other');
+    a.total   = a.staff+a.instr+a.vehicle+a.rent+a.bldg+a.adv+a.other;
+  });
+
+  // ── 4. 방과후 수업료/재료비 분리 표시 ──
+  if(RAW_DB.some(r=>r.d==='방과후사업본부')){
+    const suup  = sum(r=>r.d==='방과후사업본부' && r.t==='매출' && r.a==='방과후학교') / 1e8;
+    const jae   = sum(r=>r.d==='방과후사업본부' && r.t==='매출' && r.a==='재료비수입') / 1e8;
+    const total = suup + jae;
+    const elT = document.getElementById('bghu-val-total');
+    const elS = document.getElementById('bghu-val-suup');
+    const elJ = document.getElementById('bghu-val-jae');
+    if(elT) elT.textContent = total.toFixed(1);
+    if(elS) elS.textContent = suup.toFixed(1);
+    if(elJ) elJ.textContent = jae.toFixed(1);
+  }
+
+  // ── U2M 가맹사업 매출 갱신 ──
+  if(RAW_DB.some(r=>r.d==='U2M사업부' && r.t==='매출')){
+    const franchise = sum(r=>r.d==='U2M사업부' && r.t==='매출' && r.a==='가맹비수입') / 1e8;
+    const elF = document.getElementById('u2m-val-franchise');
+    if(elF) elF.textContent = franchise.toFixed(2);
+  }
+
+  // ── 5. 초기화된 탭 리셋 → 다음 방문시 재렌더 ──
+  Object.keys(inited).forEach(k=>{ inited[k]=false; });
+  inited['overview'] = false;
+  // overview는 즉시 재렌더
+  initOverview();
+}
+
+function renderUploadSummary(){
+  if(!RAW_DB.length){ document.getElementById('uploadPreview').style.display='none'; return; }
+  document.getElementById('uploadPreview').style.display='block';
+
+  const months = [...new Set(RAW_DB.map(r=>r.m))].sort((a,b)=>MONTH_IDX[a]-MONTH_IDX[b]);
+  const depts = ['학원사업본부','U2M사업부','미래교육사업부','방과후사업본부','경영기획실'];
+  const sum = (filter) => RAW_DB.filter(filter).reduce((s,r)=>s+r.v, 0);
+  const M = 1e6;
+
+  let html = `<table class="utbl"><thead><tr>
+    <th>사업부</th>
+    ${months.map(m=>`<th style="color:var(--c26a)">${m} 매출</th><th style="color:var(--muted)">${m} 판관비</th>`).join('')}
+  </tr></thead><tbody>`;
+
+  depts.forEach(d=>{
+    html += `<tr><td style="font-weight:600">${d}</td>`;
+    months.forEach(mn=>{
+      const s = sum(r=>r.d===d&&r.m===mn&&r.t==='매출');
+      const c = sum(r=>r.d===d&&r.m===mn&&r.t==='판매관리비');
+      html += `<td class="r" style="color:var(--c26a)">${s?(s/M).toFixed(1):'−'}</td>`;
+      html += `<td class="r" style="color:var(--muted)">${c?(c/M).toFixed(1):'−'}</td>`;
+    });
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  document.getElementById('uploadSummary').innerHTML = html;
+
+  document.getElementById('dataRangeEl').textContent = months.join(', ');
+  document.getElementById('rowCountEl').textContent = RAW_DB.length.toLocaleString()+'건';
+  const lu = localStorage.getItem('olymp_lastUpload');
+  if(lu) document.getElementById('lastUploadEl').textContent = new Date(lu).toLocaleString('ko-KR');
+}
+
+// ============================================================
+// goMain에 admin 지원 추가
+// ============================================================
+const _goMainOrig=goMain;
+goMain=function(id,el){
+  _goMainOrig(id,el);
+  if(id==='admin') renderAdminPage();
+};
+
+// ============================================================
+// STARTUP
+// ============================================================
+loadRawDB();
+if(RAW_DB.length) applyRawToDashboard();
+// 세션 없음 → 로그아웃 상태로 시작
+applyAuth();
+loadComments();
+</script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+# Excel files (large, sensitive)
+*.xlsx
+*.xls
+
+# Node
+node_modules/
+
+# Helper scripts
+analyze.js
+extract.js
+extract_full.js
+extract_mirae.js
+inspect*.js
+Code.gs
+appsscript.json
+.clasp.json
+
+# Output/temp files
+*.txt
+*.png
+*.zip
+files.zip
+
+# Keep only the dashboard
