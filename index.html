@@ -231,9 +231,22 @@ tbody td.indent{padding-left:26px;color:var(--muted2)}
 }
 
 /* ═══════════════════════════════════
-   ② 미니카드 수치만 강조 (원래 20px의 ×1.8)
+   ② 폰트 ×1.2 + 미니카드 수치 강조
 ═══════════════════════════════════ */
+.hdr-title{font-size:18px}
+.tab{font-size:16px}
+.subtab{font-size:14px}
+.ct{font-size:16px}.cs{font-size:13px}
+.mc-lbl,.mc-meta{font-size:12px}
 .mc-val{font-size:36px}
+table{font-size:14px}
+thead th{font-size:13px}
+.legend-bar{font-size:14px}
+.period-badge{font-size:14px}
+.kpi-row-val{font-size:14px}
+.cr-name,.cr-sales,.cr-profit{font-size:14px}
+.campus-group-name{font-size:14px}
+.stu-card .name{font-size:14px}
 
 /* ═══════════════════════════════════
    ③ 모바일 반응형 (≤768px)
@@ -1359,8 +1372,9 @@ const RAW=[
 // ============================================================
 const CO={responsive:true,maintainAspectRatio:false,
   plugins:{legend:{labels:{color:'#6b7599',font:{size:11},boxWidth:10,padding:10}}},
-  scales:{x:{grid:{color:'#1d2340'},ticks:{color:'#8b98c7',font:{size:20}}},
-          y:{grid:{color:'#1d2340'},ticks:{color:'#8b98c7',font:{size:20}}}}};
+  scales:{x:{grid:{color:'#1d2340'},ticks:{color:'#8b98c7',font:{size:11}}},
+          y:{grid:{color:'#1d2340'},ticks:{color:'#8b98c7',font:{size:11}}}}};
+const CO_SM={...CO,scales:{x:{grid:{color:'#1d2340'},ticks:{color:'#8b98c7',font:{size:9}}},y:{grid:{color:'#1d2340'},ticks:{color:'#8b98c7',font:{size:9}}}}};
 
 function mkLine(id,labels,datasets){
   const ctx=document.getElementById(id);
@@ -1450,7 +1464,7 @@ function initHakwon(){
   mkBar('c_hak_campus',campuses,[
     dsBar('매출',campusSales,C26A),
     dsBar('영업이익',campusProfit,C25),
-  ]);
+  ],CO_SM);
 
   // ── 판매관리비 캠퍼스별 상세 데이터 ──
   // 구조: {캠퍼스명: {sales:{yr25,yr26p,yr26a}, staff:{...}, instr:{...}, vehicle:{...}, rent:{...}, bldg:{...}, adv:{...}, other:{...}, total:{...}}}
@@ -1514,8 +1528,8 @@ function initHakwon(){
     function cell26(val, sales, bold){
       const pct=sales>0?(val/sales*100).toFixed(1)+'%':'-';
       return `<td style="padding:4px 10px;text-align:right;white-space:nowrap;vertical-align:top;${bold?'font-weight:700;':''}color:var(--c26a)">
-        <div style="font-size:12px">${(val/M).toFixed(1)}</div>
-        <div style="font-size:12px;color:var(--muted);font-weight:400;margin-top:1px">${pct}</div>
+        <div style="font-size:18px">${(val/M).toFixed(1)}</div>
+        <div style="font-size:11px;color:var(--muted);font-weight:400;margin-top:1px">${pct}</div>
       </td>`;
     }
     // 3열 셀 (25실적/26계획/26실적 + 매출比)
@@ -1523,8 +1537,8 @@ function initHakwon(){
       const f=(v,s,c)=>{
         const pct=s>0?(v/s*100).toFixed(1)+'%':'-';
         return `<td style="padding:4px 10px;text-align:right;white-space:nowrap;vertical-align:top;${bold?'font-weight:700;':''}${c?`color:${c};`:''}">
-          <div style="font-size:12px">${(v/M).toFixed(1)}</div>
-          <div style="font-size:12px;color:var(--muted);font-weight:400;margin-top:1px">${pct}</div>
+          <div style="font-size:18px">${(v/M).toFixed(1)}</div>
+          <div style="font-size:11px;color:var(--muted);font-weight:400;margin-top:1px">${pct}</div>
         </td>`;
       };
       return f(yr25,s25,null)+f(yr26p,s26p,null)+f(yr26a,s26a,'var(--c26a)');
@@ -1718,7 +1732,7 @@ function renderCC3YTree(containerId, groupDef, dataObj){
       </div>
 
       <div style="overflow-x:auto">
-      <table style="width:100%;border-collapse:collapse;font-size:11.5px;min-width:860px">
+      <table style="width:100%;border-collapse:collapse;font-size:17px;min-width:860px">
         <thead>
           <tr style="background:var(--s3)">
             <th rowspan="2" style="padding:7px 10px;text-align:left;color:var(--muted);font-weight:600;border-bottom:2px solid var(--border2);min-width:110px">CC</th>
@@ -1839,7 +1853,7 @@ function initU2m(){
   mkBar('c_u2m_bar',labels,[
     dsBar('매출',names.map(n=>PL[n].sales/1e6),C26A),
     dsBar('영업이익',names.map(n=>PL[n].profit/1e6),C25),
-  ]);
+  ],CO_SM);
   renderU2mTree();
 }
 
@@ -2013,7 +2027,7 @@ function initBgh(){
     dsBar('매출',[PL['방과후사업본부'].sales/1e6],C26A),
     dsBar('비용',[PL['방과후사업본부'].cost/1e6],'#f87171'),
     dsBar('영업이익',[PL['방과후사업본부'].profit/1e6],C25),
-  ]);
+  ],CO_SM);
   mkDoughnut('c_bgh_cost',
     ['인건비','임대료','소모품비','기타'],
     [428.0,120.0,40.0,(PL['방과후사업본부'].cost/1e6-428.0-120.0-40.0)].map(v=>Math.max(v,0)),
