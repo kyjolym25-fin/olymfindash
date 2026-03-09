@@ -808,7 +808,7 @@ thead th{font-size:13px}
 
   <!-- ── 경영기획실 ── -->
   <div class="subpage" id="sp-mgmt">
-    <div class="mini-cards">
+    <div class="mini-cards" style="grid-template-columns:repeat(4,1fr)">
       <div class="mini-card cr"><div class="mc-lbl">매출</div><div class="mc-val">0<span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--muted)">매출 없음</div></div>
       <div class="mini-card cr"><div class="mc-lbl">판매관리비</div><div class="mc-val">0.40<span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--muted)">경영기획실</div></div>
       <div class="mini-card cr"><div class="mc-lbl">영업손실</div><div class="mc-val">-0.40<span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--loss)">전액 비용</div></div>
@@ -1857,9 +1857,21 @@ function initU2m(){
 function initMirae(){
   // ── 매출 데이터 (26년 1월 실적)
   const MIRAE = {
-    직영수학: {book:7511600,   online:58672500,  total:66184100},
-    직영영어: {book:886200,    online:26538400,  total:27424600},
-    FC수학:   {book:96586840,  online:201166300, total:297753140},
+    직영수학: {
+      yr25: {book:0,        online:0,         total:0},
+      yr26p:{book:0,        online:0,         total:0},
+      yr26a:{book:7511600,  online:58672500,  total:66184100},
+    },
+    직영영어: {
+      yr25: {book:0,        online:0,         total:0},
+      yr26p:{book:0,        online:0,         total:0},
+      yr26a:{book:886200,   online:26538400,  total:27424600},
+    },
+    FC수학: {
+      yr25: {book:0,        online:0,         total:0},
+      yr26p:{book:0,        online:0,         total:0},
+      yr26a:{book:96586840, online:201166300, total:297753140},
+    },
   };
   const CCS = ['직영수학','직영영어','FC수학'];
   const COLORS = {'직영수학':'#2d74e8','직영영어':'#9474f0','FC수학':'#0ea872'};
@@ -1888,7 +1900,7 @@ function initMirae(){
         datasets:[
           {
             label:'교재 (도서수입)',
-            data: CCS.map(c=>MIRAE[c].book/1e6),
+            data: CCS.map(c=>MIRAE[c].yr26a.book/1e6),
             backgroundColor: CCS.map(c=>COLORS[c]+'99'),
             borderColor:     CCS.map(c=>COLORS[c]),
             borderWidth:1,
@@ -1896,7 +1908,7 @@ function initMirae(){
           },
           {
             label:'원격 (온라인컨텐츠)',
-            data: CCS.map(c=>MIRAE[c].online/1e6),
+            data: CCS.map(c=>MIRAE[c].yr26a.online/1e6),
             backgroundColor: CCS.map(c=>COLORS[c]+'dd'),
             borderColor:     CCS.map(c=>COLORS[c]),
             borderWidth:1,
@@ -1915,41 +1927,53 @@ function initMirae(){
     });
   })();
 
-  // ── 교재·원격 CC별 상세표
-  const totalBook   = CCS.reduce((s,c)=>s+MIRAE[c].book,0);
-  const totalOnline = CCS.reduce((s,c)=>s+MIRAE[c].online,0);
-  const totalAll    = CCS.reduce((s,c)=>s+MIRAE[c].total,0);
+  // ── 교재·원격 CC별 상세표 (3년 비교)
+  const YRS = ['yr25','yr26p','yr26a'];
+  const YR_LABELS = {'yr25':'25년실적','yr26p':'26년계획','yr26a':'26년실적'};
+  const YR_COLORS = {'yr25':'var(--c25)','yr26p':'var(--c26p)','yr26a':'var(--c26a)'};
+
+  const totals = {};
+  YRS.forEach(yr=>{
+    totals[yr]={
+      book:  CCS.reduce((s,c)=>s+(MIRAE[c][yr].book||0),0),
+      online:CCS.reduce((s,c)=>s+(MIRAE[c][yr].online||0),0),
+      total: CCS.reduce((s,c)=>s+(MIRAE[c][yr].total||0),0),
+    };
+  });
+
+  const thYr = (yr) => `<th colspan="3" style="padding:5px 8px;text-align:center;font-size:11px;font-weight:700;color:${YR_COLORS[yr]};border-left:1px solid var(--border)">${YR_LABELS[yr]}</th>`;
+  const thSub = `<th style="${thS2}">교재</th><th style="${thS2}">원격</th><th style="${thS2}">합계</th>`;
+  const cellYr = (d) => {
+    const v = d.total > 0;
+    return `<td style="padding:5px 8px;text-align:right;font-size:14px;border-left:1px solid var(--border)">${v?fm(d.book):'-'}</td>
+            <td style="padding:5px 8px;text-align:right;font-size:14px">${v?fm(d.online):'-'}</td>
+            <td style="padding:5px 8px;text-align:right;font-size:14px;font-weight:600">${v?fm(d.total):'-'}</td>`;
+  };
 
   let revRows = '';
   for(const cc of CCS){
-    const d = MIRAE[cc];
     const col = COLORS[cc];
     revRows += `<tr style="border-bottom:1px solid var(--border)">
       <td style="padding:5px 10px;font-size:12px;font-weight:600;color:${col}">${cc}</td>
-      <td style="padding:5px 10px;text-align:right;font-size:14px">${fm(d.book)}</td>
-      <td style="padding:5px 10px;text-align:right;font-size:11px;color:var(--muted)">${fp(d.book,d.total)}</td>
-      <td style="padding:5px 10px;text-align:right;font-size:14px">${fm(d.online)}</td>
-      <td style="padding:5px 10px;text-align:right;font-size:11px;color:var(--muted)">${fp(d.online,d.total)}</td>
-      <td style="padding:5px 10px;text-align:right;font-size:14px;font-weight:600">${fm(d.total)}</td>
+      ${YRS.map(yr=>cellYr(MIRAE[cc][yr])).join('')}
     </tr>`;
   }
   revRows += `<tr style="background:var(--s2);font-weight:700;border-top:2px solid var(--border2)">
     <td style="padding:6px 10px;font-size:12px">합계</td>
-    <td style="padding:6px 10px;text-align:right;font-size:14px">${fm(totalBook)}</td>
-    <td style="padding:6px 10px;text-align:right;font-size:11px;color:var(--muted)">${fp(totalBook,totalAll)}</td>
-    <td style="padding:6px 10px;text-align:right;font-size:14px">${fm(totalOnline)}</td>
-    <td style="padding:6px 10px;text-align:right;font-size:11px;color:var(--muted)">${fp(totalOnline,totalAll)}</td>
-    <td style="padding:6px 10px;text-align:right;font-size:14px">${fm(totalAll)}</td>
+    ${YRS.map(yr=>cellYr(totals[yr])).join('')}
   </tr>`;
 
   document.getElementById('mirae_rev_table').innerHTML = `
-    <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">
-      <thead><tr style="background:var(--s3)">
-        <th style="${thL2}">CC</th>
-        <th style="${thS2}">교재(백만원)</th><th style="${thS2}">비중</th>
-        <th style="${thS2}">원격(백만원)</th><th style="${thS2}">비중</th>
-        <th style="${thS2}">합계(백만원)</th>
-      </tr></thead>
+    <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;min-width:700px">
+      <thead>
+        <tr style="background:var(--s3)">
+          <th rowspan="2" style="${thL2}">CC</th>
+          ${YRS.map(thYr).join('')}
+        </tr>
+        <tr style="background:var(--s3)">
+          ${YRS.map(()=>thSub).join('')}
+        </tr>
+      </thead>
       <tbody>${revRows}</tbody>
     </table></div>`;
 
