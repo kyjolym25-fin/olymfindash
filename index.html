@@ -766,8 +766,8 @@ thead th{font-size:13px}
   <div class="subpage" id="sp-bghu">
     <div class="mini-cards">
       <div class="mini-card c26a"><div class="mc-lbl">전체 매출</div><div class="mc-val"><span id="bghu-val-total">6.6</span><span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--muted)">26년 1월 실적</div></div>
-      <div class="mini-card c26a"><div class="mc-lbl">수업료</div><div class="mc-val"><span id="bghu-val-suup">5.8</span><span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--muted)">계정: 방과후학교</div></div>
-      <div class="mini-card c26a"><div class="mc-lbl">재료비 매출</div><div class="mc-val"><span id="bghu-val-jae">0.8</span><span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--muted)">계정: 재료비수입</div></div>
+      <div class="mini-card c26a"><div class="mc-lbl">수업료</div><div class="mc-val"><span id="bghu-val-suup">5.8</span><span class="mc-unit">억</span></div><div class="mc-meta" id="bghu-meta-suup" style="color:var(--muted)">계정: 방과후학교</div></div>
+      <div class="mini-card c26a"><div class="mc-lbl">재료비 매출</div><div class="mc-val"><span id="bghu-val-jae">0.8</span><span class="mc-unit">억</span></div><div class="mc-meta" id="bghu-meta-jae" style="color:var(--muted)">계정: 재료비수입</div></div>
       <div class="mini-card cr"><div class="mc-lbl">판매관리비</div><div class="mc-val">7.1<span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--loss)">매출比 107.2%</div></div>
       <div class="mini-card cr"><div class="mc-lbl">영업손실</div><div class="mc-val">-0.47<span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--loss)">이익률 -7.2%</div></div>
     </div>
@@ -783,6 +783,11 @@ thead th{font-size:13px}
     </div>
   <div id="cb-bghu-m1" class="comment-box" style="display:none"><div class="cb-label"><span>✦</span> COMMENT</div><div class="cb-text" id="cb-text-bghu-m1"></div><div class="cb-date" id="cb-date-bghu-m1"></div></div>
   <div id="ce-bghu-m1" class="comment-editor"><div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div><textarea id="ce-text-bghu-m1" placeholder="코멘트를 입력하세요..."></textarea><div class="cb-btns"><button class="cb-del" onclick="deleteComment('bghu-m1')">삭제</button><button class="cb-save" onclick="saveComment('bghu-m1')">저장</button></div></div>
+
+    <div class="full card">
+      <div class="ch"><div><div class="ct">손익 현황 비교</div><div class="cs">25년 실적 · 26년 계획 · 26년 실적 (단위: 백만원)</div></div></div>
+      <div id="bgh_pl_table"></div>
+    </div>
 
     <div class="full card">
       <div class="ch"><div><div class="ct">판매관리비 주요 계정</div><div class="cs">26년 1월 실적 (단위: 백만원)</div></div></div>
@@ -2053,6 +2058,61 @@ function initMirae(){
 // DEPT: 방과후
 // ============================================================
 function initBgh(){
+  // ── 25년 실적 / 26년 계획 (2026 경영계획_캠퍼스 통합본 > 방과후사업본부 시트 1월)
+  const BGH25  = {sales:594365230, suup:442524430, jae:151840800, cost:582106246, profit:12258984};
+  const BGH26P = {sales:703249429, suup:567297674, jae:135951754, cost:712365169, profit:-9115740};
+  const BGH26A = PL['방과후사업본부'];
+
+  const fm   = v => (v/1e6).toFixed(1);
+  const fPct = (a,b) => b!==0 ? (a/b*100).toFixed(1)+'%' : '-';
+  const fDiff= v => `<span style="color:${v>=0?'var(--c26a)':'var(--loss)'}">${v>=0?'+':''}${fm(v)}</span>`;
+  const thS  = 'padding:5px 10px;text-align:right;font-size:11px;font-weight:600';
+  const thL  = 'padding:5px 10px;text-align:left;font-size:11px;font-weight:600;color:var(--muted)';
+
+  const plRow = (label, v25, v26p, v26a, bold) => {
+    const bs = bold ? 'font-weight:700;background:var(--s2);' : '';
+    const bt = bold ? 'border-top:2px solid var(--border2);' : 'border-bottom:1px solid var(--border);';
+    return `<tr style="${bs}${bt}">
+      <td style="padding:5px 10px;font-size:14px;${bs}">${label}</td>
+      <td style="padding:5px 10px;text-align:right;font-size:14px;${bs}">${fm(v25)}</td>
+      <td style="padding:5px 10px;text-align:right;font-size:14px;${bs}">${fm(v26p)}</td>
+      <td style="padding:5px 10px;text-align:right;font-size:14px;${bs}">${fm(v26a)}</td>
+      <td style="padding:5px 10px;text-align:right;font-size:12px;color:var(--muted)">${fPct(v26a,v26p)}</td>
+      <td style="padding:5px 10px;text-align:right;font-size:12px">${fDiff(v26a-v25)}</td>
+    </tr>`;
+  };
+
+  document.getElementById('bgh_pl_table').innerHTML = `
+    <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">
+      <thead><tr style="background:var(--s3)">
+        <th style="${thL}">항목</th>
+        <th style="${thS};color:var(--c25)">25년 실적</th>
+        <th style="${thS};color:var(--c26p)">26년 계획</th>
+        <th style="${thS};color:var(--c26a)">26년 실적</th>
+        <th style="${thS};color:var(--muted)">계획비</th>
+        <th style="${thS};color:var(--muted)">증감액</th>
+      </tr></thead>
+      <tbody>
+        ${plRow('매출',BGH25.sales,BGH26P.sales,BGH26A.sales,false)}
+        ${plRow('수업료 (방과후학교)',BGH25.suup,BGH26P.suup,BGH26A.sales*BGH25.suup/BGH25.sales,false)}
+        ${plRow('재료비수입',BGH25.jae,BGH26P.jae,BGH26A.sales*BGH25.jae/BGH25.sales,false)}
+        ${plRow('판매관리비',BGH25.cost,BGH26P.cost,BGH26A.cost,false)}
+        ${plRow('영업이익',BGH25.profit,BGH26P.profit,BGH26A.profit,true)}
+      </tbody>
+    </table></div>`;
+
+  // ── 미니카드 25년比 갱신
+  const suup26a = parseFloat(document.getElementById('bghu-val-suup')?.textContent||'5.8') * 1e8;
+  const jae26a  = parseFloat(document.getElementById('bghu-val-jae')?.textContent||'0.8') * 1e8;
+  const fMc = (v,b) => {
+    const d = v-b, c = d>=0?'var(--c26a)':'var(--loss)';
+    return `<span style="color:${c}">25년比 ${d>=0?'+':'-'}${(Math.abs(d)/1e8).toFixed(2)}억 (${d>=0?'+':''}${(d/b*100).toFixed(1)}%)</span>`;
+  };
+  const elMS = document.getElementById('bghu-meta-suup');
+  const elMJ = document.getElementById('bghu-meta-jae');
+  if(elMS) elMS.innerHTML = fMc(suup26a, BGH25.suup);
+  if(elMJ) elMJ.innerHTML = fMc(jae26a,  BGH25.jae);
+
   mkBar('c_bgh_bar',['방과후사업본부'],[
     dsBar('매출',[PL['방과후사업본부'].sales/1e6],C26A),
     dsBar('비용',[PL['방과후사업본부'].cost/1e6],'#f87171'),
