@@ -1447,7 +1447,7 @@ function initOverview(){
       c2.fillStyle=color;
       c2.textAlign='center';
       c2.textBaseline='bottom';
-      c2.fillText(Math.round(v).toLocaleString(), pt.x, pt.y-8);
+      c2.fillText(Math.round(v).toLocaleString(), pt.x, pt.y-14);
       c2.restore();
     }
   });
@@ -1996,16 +1996,15 @@ function initMirae(){
     };
   });
 
-  const thType = (label) => `<th colspan="5" style="padding:5px 8px;text-align:center;font-size:11px;font-weight:700;color:var(--text);border-left:2px solid var(--border2)">${label}</th>`;
+  const thType = (label) => `<th colspan="5" style="padding:5px 8px;text-align:center;font-size:11px;font-weight:700;color:var(--text)">${label}</th>`;
   const fPct = (a,b) => b>0 ? (a/b*100).toFixed(1)+'%' : '-';
   const fDiff = v => (v>=0?'+':'')+fm(v);
   const cellsType = (d25, d26p, d26a, key, first) => {
     const [v25,v26p,v26a] = [d25[key]||0, d26p[key]||0, d26a[key]||0];
     const hasData = d26a.total > 0;
-    const bl = first ? 'border-left:2px solid var(--border2);' : '';
     const diff = v26a - v25;
     return `
-      <td style="padding:5px 8px;text-align:right;font-size:14px;${bl}">${d25.total>0?fm(v25):'-'}</td>
+      <td style="padding:5px 8px;text-align:right;font-size:14px">${d25.total>0?fm(v25):'-'}</td>
       <td style="padding:5px 8px;text-align:right;font-size:14px">${d26p.total>0?fm(v26p):'-'}</td>
       <td style="padding:5px 8px;text-align:right;font-size:14px">${hasData?fm(v26a):'-'}</td>
       <td style="padding:5px 8px;text-align:right;font-size:12px;color:${hasData&&d26p.total>0?(v26a>=v26p?'var(--c26a)':'var(--loss)'):'var(--muted)'}">${hasData&&d26p.total>0?fPct(v26a,v26p):'-'}</td>
