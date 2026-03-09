@@ -785,7 +785,7 @@ thead th{font-size:13px}
   <div id="ce-bghu-m1" class="comment-editor"><div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div><textarea id="ce-text-bghu-m1" placeholder="코멘트를 입력하세요..."></textarea><div class="cb-btns"><button class="cb-del" onclick="deleteComment('bghu-m1')">삭제</button><button class="cb-save" onclick="saveComment('bghu-m1')">저장</button></div></div>
 
     <div class="full card">
-      <div class="ch"><div><div class="ct">손익 현황 비교</div><div class="cs">25년 실적 · 26년 계획 · 26년 실적 (단위: 백만원)</div></div></div>
+      <div class="ch"><div><div class="ct">손익 현황 비교</div><div class="cs">단위: 백만원</div></div></div>
       <div id="bgh_pl_table"></div>
     </div>
 
@@ -2093,7 +2093,6 @@ function initBgh(){
         <th style="${thS};color:var(--muted)">증감액</th>
       </tr></thead>
       <tbody>
-        ${plRow('매출',BGH25.sales,BGH26P.sales,BGH26A.sales,false)}
         ${plRow('수업료 (방과후학교)',BGH25.suup,BGH26P.suup,BGH26A.sales*BGH25.suup/BGH25.sales,false)}
         ${plRow('재료비수입',BGH25.jae,BGH26P.jae,BGH26A.sales*BGH25.jae/BGH25.sales,false)}
         ${plRow('판매관리비',BGH25.cost,BGH26P.cost,BGH26A.cost,false)}
