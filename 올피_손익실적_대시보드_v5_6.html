@@ -785,12 +785,12 @@ thead th{font-size:13px}
   <div id="ce-bghu-m1" class="comment-editor"><div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div><textarea id="ce-text-bghu-m1" placeholder="코멘트를 입력하세요..."></textarea><div class="cb-btns"><button class="cb-del" onclick="deleteComment('bghu-m1')">삭제</button><button class="cb-save" onclick="saveComment('bghu-m1')">저장</button></div></div>
 
     <div class="full card">
-      <div class="ch"><div><div class="ct">손익 현황 비교</div><div class="cs">단위: 백만원</div></div></div>
+      <div class="ch"><div><div class="ct">손익 현황 비교</div><div class="cs">(단위: 백만원)</div></div></div>
       <div id="bgh_pl_table"></div>
     </div>
 
     <div class="full card">
-      <div class="ch"><div><div class="ct">판매관리비 주요 계정</div><div class="cs">26년 1월 실적 (단위: 백만원)</div></div></div>
+      <div class="ch"><div><div class="ct">판매관리비 주요 계정</div><div class="cs">(단위: 백만원)</div></div></div>
       <div id="bgh_cost_table"></div>
     </div>
   <div id="cb-bghu-s2" class="comment-box" style="display:none"><div class="cb-label"><span>✦</span> COMMENT</div><div class="cb-text" id="cb-text-bghu-s2"></div><div class="cb-date" id="cb-date-bghu-s2"></div></div>
@@ -2077,7 +2077,7 @@ function initBgh(){
       <td style="padding:5px 10px;text-align:right;font-size:14px;${bs}">${fm(v25)}</td>
       <td style="padding:5px 10px;text-align:right;font-size:14px;${bs}">${fm(v26p)}</td>
       <td style="padding:5px 10px;text-align:right;font-size:14px;${bs}">${fm(v26a)}</td>
-      <td style="padding:5px 10px;text-align:right;font-size:12px;color:var(--muted)">${fPct(v26a,v26p)}</td>
+      <td style="padding:5px 10px;text-align:right;font-size:12px;color:${v26p!==0?(v26a>=v26p?'var(--c26a)':'var(--loss)'):'var(--muted)'}">${fPct(v26a,v26p)}</td>
       <td style="padding:5px 10px;text-align:right;font-size:12px">${fDiff(v26a-v25)}</td>
     </tr>`;
   };
