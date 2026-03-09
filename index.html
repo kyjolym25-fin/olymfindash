@@ -108,7 +108,7 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
 .campus-row{background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:12px 14px;display:flex;align-items:center;gap:10px;transition:border-color .15s}
 .campus-row:hover{border-color:var(--border2)}
 .cr-name{font-size:12px;font-weight:600;width:110px;flex-shrink:0}
-.cr-sales{font-size:12px;font-weight:600;color:var(--c25);min-width:70px;text-align:right}
+.cr-sales{font-size:12px;font-weight:600;min-width:70px;text-align:right}
 .cr-profit{font-size:12px;font-weight:700;min-width:70px;text-align:right}
 .cr-margin{font-size:12px;min-width:46px;text-align:right}
 .cr-bar-wrap{flex:1;height:5px;background:var(--border);border-radius:3px;overflow:hidden}
@@ -243,7 +243,8 @@ table{font-size:14px}
 thead th{font-size:13px}
 .legend-bar{font-size:14px}
 .period-badge{font-size:14px}
-.kpi-row-val{font-size:14px}
+.kpi-row-val{font-size:14px;color:var(--text)!important}
+.kpi-main-val{color:var(--text)!important}
 .cr-name,.cr-sales,.cr-profit{font-size:14px}
 .campus-group-name{font-size:14px}
 .stu-card .name{font-size:14px}
@@ -1527,7 +1528,7 @@ function initHakwon(){
     // 26실적+매출比 단일 셀
     function cell26(val, sales, bold){
       const pct=sales>0?(val/sales*100).toFixed(1)+'%':'-';
-      return `<td style="padding:4px 10px;text-align:right;white-space:nowrap;vertical-align:top;${bold?'font-weight:700;':''}color:var(--c26a)">
+      return `<td style="padding:4px 10px;text-align:right;white-space:nowrap;vertical-align:top;${bold?'font-weight:700;':''}">
         <div style="font-size:14px">${(val/M).toFixed(1)}</div>
         <div style="font-size:11px;color:var(--muted);font-weight:400;margin-top:1px">${pct}</div>
       </td>`;
@@ -1541,7 +1542,7 @@ function initHakwon(){
           <div style="font-size:11px;color:var(--muted);font-weight:400;margin-top:1px">${pct}</div>
         </td>`;
       };
-      return f(yr25,s25,null)+f(yr26p,s26p,null)+f(yr26a,s26a,'var(--c26a)');
+      return f(yr25,s25,null)+f(yr26p,s26p,null)+f(yr26a,s26a,null);
     }
 
 
@@ -1569,7 +1570,7 @@ function initHakwon(){
       };
       rows+=`<tr style="background:rgba(77,150,240,0.07);border-bottom:1px solid var(--border)">
         <td style="padding:4px 10px;font-size:14px;font-weight:600;display:flex;align-items:center">${dot(di++)}인건비 소계</td>
-        <td style="padding:4px 10px;font-size:14px;color:var(--muted)">직원인건비+강사비+차량운행비</td>
+        <td style="padding:4px 10px;font-size:12px;color:var(--muted)">직원인건비+강사비+차량운행비</td>
         ${cells3(laborTotal.yr25,laborTotal.yr26p,laborTotal.yr26a,d.sales.yr25,d.sales.yr26p,d.sales.yr26a,true)}
       </tr>`;
       // 인건비 세부
@@ -1577,7 +1578,7 @@ function initHakwon(){
         const v=d[item.key];
         rows+=`<tr style="border-bottom:1px solid var(--border)">
           <td style="padding:3px 10px 3px 26px;font-size:14px;color:var(--muted)">↳ ${item.label}</td>
-          <td style="padding:3px 10px;font-size:14px;color:var(--muted)">${item.desc||''}</td>
+          <td style="padding:3px 10px;font-size:12px;color:var(--muted)">${item.desc||''}</td>
           ${cells3(v.yr25,v.yr26p,v.yr26a,d.sales.yr25,d.sales.yr26p,d.sales.yr26a,false)}
         </tr>`;
       }
@@ -1586,7 +1587,7 @@ function initHakwon(){
         const v=d[item.key];
         rows+=`<tr style="border-bottom:1px solid var(--border)">
           <td style="padding:4px 10px;font-size:14px;display:flex;align-items:center">${dot(di++)}${item.label}</td>
-          <td style="padding:4px 10px;font-size:14px;color:var(--muted)">${item.desc||''}</td>
+          <td style="padding:4px 10px;font-size:12px;color:var(--muted)">${item.desc||''}</td>
           ${cells3(v.yr25||0,v.yr26p||0,v.yr26a||0,d.sales.yr25,d.sales.yr26p,d.sales.yr26a,false)}
         </tr>`;
       }
@@ -1757,9 +1758,9 @@ function renderCC3YTree(containerId, groupDef, dataObj){
       return `<tr style="border-bottom:1px solid var(--border)"
           onmouseover="this.style.background='var(--s3)'" onmouseout="this.style.background=''">
         <td style="padding:9px 10px 9px 22px;font-weight:600">${ccLbl(cc)}</td>
-        <td style="padding:9px 8px;text-align:right;color:var(--c25);border-left:2px solid var(--border2)">${fx(d25.s)}</td>
-        <td style="padding:9px 8px;text-align:right;color:var(--c26p)">${fx(d26p.s)}</td>
-        <td style="padding:9px 8px;text-align:right;color:#4d96f0;font-weight:700">${fx(d26a.s)}</td>
+        <td style="padding:9px 8px;text-align:right;border-left:2px solid var(--border2)">${fx(d25.s)}</td>
+        <td style="padding:9px 8px;text-align:right">${fx(d26p.s)}</td>
+        <td style="padding:9px 8px;text-align:right;font-weight:700">${fx(d26a.s)}</td>
         <td style="padding:9px 8px;text-align:right;color:${ac(sAch)};font-weight:600">${fp2(sAch)}</td>
         <td style="padding:9px 8px;text-align:right;color:${sDiff>=0?'var(--c26a)':'var(--loss)'};font-weight:600">${fd(sDiff)}</td>
         <td style="padding:9px 8px;text-align:right;color:${pc(d25.p2)};border-left:2px solid var(--border2)">${fx(d25.p2)}<span style="font-size:9px;color:var(--muted);margin-left:2px">(${mg(d25.p2,d25.s)})</span></td>
@@ -1791,9 +1792,9 @@ function renderCC3YTree(containerId, groupDef, dataObj){
     const tPach=ach(T26a.p2,T26p.p2), tPdiff=T26a.p2-T25.p2;
     bodyRows += `<tr style="background:var(--s3);font-weight:700;border-top:2px solid var(--border2)">
       <td style="padding:8px 10px;color:${color}">합계</td>
-      <td style="padding:8px;text-align:right;color:var(--c25);border-left:2px solid var(--border2)">${fx(T25.s)}</td>
-      <td style="padding:8px;text-align:right;color:var(--c26p)">${fx(T26p.s)}</td>
-      <td style="padding:8px;text-align:right;color:#4d96f0">${fx(T26a.s)}</td>
+      <td style="padding:8px;text-align:right;border-left:2px solid var(--border2)">${fx(T25.s)}</td>
+      <td style="padding:8px;text-align:right">${fx(T26p.s)}</td>
+      <td style="padding:8px;text-align:right">${fx(T26a.s)}</td>
       <td style="padding:8px;text-align:right;color:${ac(tSach)}">${fp2(tSach)}</td>
       <td style="padding:8px;text-align:right;color:${tSdiff>=0?'var(--c26a)':'var(--loss)'}">${fd(tSdiff)}</td>
       <td style="padding:8px;text-align:right;color:${pc(T25.p2)};border-left:2px solid var(--border2)">${fx(T25.p2)}<span style="font-size:9px;color:var(--muted);margin-left:2px">(${mg(T25.p2,T25.s)})</span></td>
@@ -1979,13 +1980,13 @@ function initMirae(){
       : '';
     cRows += `<tr style="${bStyle}${btop}">
       <td style="padding:5px 10px;font-size:14px;${bStyle}">${dot}${row.label}</td>
-      <td style="padding:5px 10px;text-align:right;font-size:14px;color:var(--c25);${bStyle}">
+      <td style="padding:5px 10px;text-align:right;font-size:14px;${bStyle}">
         ${fm(row.yr25)}${pcS(row.yr25, SALES3.yr25)}
       </td>
-      <td style="padding:5px 10px;text-align:right;font-size:14px;color:var(--c26p);${bStyle}">
+      <td style="padding:5px 10px;text-align:right;font-size:14px;${bStyle}">
         ${fm(row.yr26p)}${pcS(row.yr26p, SALES3.yr26p)}
       </td>
-      <td style="padding:5px 10px;text-align:right;font-size:14px;color:var(--c26a);${bStyle}">
+      <td style="padding:5px 10px;text-align:right;font-size:14px;${bStyle}">
         ${fm(row.yr26a)}${pcS(row.yr26a, SALES3.yr26a)}
       </td>
     </tr>`;
@@ -2070,19 +2071,19 @@ function renderDeptCostTable(containerId, items, salesK){
   const toM = v => v>0?(v/1000).toFixed(1):'-';
   const cell = (v, base, color) => {
     const pct = (base>0 && v>0) ? `<div style="font-size:11px;color:var(--muted);margin-top:1px">${(v/base*100).toFixed(1)}%</div>` : '';
-    return `<td style="padding:5px 12px;text-align:right;white-space:nowrap;${color?'color:'+color+';':''}">
+    return `<td style="padding:5px 12px;text-align:right;white-space:nowrap;">
       <div style="font-size:14px">${toM(v)}</div>${pct}
     </td>`;
   };
   const cellPlain = (v, color) =>
-    `<td style="padding:5px 12px;text-align:right;white-space:nowrap;font-size:14px;${color?'color:'+color+';':'color:var(--muted);'}">
+    `<td style="padding:5px 12px;text-align:right;white-space:nowrap;font-size:14px;">
       ${toM(v)}
     </td>`;
 
   let rows = items.map((it,i)=>`
     <tr style="border-bottom:1px solid var(--border)">
       <td style="padding:6px 12px;font-size:14px;display:flex;align-items:center;white-space:nowrap">${dot(i)}${it.label}</td>
-      <td style="padding:6px 12px;font-size:14px;color:var(--muted)">${it.desc||''}</td>
+      <td style="padding:6px 12px;font-size:12px;color:var(--muted)">${it.desc||''}</td>
       ${cellPlain(it.yr25||0, null)}
       ${cellPlain(it.yr26p||0, null)}
       ${cell(it.yr26a||0, showSales?salesK:tot26a, 'var(--c26a)')}
