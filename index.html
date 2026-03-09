@@ -46,6 +46,9 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
 .subtab{padding:8px 16px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s;white-space:nowrap}
 .subtab:hover{color:var(--text)}
 .subtab.on{color:var(--c26a);border-color:var(--c26a)}
+.mtn-btn{padding:3px 12px;font-size:11px;font-weight:500;color:var(--muted);background:var(--s3);border:1px solid var(--border);border-radius:12px;cursor:pointer;transition:all .2s}
+.mtn-btn:hover{color:var(--text);border-color:var(--border2)}
+.mtn-btn.on{color:#fff;background:var(--c26a);border-color:var(--c26a)}
 
 /* ── LAYOUT ── */
 .main{padding:20px 28px;padding-bottom:60px}
@@ -574,6 +577,19 @@ thead th{font-size:13px}
   <div id="ce-hak-m2" class="comment-editor"><div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div><textarea id="ce-text-hak-m2" placeholder="코멘트를 입력하세요..."></textarea><div class="cb-btns"><button class="cb-del" onclick="deleteComment('hak-m2')">삭제</button><button class="cb-save" onclick="saveComment('hak-m2')">저장</button></div></div>
 
     <div class="full card">
+      <div class="ch">
+        <div><div class="ct">캠퍼스별 월별 영업이익 추이</div><div class="cs">공통비 제외 · 25년 실적 vs 26년 실적 (단위: 백만원)</div></div>
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap" id="hak_mtn_btns">
+          <button class="mtn-btn on" onclick="switchCampMtn('hak','광진',this)">광진</button>
+          <button class="mtn-btn" onclick="switchCampMtn('hak','성동',this)">성동</button>
+          <button class="mtn-btn" onclick="switchCampMtn('hak','동대문',this)">동대문</button>
+          <button class="mtn-btn" onclick="switchCampMtn('hak','중랑',this)">중랑</button>
+        </div>
+      </div>
+      <div class="cw" style="height:210px"><canvas id="c_hak_mountain"></canvas></div>
+    </div>
+
+    <div class="full card">
       <div class="ch"><div><div class="ct">판매관리비 항목별 분석</div><div class="cs">(단위: 백만원)</div></div></div>
       <div id="hak_cost_table"></div>
     </div>
@@ -644,6 +660,19 @@ thead th{font-size:13px}
     </div>
   <div id="cb-u2m-m2" class="comment-box" style="display:none"><div class="cb-label"><span>✦</span> COMMENT</div><div class="cb-text" id="cb-text-u2m-m2"></div><div class="cb-date" id="cb-date-u2m-m2"></div></div>
   <div id="ce-u2m-m2" class="comment-editor"><div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div><textarea id="ce-text-u2m-m2" placeholder="코멘트를 입력하세요..."></textarea><div class="cb-btns"><button class="cb-del" onclick="deleteComment('u2m-m2')">삭제</button><button class="cb-save" onclick="saveComment('u2m-m2')">저장</button></div></div>
+
+    <div class="full card">
+      <div class="ch">
+        <div><div class="ct">캠퍼스별 월별 영업이익 추이</div><div class="cs">공통비 제외 · 25년 실적 vs 26년 실적 (단위: 백만원)</div></div>
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap" id="u2m_mtn_btns">
+          <button class="mtn-btn on" onclick="switchCampMtn('u2m','중계',this)">중계</button>
+          <button class="mtn-btn" onclick="switchCampMtn('u2m','송파방이',this)">송파방이</button>
+          <button class="mtn-btn" onclick="switchCampMtn('u2m','미사',this)">미사</button>
+          <button class="mtn-btn" onclick="switchCampMtn('u2m','위례',this)">위례</button>
+        </div>
+      </div>
+      <div class="cw" style="height:210px"><canvas id="c_u2m_mountain"></canvas></div>
+    </div>
 
     <div class="full card">
       <div class="ch"><div><div class="ct">판매관리비 항목별 분석</div><div class="cs">(단위: 백만원)</div></div></div>
@@ -1683,6 +1712,7 @@ function initHakwon(){
 
   // 계층 트리 렌더링
   renderHakwonTree();
+  renderCampMountain('광진', 'c_hak_mountain', 'hak');
 }
 
 // ── 공통: 3년 비교 트리 렌더러 ──
@@ -1730,6 +1760,104 @@ const CC3Y = {
     yr26a:{s:76955800,  p2:14132732},
   },
 };
+
+// ── 캠퍼스별 월별 영업이익 마운틴 차트 ──
+// 25년 월별 실적 (공통비 제외, 백만원) — 출처: 올림피아드교육 부서손익_2025년 12월_ver07.xlsx
+const CAMP_MONTHLY = {
+  '광진':    { p25:[241,87,150,109,126,113,228,24,78,80,8,57],   p26a:[214,null,null,null,null,null,null,null,null,null,null,null] },
+  '성동':    { p25:[140,13,77,79,72,75,125,28,48,56,0,44],       p26a:[125,null,null,null,null,null,null,null,null,null,null,null] },
+  '동대문':  { p25:[173,82,122,120,116,108,153,74,97,96,60,63],  p26a:[128,null,null,null,null,null,null,null,null,null,null,null] },
+  '중랑':    { p25:[58,35,45,42,40,33,51,14,21,24,-52,7],        p26a:[55,null,null,null,null,null,null,null,null,null,null,null] },
+  '중계':    { p25:[7,-21,-7,-8,-10,-8,9,-15,-20,-18,-30,-11],   p26a:[11,null,null,null,null,null,null,null,null,null,null,null] },
+  '송파방이':{ p25:[7,10,8,6,3,4,33,-3,4,5,-18,-18],             p26a:[10,null,null,null,null,null,null,null,null,null,null,null] },
+  '미사':    { p25:[17,0,6,3,4,0,14,-11,-2,3,-16,-6],            p26a:[2,null,null,null,null,null,null,null,null,null,null,null] },
+  '위례':    { p25:[6,-11,-7,-10,-9,-6,7,-18,-7,-7,-7,-5],       p26a:[25,null,null,null,null,null,null,null,null,null,null,null] },
+};
+
+let campMtnCharts = {};  // { hak: Chart, u2m: Chart }
+
+function renderCampMountain(camp, canvasId, section) {
+  const d = CAMP_MONTHLY[camp];
+  if(!d) return null;
+  const ctx = document.getElementById(canvasId);
+  if(!ctx) return null;
+  if(campMtnCharts[section]) { campMtnCharts[section].destroy(); campMtnCharts[section] = null; }
+
+  const M = ['1','2','3','4','5','6','7','8','9','10','11','12'];
+
+  const lblPlugin = {
+    id:'campMtnLbl',
+    afterDraw(chart){
+      const c2 = chart.ctx;
+      chart.data.datasets.forEach((ds, di) => {
+        const meta = chart.getDatasetMeta(di);
+        ds.data.forEach((v, pi) => {
+          if(v == null) return;
+          const pt = meta.data[pi];
+          if(!pt) return;
+          c2.save();
+          c2.font = 'bold 9px sans-serif';
+          c2.fillStyle = ds.borderColor;
+          c2.textAlign = 'center';
+          if(v >= 0){ c2.textBaseline='bottom'; c2.fillText(v, pt.x, pt.y-5); }
+          else      { c2.textBaseline='top';    c2.fillText(v, pt.x, pt.y+5); }
+          c2.restore();
+        });
+      });
+    }
+  };
+
+  campMtnCharts[section] = new Chart(ctx.getContext('2d'), {
+    type:'line',
+    data:{
+      labels:M,
+      datasets:[
+        { label:'25년 실적', data:d.p25,
+          borderColor:'rgba(77,150,240,0.75)', backgroundColor:'rgba(77,150,240,0.18)',
+          fill:true, borderWidth:1.5, tension:.35, order:1,
+          pointRadius:3, pointBackgroundColor:'rgba(77,150,240,0.75)' },
+        { label:'26년 실적', data:d.p26a,
+          borderColor:'#22bf85', backgroundColor:'rgba(34,191,133,0.38)',
+          fill:true, borderWidth:2.5, tension:.35, order:0, spanGaps:false,
+          pointRadius:5, pointBackgroundColor:'#22bf85',
+          pointBorderColor:'#fff', pointBorderWidth:2 },
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{
+          display:true, position:'top',
+          labels:{color:'#8b98c7', font:{size:11}, boxWidth:12, padding:12,
+            generateLabels(chart){
+              return chart.data.datasets.map((ds,i)=>({
+                text:ds.label, fillStyle:ds.backgroundColor,
+                strokeStyle:ds.borderColor, lineWidth:2,
+                hidden:false, datasetIndex:i
+              }));
+            }
+          }
+        },
+        tooltip:{mode:'index',intersect:false}
+      },
+      scales:{
+        x:{grid:{color:'#1d2340'}, ticks:{color:'#8b98c7',font:{size:10}},
+           title:{display:true,text:'월',color:'#6b7599',font:{size:9}}},
+        y:{grid:{color:'#1d2340'}, ticks:{color:'#8b98c7',font:{size:10}}}
+      }
+    },
+    plugins:[lblPlugin]
+  });
+  return campMtnCharts[section];
+}
+
+function switchCampMtn(section, camp, btn) {
+  const btnWrap = btn.parentElement;
+  btnWrap.querySelectorAll('.mtn-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  const canvasId = section==='hak' ? 'c_hak_mountain' : 'c_u2m_mountain';
+  renderCampMountain(camp, canvasId, section);
+}
 
 
 function renderCC3YTree(containerId, groupDef, dataObj){
@@ -1904,6 +2032,7 @@ function initU2m(){
     dsBar('영업이익',names.map(n=>PL[n].profit/1e6),C25),
   ],CO_SM);
   renderU2mTree();
+  renderCampMountain('중계', 'c_u2m_mountain', 'u2m');
 }
 
 // ============================================================
