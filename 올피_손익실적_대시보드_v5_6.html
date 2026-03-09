@@ -464,7 +464,7 @@ thead th{font-size:13px}
   <div class="g3">
     <div class="card">
       <div class="ch">
-        <div><div class="ct">누적 매출 비교</div><div class="cs">월별 누적합계 · 25년 실적 · 26년 계획 · 26년 실적 (백만원)</div></div>
+        <div><div class="ct">누적 매출 비교</div><div class="cs">월별 누적합계 (백만원)</div></div>
         <div class="cbg">누적</div>
       </div>
       <div class="cw" style="height:250px"><canvas id="c_overall_sales"></canvas></div>
@@ -1417,11 +1417,40 @@ const fp=v=>v==null?'-':v.toFixed(1)+'%';
 // ============================================================
 function initOverview(){
   // 누적 매출: 26년 실적 맨 앞
-  mkLine('c_overall_sales', M, [
-    dsLine('26년 실적',  cumSum(OV.yr26as).map((v,i)=>OV.yr26as[i]>0?v:null), C26A),
-    dsLine('25년 실적',  cumSum(OV.yr25s),  C25),
-    dsLine('26년 계획',  cumSum(OV.yr26ps), C26P, true),
-  ]);
+  // 누적 매출 비교 - 당월 실적 데이터 레이블 (표식 위에 표시)
+  (function(){
+    const ctxEl = document.getElementById('c_overall_sales');
+    if(!ctxEl) return;
+    const yr26aData = cumSum(OV.yr26as).map((v,i)=>OV.yr26as[i]>0?v:null);
+    const lastIdx = yr26aData.reduce((li,v,i)=>v!=null?i:li, -1);
+    const dsets = [
+      dsLine('26년 실적', yr26aData, C26A),
+      dsLine('25년 실적', cumSum(OV.yr25s), C25),
+      dsLine('26년 계획', cumSum(OV.yr26ps), C26P, true),
+    ];
+    const saleLblPlugin = {
+      id:'saleLbl',
+      afterDraw(chart){
+        if(lastIdx<0) return;
+        const meta = chart.getDatasetMeta(0);
+        const pt = meta.data[lastIdx];
+        if(!pt||pt.skip) return;
+        const v = yr26aData[lastIdx];
+        if(v==null) return;
+        const c2 = chart.ctx;
+        c2.save();
+        c2.font='bold 11px sans-serif';
+        c2.fillStyle=C26A;
+        c2.textAlign='center';
+        c2.textBaseline='bottom';
+        c2.fillText(Math.round(v).toLocaleString(), pt.x, pt.y-8);
+        c2.restore();
+      }
+    };
+    new Chart(ctxEl.getContext('2d'),{type:'line',data:{labels:M,datasets:dsets},
+      options:{...CO,elements:{line:{tension:.35},point:{radius:3,hoverRadius:6}}},
+      plugins:[saleLblPlugin]});
+  })();
   // 누적 영업이익: 26년 실적 맨 앞
   mkLine('c_overall_profit', M, [
     dsLine('26년 실적',  cumSum(OV.yr26ap).map((v,i)=>OV.yr26ap[i]!==0?v:null), C26A),
