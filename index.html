@@ -1695,9 +1695,9 @@ function renderCC3YTree(containerId, groupDef, dataObj){
 
   // 열 헤더 (매출·영업이익 각 5열씩)
   const subHd = (color, showMgRatio=false) => `
-    <th style="padding:4px 8px;text-align:right;color:var(--c25)">25년실적${showMgRatio?'<br><span style="font-size:9px;font-weight:400;color:var(--muted)">매출比</span>':''}</th>
-    <th style="padding:4px 8px;text-align:right;color:var(--c26p)">26년계획${showMgRatio?'<br><span style="font-size:9px;font-weight:400;color:var(--muted)">매출比</span>':''}</th>
-    <th style="padding:4px 8px;text-align:right;color:${color};font-weight:700">26년실적${showMgRatio?'<br><span style="font-size:9px;font-weight:400;color:var(--muted)">매출比</span>':''}</th>
+    <th style="padding:4px 8px;text-align:right;color:var(--c25)">25년 실적${showMgRatio?'<br><span style="font-size:9px;font-weight:400;color:var(--muted)">매출比</span>':''}</th>
+    <th style="padding:4px 8px;text-align:right;color:var(--c26p)">26년 계획${showMgRatio?'<br><span style="font-size:9px;font-weight:400;color:var(--muted)">매출比</span>':''}</th>
+    <th style="padding:4px 8px;text-align:right;color:${color};font-weight:700">26년 실적${showMgRatio?'<br><span style="font-size:9px;font-weight:400;color:var(--muted)">매출比</span>':''}</th>
     <th style="padding:4px 8px;text-align:right;color:var(--muted)">계획비</th>
     <th style="padding:4px 8px;text-align:right;color:var(--muted)">증감액</th>`;
 
@@ -1719,14 +1719,14 @@ function renderCC3YTree(containerId, groupDef, dataObj){
       <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:10px">
         <span style="font-size:13px;font-weight:700;color:${color}">${emoji} ${name}</span>
         <span style="font-size:11px;color:var(--muted)">
-          매출: <b style="color:var(--c25)">${fx(T25.s)}</b> →
-                <b style="color:var(--c26p)">${fx(T26p.s)}</b> →
-                <b style="color:var(--c26a)">${fx(T26a.s)}</b>
+          매출: <b>${fx(T25.s)}</b> →
+                <b>${fx(T26p.s)}</b> →
+                <b>${fx(T26a.s)}</b>
         </span>
         <span style="font-size:11px;color:var(--muted)">
-          영업이익: <b style="color:${pc(T25.p2)}">${fx(T25.p2)}</b> →
-                    <b style="color:var(--c26p)">${fx(T26p.p2)}</b> →
-                    <b style="color:${pc(T26a.p2)}">${fx(T26a.p2)}</b>
+          영업이익: <b>${fx(T25.p2)}</b> →
+                    <b>${fx(T26p.p2)}</b> →
+                    <b>${fx(T26a.p2)}</b>
         </span>
       </div>
 
