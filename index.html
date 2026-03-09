@@ -773,7 +773,7 @@ thead th{font-size:13px}
     </div>
     <div class="g2">
       <div class="card">
-        <div class="ch"><div><div class="ct">방과후 손익 현황</div><div class="cs">1월 실적 (백만원)</div></div></div>
+        <div class="ch"><div><div class="ct">누적 매출 비교</div><div class="cs">월별 누적합계 (백만원)</div></div></div>
         <div class="cw" style="height:230px"><canvas id="c_bgh_bar"></canvas></div>
       </div>
       <div class="card">
@@ -785,7 +785,7 @@ thead th{font-size:13px}
   <div id="ce-bghu-m1" class="comment-editor"><div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div><textarea id="ce-text-bghu-m1" placeholder="코멘트를 입력하세요..."></textarea><div class="cb-btns"><button class="cb-del" onclick="deleteComment('bghu-m1')">삭제</button><button class="cb-save" onclick="saveComment('bghu-m1')">저장</button></div></div>
 
     <div class="full card">
-      <div class="ch"><div><div class="ct">손익 현황 비교</div><div class="cs">(단위: 백만원)</div></div></div>
+      <div class="ch"><div><div class="ct">손익 현황 상세</div><div class="cs">(단위: 백만원)</div></div></div>
       <div id="bgh_pl_table"></div>
     </div>
 
@@ -2141,11 +2141,42 @@ function initBgh(){
   if(elMS) elMS.innerHTML = fMc(suup26a, BGH25.suup);
   if(elMJ) elMJ.innerHTML = fMc(jae26a,  BGH25.jae);
 
-  mkBar('c_bgh_bar',['방과후사업본부'],[
-    dsBar('매출',[PL['방과후사업본부'].sales/1e6],C26A),
-    dsBar('비용',[PL['방과후사업본부'].cost/1e6],'#f87171'),
-    dsBar('영업이익',[PL['방과후사업본부'].profit/1e6],C25),
-  ],CO_SM);
+  // 누적 매출 꺾은선 그래프
+  (function(){
+    const ctxEl = document.getElementById('c_bgh_bar');
+    if(!ctxEl) return;
+    const yr25m  = [594.37,497.06,644.46,867.71,932.36,772.11,747.37,1002.12,876.82,664.31,999.63,860.09];
+    const yr26pm = [703.25,478.23,708.91,954.48,1025.59,849.32,822.11,1102.34,964.50,730.74,1099.60,946.10];
+    const yr26am = [PL['방과후사업본부'].sales/1e6,...Array(11).fill(0)];
+    const yr26aData = cumSum(yr26am).map((v,i)=>yr26am[i]>0?v:null);
+    const lastIdx = yr26aData.reduce((li,v,i)=>v!=null?i:li, -1);
+    const dsets = [
+      dsLine('26년 실적', yr26aData, C26A),
+      dsLine('25년 실적', cumSum(yr25m), C25),
+      dsLine('26년 계획', cumSum(yr26pm), C26P, true),
+    ];
+    const bghLblPlugin = {
+      id:'bghLbl',
+      afterDraw(chart){
+        if(lastIdx<0) return;
+        const pt = chart.getDatasetMeta(0).data[lastIdx];
+        if(!pt||pt.skip) return;
+        const v = yr26aData[lastIdx];
+        if(v==null) return;
+        const c2 = chart.ctx;
+        c2.save();
+        c2.font='bold 11px sans-serif';
+        c2.fillStyle=C26A;
+        c2.textAlign='center';
+        c2.textBaseline='bottom';
+        c2.fillText(Math.round(v).toLocaleString(), pt.x, pt.y-8);
+        c2.restore();
+      }
+    };
+    new Chart(ctxEl.getContext('2d'),{type:'line',data:{labels:M,datasets:dsets},
+      options:{...CO,elements:{line:{tension:.35},point:{radius:3,hoverRadius:6}}},
+      plugins:[bghLblPlugin]});
+  })();
   mkDoughnut('c_bgh_cost',
     ['인건비','임대료','소모품비','기타'],
     [428.0,120.0,40.0,(PL['방과후사업본부'].cost/1e6-428.0-120.0-40.0)].map(v=>Math.max(v,0)),
