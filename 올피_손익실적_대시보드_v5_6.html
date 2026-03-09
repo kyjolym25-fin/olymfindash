@@ -692,8 +692,8 @@ thead th{font-size:13px}
   <div class="subpage" id="sp-mirae">
     <div class="mini-cards">
       <div class="mini-card c26a"><div class="mc-lbl">미래교육 전체 매출</div><div class="mc-val">3.9<span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--muted)">26년 1월 실적</div></div>
-      <div class="mini-card c26a"><div class="mc-lbl">교재 매출</div><div class="mc-val">1.1<span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--muted)">도서수입 합계</div></div>
-      <div class="mini-card c26a"><div class="mc-lbl">원격 매출</div><div class="mc-val">2.9<span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--muted)">온라인컨텐츠수입 합계</div></div>
+      <div class="mini-card c26a"><div class="mc-lbl">교재 매출</div><div class="mc-val">1.1<span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--c26a)">계획比 +0.18억 (+21.2%)</div></div>
+      <div class="mini-card c26a"><div class="mc-lbl">원격 매출</div><div class="mc-val">2.9<span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--c26a)">계획比 +0.29억 (+11.4%)</div></div>
       <div class="mini-card cr"><div class="mc-lbl">판매관리비</div><div class="mc-val">3.5<span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--muted)">매출比 88.5%</div></div>
       <div class="mini-card c26a"><div class="mc-lbl">영업이익</div><div class="mc-val">0.45<span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--c26a)">이익률 11.5%</div></div>
     </div>
@@ -1005,15 +1005,21 @@ thead th{font-size:13px}
   <div class="full card">
     <div class="ch"><div><div class="ct" id="stu_ytd_title">캠퍼스별 재원생 YTD 누적 (1~1월)</div><div class="cs">월별 재원생 합계 누적 · 25년 YTD 대비</div></div></div>
     <div class="tw"><table>
-      <thead><tr>
-        <th>캠퍼스</th>
-        <th class="r" style="color:var(--c26a)">26년<br>YTD</th>
-        <th class="r" style="color:var(--c25)">25년<br>YTD</th>
-        <th class="r">YoY<br>증감</th>
-        <th class="r">YoY<br>(%)</th>
-        <th class="r" style="color:var(--muted)">월평균<br>26년</th>
-        <th class="r" style="color:var(--muted)">월평균<br>25년</th>
-      </tr></thead>
+      <thead>
+        <tr>
+          <th rowspan="2">캠퍼스</th>
+          <th class="r" rowspan="2" style="color:var(--c26a)">26년<br>YTD</th>
+          <th class="r" rowspan="2" style="color:var(--c25)">25년<br>YTD</th>
+          <th class="r" colspan="2" style="text-align:center;border-left:1px solid var(--border2);padding-bottom:3px">YoY</th>
+          <th class="r" colspan="2" style="text-align:center;border-left:1px solid var(--border2);padding-bottom:3px">월평균</th>
+        </tr>
+        <tr>
+          <th class="r" style="color:var(--muted);border-left:1px solid var(--border2)">증감</th>
+          <th class="r" style="color:var(--muted)">(%)</th>
+          <th class="r" style="color:var(--c26a);border-left:1px solid var(--border2)">26년</th>
+          <th class="r" style="color:var(--c25)">25년</th>
+        </tr>
+      </thead>
       <tbody id="stu_ytd_table"></tbody>
     </table></div>
   </div>
@@ -2536,8 +2542,8 @@ function renderStuTable(month){
       <td class="r" style="color:var(--c25)">${ytd25.toLocaleString()}</td>
       <td class="r" style="color:${dc};font-weight:600">${diff>0?'+':''}${diff.toLocaleString()}</td>
       <td class="r" style="color:${dc}">${diff>0?'+':''}${pct}%</td>
-      <td class="r" style="color:var(--muted);font-size:11px">${Number(avg26).toLocaleString()}</td>
-      <td class="r" style="color:var(--muted);font-size:11px">${Number(avg25).toLocaleString()}</td>
+      <td class="r" style="color:var(--c26a);font-size:11px">${Number(avg26).toLocaleString()}</td>
+      <td class="r" style="color:var(--c25);font-size:11px">${Number(avg25).toLocaleString()}</td>
     </tr>`;
   });
   const ytdD=ytdTot26-ytdTot25;
@@ -2548,8 +2554,8 @@ function renderStuTable(month){
     <td class="r" style="color:var(--c25)">${ytdTot25.toLocaleString()}</td>
     <td class="r" style="color:var(--loss);font-weight:700">${ytdD>0?'+':''}${ytdD.toLocaleString()}</td>
     <td class="r" style="color:var(--loss)">${ytdD>0?'+':''}${ytdP}%</td>
-    <td class="r" style="color:var(--muted)">${(ytdTot26/mnNum).toFixed(0)}</td>
-    <td class="r" style="color:var(--muted)">${(ytdTot25/mnNum).toFixed(0)}</td>
+    <td class="r" style="color:var(--c26a)">${(ytdTot26/mnNum).toFixed(0)}</td>
+    <td class="r" style="color:var(--c25)">${(ytdTot25/mnNum).toFixed(0)}</td>
   </tr>`;
   document.getElementById('stu_ytd_table').innerHTML=ytdHtml;
 }
