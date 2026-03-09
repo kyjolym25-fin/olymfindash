@@ -1783,9 +1783,9 @@ function renderCC3YTree(containerId, groupDef, dataObj){
       <table style="width:100%;border-collapse:collapse;font-size:14px;min-width:860px">
         <thead>
           <tr style="background:var(--s3)">
-            <th rowspan="2" style="padding:7px 10px;text-align:left;color:var(--muted);font-weight:600;border-bottom:2px solid var(--border2);min-width:110px">CC</th>
-            <th colspan="5" style="padding:6px 0;text-align:center;color:#4d96f0;font-weight:600;border-left:2px solid var(--border2);border-bottom:1px solid var(--border)">💰 매출</th>
-            <th colspan="5" style="padding:6px 0;text-align:center;color:#22bf85;font-weight:600;border-left:2px solid var(--border2);border-bottom:1px solid var(--border)">📈 영업이익</th>
+            <th rowspan="2" style="padding:7px 10px;text-align:left;color:var(--muted);font-weight:600;border-bottom:2px solid var(--border2);min-width:110px">구분</th>
+            <th colspan="5" style="padding:6px 0;text-align:center;color:#4d96f0;font-weight:600;border-bottom:1px solid var(--border)">💰 매출</th>
+            <th colspan="5" style="padding:6px 0;text-align:center;color:#22bf85;font-weight:600;border-bottom:1px solid var(--border)">📈 영업이익</th>
           </tr>
           <tr style="background:var(--s3);font-size:10.5px">
             ${subHd('#4d96f0')}
@@ -1805,12 +1805,12 @@ function renderCC3YTree(containerId, groupDef, dataObj){
       return `<tr style="border-bottom:1px solid var(--border)"
           onmouseover="this.style.background='var(--s3)'" onmouseout="this.style.background=''">
         <td style="padding:9px 10px 9px 22px;font-weight:600">${ccLbl(cc)}</td>
-        <td style="padding:9px 8px;text-align:right;border-left:2px solid var(--border2)">${fx(d25.s)}</td>
+        <td style="padding:9px 8px;text-align:right">${fx(d25.s)}</td>
         <td style="padding:9px 8px;text-align:right">${fx(d26p.s)}</td>
         <td style="padding:9px 8px;text-align:right;font-weight:700">${fx(d26a.s)}</td>
         <td style="padding:9px 8px;text-align:right;color:${ac(sAch)};font-weight:600">${fp2(sAch)}</td>
         <td style="padding:9px 8px;text-align:right;color:${sDiff>=0?'var(--c26a)':'var(--loss)'};font-weight:600">${fd(sDiff)}</td>
-        <td style="padding:6px 8px;text-align:right;border-left:2px solid var(--border2)"><div>${fx(d25.p2)}</div><div style="font-size:9px;color:var(--muted)">${mg(d25.p2,d25.s)}</div></td>
+        <td style="padding:6px 8px;text-align:right"><div>${fx(d25.p2)}</div><div style="font-size:9px;color:var(--muted)">${mg(d25.p2,d25.s)}</div></td>
         <td style="padding:6px 8px;text-align:right"><div>${fx(d26p.p2)}</div><div style="font-size:9px;color:var(--muted)">${mg(d26p.p2,d26p.s)}</div></td>
         <td style="padding:6px 8px;text-align:right;font-weight:700"><div>${fx(d26a.p2)}</div><div style="font-size:9px;color:var(--muted)">${mg(d26a.p2,d26a.s)}</div></td>
         <td style="padding:9px 8px;text-align:right;color:${ac(pAch)};font-weight:600">${fp2(pAch)}</td>
@@ -1839,12 +1839,12 @@ function renderCC3YTree(containerId, groupDef, dataObj){
     const tPach=ach(T26a.p2,T26p.p2), tPdiff=T26a.p2-T25.p2;
     bodyRows += `<tr style="background:var(--s3);font-weight:700;border-top:2px solid var(--border2)">
       <td style="padding:8px 10px;color:${color}">합계</td>
-      <td style="padding:8px;text-align:right;border-left:2px solid var(--border2)">${fx(T25.s)}</td>
+      <td style="padding:8px;text-align:right">${fx(T25.s)}</td>
       <td style="padding:8px;text-align:right">${fx(T26p.s)}</td>
       <td style="padding:8px;text-align:right">${fx(T26a.s)}</td>
       <td style="padding:8px;text-align:right;color:${ac(tSach)}">${fp2(tSach)}</td>
       <td style="padding:8px;text-align:right;color:${tSdiff>=0?'var(--c26a)':'var(--loss)'}">${fd(tSdiff)}</td>
-      <td style="padding:6px 8px;text-align:right;border-left:2px solid var(--border2)"><div>${fx(T25.p2)}</div><div style="font-size:9px;color:var(--muted)">${mg(T25.p2,T25.s)}</div></td>
+      <td style="padding:6px 8px;text-align:right"><div>${fx(T25.p2)}</div><div style="font-size:9px;color:var(--muted)">${mg(T25.p2,T25.s)}</div></td>
       <td style="padding:6px 8px;text-align:right"><div>${fx(T26p.p2)}</div><div style="font-size:9px;color:var(--muted)">${mg(T26p.p2,T26p.s)}</div></td>
       <td style="padding:6px 8px;text-align:right"><div>${fx(T26a.p2)}</div><div style="font-size:9px;color:var(--muted)">${mg(T26a.p2,T26a.s)}</div></td>
       <td style="padding:8px;text-align:right;color:${ac(tPach)}">${fp2(tPach)}</td>
