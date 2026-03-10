@@ -31,9 +31,8 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 
 /* ── LEGEND ── */
-.legend-bar{background:var(--s1);border-bottom:1px solid var(--border);padding:7px 28px;display:flex;align-items:center;gap:20px;font-size:12px}
-.leg{display:flex;align-items:center;gap:5px}
-.leg-dot{width:11px;height:11px;border-radius:3px}
+.leg{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--muted)}
+.leg-dot{width:9px;height:9px;border-radius:2px}
 
 /* ── TOP TABS (메인) ── */
 .tabs{background:var(--s1);border-bottom:1px solid var(--border);padding:0 28px;display:flex;gap:2px;overflow-x:auto}
@@ -244,7 +243,6 @@ tbody td.indent{padding-left:26px;color:var(--muted2)}
 .mc-val{font-size:34px}
 table{font-size:14px}
 thead th{font-size:13px}
-.legend-bar{font-size:14px}
 .period-badge{font-size:14px}
 .kpi-row-val{font-size:14px;color:var(--text)!important}
 .kpi-main-val{color:var(--text)!important}
@@ -261,8 +259,6 @@ thead th{font-size:13px}
   .hdr-title{font-size:14px}
   .hdr-sub,.dot-live,.pill{font-size:11px}
   .logo{width:28px;height:28px;font-size:13px}
-  /* 범례 */
-  .legend-bar{padding:6px 14px;gap:10px;font-size:11px;flex-wrap:wrap}
   /* 탭 */
   .tabs{padding:0 10px}
   .tab{padding:8px 10px;font-size:12px}
@@ -309,7 +305,6 @@ thead th{font-size:13px}
   .comment-editor textarea{font-size:14px}
   .fsel,.finput{font-size:13px}
   .period-badge{font-size:12px}
-  .legend-bar{font-size:11px}
   /* 인증 패널 */
   .auth-panel{padding:24px 20px;width:92vw}
 }
@@ -326,8 +321,8 @@ thead th{font-size:13px}
 
 <div class="hdr">
   <div class="hdr-l">
-    <div class="logo">🏫</div>
-    <div>
+    <div class="logo">🏢</div>
+    <div style="display:flex;flex-direction:column;gap:5px">
       <div class="hdr-title">올림피아드교육 손익실적 대시보드</div>
       <div class="hdr-sub">2026년 1월 · 손익계산서 기반 자동 집계</div>
     </div>
@@ -335,19 +330,10 @@ thead th{font-size:13px}
   <div style="display:flex;align-items:center;gap:10px">
     <div class="pill">최종수정일 : 26.03.09</div>
     <div class="dot-live"><div class="dot"></div>Live</div>
+    <button onclick="openAuth()" id="authBtn" style="display:none;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:5px 14px;font-size:11px;color:var(--muted);cursor:pointer;align-items:center;gap:6px">
+      🔑 <span id="authBtnLabel">로그인</span>
+    </button>
   </div>
-</div>
-
-<div class="legend-bar" style="justify-content:space-between;display:none">
-  <div style="display:flex;align-items:center;gap:10px">
-    <span style="font-size:11px;color:var(--muted)">범례</span>
-    <div class="leg"><div class="leg-dot" style="background:var(--c25)"></div>25년 실적</div>
-    <div class="leg"><div class="leg-dot" style="background:var(--c26p)"></div>26년 계획</div>
-    <div class="leg"><div class="leg-dot" style="background:var(--c26a)"></div>26년 실적</div>
-  </div>
-  <button onclick="openAuth()" id="authBtn" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:5px 14px;font-size:11px;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:6px">
-    🔑 <span id="authBtnLabel">로그인</span>
-  </button>
 </div>
 
 <div class="tabs" id="mainTabs" style="display:none">
@@ -356,6 +342,12 @@ thead th{font-size:13px}
   <div class="tab"     onclick="goMain('students',this)">👥 재원생 현황</div>
   <div class="tab admin-only" id="tab-rawdata" onclick="goMain('rawdata',this)">📋 데이터 로우</div>
   <div class="tab admin-only" id="tab-admin" onclick="goMain('admin',this)">⚙️ 관리</div>
+  <div style="display:flex;align-items:center;gap:8px;margin-left:auto;padding:0 8px;flex-shrink:0;font-size:10px">
+    <span style="color:var(--muted);font-size:10px">범례</span>
+    <div class="leg"><div class="leg-dot" style="background:var(--c25)"></div>25년 실적</div>
+    <div class="leg"><div class="leg-dot" style="background:var(--c26p)"></div>26년 계획</div>
+    <div class="leg"><div class="leg-dot" style="background:var(--c26a)"></div>26년 실적</div>
+  </div>
 </div>
 
 <!-- ══ 로그인 전 랜딩 ══ -->
@@ -2971,17 +2963,17 @@ function applyAuth(){
   const landing=document.getElementById('landing-screen');
   const dash=document.getElementById('dashboard-wrap');
   const tabs=document.getElementById('mainTabs');
-  const legend=document.querySelector('.legend-bar');
+  const authBtn=document.getElementById('authBtn');
   if(loggedIn){
     landing.style.display='none';
     dash.style.display='block';
     tabs.style.display='flex';
-    if(legend) legend.style.display='flex';
+    if(authBtn) authBtn.style.display='flex';
   } else {
     landing.style.display='flex';
     dash.style.display='none';
     tabs.style.display='none';
-    if(legend) legend.style.display='none';
+    if(authBtn) authBtn.style.display='none';
   }
 
   // admin-only 요소 (탭 포함)
