@@ -717,6 +717,20 @@ thead th{font-size:13px}
       <div class="mini-card c26a"><div class="mc-lbl">영업이익</div><div class="mc-val">0.45<span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--c26a)">이익률 11.5%</div></div>
     </div>
 
+    <!-- 마운틴 차트: 교재·원격 월별 매출 추이 -->
+    <div class="full card">
+      <div class="ch">
+        <div><div class="ct">교재·원격 월별 매출 추이</div><div class="cs">25년 실적 vs 26년 실적 (백만원)</div></div>
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap" id="mirae_mtn_btns">
+          <button class="mtn-btn on" onclick="switchCampMtn('mirae','미래_교재',this)">교재</button>
+          <button class="mtn-btn" onclick="switchCampMtn('mirae','미래_원격',this)">원격</button>
+        </div>
+      </div>
+      <div class="cw" style="height:210px"><canvas id="c_mirae_mountain"></canvas></div>
+    </div>
+  <div id="cb-mirae-mtn" class="comment-box" style="display:none"><div class="cb-label"><span>✦</span> COMMENT</div><div class="cb-text" id="cb-text-mirae-mtn"></div><div class="cb-date" id="cb-date-mirae-mtn"></div></div>
+  <div id="ce-mirae-mtn" class="comment-editor"><div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div><textarea id="ce-text-mirae-mtn" placeholder="코멘트를 입력하세요..."></textarea><div class="cb-btns"><button class="cb-del" onclick="deleteComment('mirae-mtn')">삭제</button><button class="cb-save" onclick="saveComment('mirae-mtn')">저장</button></div></div>
+
     <div class="period-section-hd">
       <span class="period-badge monthly">📅 당월 (1월)</span>
       <div class="period-line"></div>
@@ -790,6 +804,20 @@ thead th{font-size:13px}
       <div class="mini-card cr"><div class="mc-lbl">판매관리비</div><div class="mc-val">7.1<span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--loss)">매출比 107.2%</div></div>
       <div class="mini-card cr"><div class="mc-lbl">영업손실</div><div class="mc-val">-0.47<span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--loss)">이익률 -7.2%</div></div>
     </div>
+    <!-- 마운틴 차트: 수업료·재료비 월별 매출 추이 -->
+    <div class="full card">
+      <div class="ch">
+        <div><div class="ct">수업료·재료비 월별 매출 추이</div><div class="cs">25년 실적 vs 26년 실적 (백만원)</div></div>
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap" id="bghu_mtn_btns">
+          <button class="mtn-btn on" onclick="switchCampMtn('bghu','방과후_수업료',this)">수업료</button>
+          <button class="mtn-btn" onclick="switchCampMtn('bghu','방과후_재료비',this)">재료비</button>
+        </div>
+      </div>
+      <div class="cw" style="height:210px"><canvas id="c_bghu_mountain"></canvas></div>
+    </div>
+  <div id="cb-bghu-mtn" class="comment-box" style="display:none"><div class="cb-label"><span>✦</span> COMMENT</div><div class="cb-text" id="cb-text-bghu-mtn"></div><div class="cb-date" id="cb-date-bghu-mtn"></div></div>
+  <div id="ce-bghu-mtn" class="comment-editor"><div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div><textarea id="ce-text-bghu-mtn" placeholder="코멘트를 입력하세요..."></textarea><div class="cb-btns"><button class="cb-del" onclick="deleteComment('bghu-mtn')">삭제</button><button class="cb-save" onclick="saveComment('bghu-mtn')">저장</button></div></div>
+
     <div class="g2">
       <div class="card">
         <div class="ch"><div><div class="ct">누적 매출 비교</div><div class="cs">월별 누적합계 (백만원)</div></div></div>
@@ -1749,6 +1777,12 @@ const CAMP_MONTHLY = {
   '송파방이':{ p25:[2,5,4,1,-2,0,29,-8,0,-1,-24,-23],            p26a:[6,null,null,null,null,null,null,null,null,null,null,null] },
   '미사':    { p25:[13,-3,3,0,0,-2,11,-15,-5,-1,-19,-9],         p26a:[2,null,null,null,null,null,null,null,null,null,null,null] },
   '위례':    { p25:[4,-14,-8,-12,-11,-7,6,-20,-9,-9,-10,-6],     p26a:[25,null,null,null,null,null,null,null,null,null,null,null] },
+  // 미래교육사업본부 — 매출, 단위: 백만원 (25년 1월만 확보, 이후 업데이트 예정)
+  '미래_교재': { p25:[93,null,null,null,null,null,null,null,null,null,null,null], p26a:[105,null,null,null,null,null,null,null,null,null,null,null] },
+  '미래_원격': { p25:[272,null,null,null,null,null,null,null,null,null,null,null], p26a:[286,null,null,null,null,null,null,null,null,null,null,null] },
+  // 방과후사업본부 — 매출, 단위: 백만원
+  '방과후_수업료': { p25:[443,null,null,null,null,null,null,null,null,null,null,null], p26a:[580,null,null,null,null,null,null,null,null,null,null,null] },
+  '방과후_재료비': { p25:[152,null,null,null,null,null,null,null,null,null,null,null], p26a:[80,null,null,null,null,null,null,null,null,null,null,null] },
 };
 
 let campMtnCharts = {};  // { hak: Chart, u2m: Chart }
@@ -1760,7 +1794,7 @@ function renderCampMountain(camp, canvasId, section) {
   if(!ctx) return null;
   if(campMtnCharts[section]) { campMtnCharts[section].destroy(); campMtnCharts[section] = null; }
 
-  const M = ['1','2','3','4','5','6','7','8','9','10','11','12'];
+  const M = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
 
   const lblPlugin = {
     id:'campMtnLbl',
@@ -1805,7 +1839,7 @@ function renderCampMountain(camp, canvasId, section) {
       plugins:{
         legend:{
           display:true, position:'top',
-          labels:{color:'#8b98c7', font:{size:11}, boxWidth:12, padding:12,
+          labels:{color:'#d0d8f0', font:{size:11}, boxWidth:12, padding:12,
             generateLabels(chart){
               return chart.data.datasets.map((ds,i)=>({
                 text:ds.label, fillStyle:ds.backgroundColor,
@@ -1818,8 +1852,7 @@ function renderCampMountain(camp, canvasId, section) {
         tooltip:{mode:'index',intersect:false}
       },
       scales:{
-        x:{grid:{color:'#1d2340'}, ticks:{color:'#8b98c7',font:{size:10}},
-           title:{display:true,text:'월',color:'#6b7599',font:{size:9}}},
+        x:{grid:{color:'#1d2340'}, ticks:{color:'#8b98c7',font:{size:10}}},
         y:{grid:{color:'#1d2340'}, ticks:{color:'#8b98c7',font:{size:10}}}
       }
     },
@@ -1832,7 +1865,8 @@ function switchCampMtn(section, camp, btn) {
   const btnWrap = btn.parentElement;
   btnWrap.querySelectorAll('.mtn-btn').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');
-  const canvasId = section==='hak' ? 'c_hak_mountain' : 'c_u2m_mountain';
+  const MAP = {hak:'c_hak_mountain', u2m:'c_u2m_mountain', mirae:'c_mirae_mountain', bghu:'c_bghu_mountain'};
+  const canvasId = MAP[section];
   renderCampMountain(camp, canvasId, section);
 }
 
@@ -2201,6 +2235,8 @@ function initMirae(){
       </thead>
       <tbody>${cRows}</tbody>
     </table></div>`;
+
+  renderCampMountain('미래_교재', 'c_mirae_mountain', 'mirae');
 }
 
 // ============================================================
@@ -2308,6 +2344,8 @@ function initBgh(){
     {label:'도서인쇄비',   desc:'교재구입·교재제작',               yr25:31629,  yr26p:54013,  yr26a:34980},
     {label:'그외',         desc:'임차료·수수료·광고·운반비 등',    yr25:28118,  yr26p:29886,  yr26a:21644},
   ], Math.round(PL['방과후사업본부'].sales/1e3));
+
+  renderCampMountain('방과후_수업료', 'c_bghu_mountain', 'bghu');
 }
 
 // ============================================================
