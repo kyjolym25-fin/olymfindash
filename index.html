@@ -6,6 +6,7 @@
 <title>올림피아드교육 손익실적 대시보드</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;900&display=swap');
 :root{
@@ -2858,25 +2859,16 @@ function goDept(id,el){
 initOverview();
 
 // ============================================================
-// AUTH SYSTEM
+// AUTH SYSTEM — Supabase backend
 // ============================================================
-const UKEY='olymp_users', SKEY='olymp_session';
-// 세션: sessionStorage 사용 → 새로고침 유지, 창 닫으면 로그아웃
-const getSession=()=>{ try{return JSON.parse(sessionStorage.getItem(SKEY)||'null');}catch{return null;} };
-const saveSession=s=>{ try{sessionStorage.setItem(SKEY,JSON.stringify(s));}catch{} };
-const clearSession=()=>{ try{sessionStorage.removeItem(SKEY);}catch{} };
-// 사용자: localStorage (없으면 빈 배열)
-const getUsers=()=>{try{return JSON.parse(localStorage.getItem(UKEY)||'[]')}catch{return[]}};
-const saveUsers=u=>{try{localStorage.setItem(UKEY,JSON.stringify(u));}catch{}};
+const SB_URL='https://iukccIfsrluxudkyghhj.supabase.co';
+const SB_KEY='sb_publishable__ZwsKOgUIS-vpbt-h3caag_YnLAU1YQ';
+const sb=supabase.createClient(SB_URL,SB_KEY);
 
-// 기본 관리자 계정 초기화
-(function(){
-  const u=getUsers();
-  if(!u.find(x=>x.email==='admin@olympiad.co.kr')){
-    u.push({name:'관리자',email:'admin@olympiad.co.kr',pw:'Admin1234!',role:'admin',status:'active',joinDate:new Date().toISOString().slice(0,10),lastLogin:'-'});
-    saveUsers(u);
-  }
-})();
+const SKEY='olymp_session';
+const getSession=()=>{try{return JSON.parse(sessionStorage.getItem(SKEY)||'null');}catch{return null;}};
+const saveSession=s=>{try{sessionStorage.setItem(SKEY,JSON.stringify(s));}catch{}};
+const clearSession=()=>{try{sessionStorage.removeItem(SKEY);}catch{}};
 
 function openAuth(view){
   const s=getSession();
@@ -2894,22 +2886,21 @@ function av(view){
   }
 }
 
-function doLogin(){
+async function doLogin(){
   const email=document.getElementById('liEmail').value.trim();
   const pw=document.getElementById('liPw').value;
   const err=document.getElementById('liErr');
-  const users=getUsers();
-  const u=users.find(x=>x.email===email&&x.pw===pw);
-  if(!u){err.textContent='이메일 또는 비밀번호가 올바르지 않습니다.';return;}
+  err.textContent='로그인 중...';
+  const {data:u,error}=await sb.from('users').select('*').eq('email',email).eq('pw',pw).maybeSingle();
+  if(error||!u){err.textContent='이메일 또는 비밀번호가 올바르지 않습니다.';return;}
   if(u.status!=='active'){err.textContent='승인 대기 중인 계정입니다.';return;}
-  u.lastLogin=new Date().toISOString().slice(0,10);
-  saveUsers(users);
+  await sb.from('users').update({last_login:new Date().toISOString().slice(0,10)}).eq('email',email);
   saveSession({email:u.email,name:u.name,role:u.role});
   closeAuth();
   applyAuth();
 }
 
-function doSignup(){
+async function doSignup(){
   const name=document.getElementById('suName').value.trim();
   const email=document.getElementById('suEmail').value.trim();
   const pw=document.getElementById('suPw').value;
@@ -2917,35 +2908,40 @@ function doSignup(){
   const err=document.getElementById('suErr');
   if(!name||!email||!pw){err.textContent='모든 항목을 입력하세요.';return;}
   if(pw.length<8){err.textContent='비밀번호는 8자 이상이어야 합니다.';return;}
-  const users=getUsers();
-  if(users.find(x=>x.email===email)){err.textContent='이미 등록된 이메일입니다.';return;}
-  users.push({name,email,pw,role,status:'pending',joinDate:new Date().toISOString().slice(0,10),lastLogin:'-'});
-  saveUsers(users);
+  err.textContent='신청 중...';
+  const {error}=await sb.from('users').insert({
+    name,email,pw,role,status:'pending',
+    join_date:new Date().toISOString().slice(0,10),last_login:'-'
+  });
+  if(error){
+    err.style.color='var(--loss)';
+    err.textContent=error.code==='23505'?'이미 등록된 이메일입니다.':'오류가 발생했습니다. 다시 시도해주세요.';
+    return;
+  }
   err.style.color='var(--c26a)';
   err.textContent='가입 신청 완료. 관리자 승인 후 이용 가능합니다.';
 }
 
-function doForgot(){
+async function doForgot(){
   const email=document.getElementById('fgEmail').value.trim();
   const err=document.getElementById('fgErr');
-  const u=getUsers().find(x=>x.email===email);
-  if(!u){err.textContent='등록된 이메일이 아닙니다.';return;}
+  const {data}=await sb.from('users').select('pw').eq('email',email).maybeSingle();
+  if(!data){err.textContent='등록된 이메일이 아닙니다.';return;}
   err.style.color='var(--c26a)';
-  err.textContent=`임시 비밀번호: ${u.pw}`;
+  err.textContent=`임시 비밀번호: ${data.pw}`;
 }
 
-function doChangePw(){
+async function doChangePw(){
   const old=document.getElementById('cpOld').value;
   const nw=document.getElementById('cpNew').value;
   const nw2=document.getElementById('cpNew2').value;
   const err=document.getElementById('cpErr');
   const s=getSession(); if(!s)return;
-  const users=getUsers();
-  const u=users.find(x=>x.email===s.email);
-  if(!u||u.pw!==old){err.textContent='현재 비밀번호가 올바르지 않습니다.';return;}
+  const {data}=await sb.from('users').select('pw').eq('email',s.email).maybeSingle();
+  if(!data||data.pw!==old){err.textContent='현재 비밀번호가 올바르지 않습니다.';return;}
   if(nw.length<8){err.textContent='새 비밀번호는 8자 이상이어야 합니다.';return;}
   if(nw!==nw2){err.textContent='비밀번호가 일치하지 않습니다.';return;}
-  u.pw=nw; saveUsers(users);
+  await sb.from('users').update({pw:nw}).eq('email',s.email);
   err.style.color='var(--c26a)'; err.textContent='비밀번호가 변경됐습니다.';
 }
 
@@ -3269,14 +3265,14 @@ function renderAdminPage(){
   renderUploadSummary();
 }
 
-function renderUserTable(){
+async function renderUserTable(){
   const tbody=document.getElementById('adminUserBody'); if(!tbody)return;
-  const users=getUsers().filter(u=>u.status==='active');
-  tbody.innerHTML=users.map(u=>`<tr>
+  const {data:users}=await sb.from('users').select('*').eq('status','active').order('join_date');
+  tbody.innerHTML=(users||[]).map(u=>`<tr>
     <td>${u.name}</td><td>${u.email}</td>
     <td><span class="rbadge ${u.role}">${u.role==='admin'?'관리자':'뷰어'}</span></td>
     <td><span class="sbadge active">활성</span></td>
-    <td>${u.joinDate||'-'}</td><td>${u.lastLogin||'-'}</td>
+    <td>${u.join_date||'-'}</td><td>${u.last_login||'-'}</td>
     <td>
       <button onclick="toggleRole('${u.email}')" style="font-size:10px;padding:3px 8px;background:var(--s3);border:1px solid var(--border);border-radius:4px;cursor:pointer;color:var(--fg)">역할변경</button>
       ${u.email!=='admin@olympiad.co.kr'?`<button onclick="removeUser('${u.email}')" style="font-size:10px;padding:3px 8px;background:var(--s3);border:1px solid var(--border2);border-radius:4px;cursor:pointer;color:var(--loss);margin-left:4px">삭제</button>`:''}
@@ -3284,13 +3280,13 @@ function renderUserTable(){
   </tr>`).join('');
 }
 
-function renderPendingTable(){
+async function renderPendingTable(){
   const tbody=document.getElementById('adminPendingBody'); if(!tbody)return;
-  const users=getUsers().filter(u=>u.status==='pending');
-  tbody.innerHTML=users.length?users.map(u=>`<tr>
+  const {data:users}=await sb.from('users').select('*').eq('status','pending').order('join_date');
+  tbody.innerHTML=users&&users.length?users.map(u=>`<tr>
     <td>${u.name}</td><td>${u.email}</td>
     <td><span class="rbadge ${u.role}">${u.role==='admin'?'관리자':'뷰어'}</span></td>
-    <td>${u.joinDate||'-'}</td>
+    <td>${u.join_date||'-'}</td>
     <td>
       <button onclick="approveUser('${u.email}')" style="font-size:10px;padding:3px 8px;background:#22bf8522;border:1px solid var(--c26a);border-radius:4px;cursor:pointer;color:var(--c26a)">승인</button>
       <button onclick="rejectUser('${u.email}')" style="font-size:10px;padding:3px 8px;background:var(--s3);border:1px solid var(--border2);border-radius:4px;cursor:pointer;color:var(--loss);margin-left:4px">거절</button>
@@ -3299,17 +3295,17 @@ function renderPendingTable(){
   :`<tr><td colspan="5" style="padding:20px;text-align:center;color:var(--muted)">대기 중인 가입 신청이 없습니다</td></tr>`;
 }
 
-function approveUser(email){const u=getUsers();const x=u.find(v=>v.email===email);if(x){x.status='active';saveUsers(u);renderPendingTable();renderUserTable();}}
-function rejectUser(email){saveUsers(getUsers().filter(x=>x.email!==email));renderPendingTable();}
-function toggleRole(email){const u=getUsers();const x=u.find(v=>v.email===email);if(x){x.role=x.role==='admin'?'viewer':'admin';saveUsers(u);renderUserTable();}}
-function removeUser(email){if(!confirm(`${email} 계정을 삭제할까요?`))return;saveUsers(getUsers().filter(x=>x.email!==email));renderUserTable();}
-function adminResetPw(){
+async function approveUser(email){await sb.from('users').update({status:'active'}).eq('email',email);renderPendingTable();renderUserTable();}
+async function rejectUser(email){await sb.from('users').delete().eq('email',email);renderPendingTable();}
+async function toggleRole(email){const {data}=await sb.from('users').select('role').eq('email',email).maybeSingle();if(data){await sb.from('users').update({role:data.role==='admin'?'viewer':'admin'}).eq('email',email);renderUserTable();}}
+async function removeUser(email){if(!confirm(`${email} 계정을 삭제할까요?`))return;await sb.from('users').delete().eq('email',email);renderUserTable();}
+async function adminResetPw(){
   const email=document.getElementById('rtEmail').value.trim();
   const pw=document.getElementById('rtPw').value.trim();
   const msg=document.getElementById('rtMsg');
-  const u=getUsers();const x=u.find(v=>v.email===email);
-  if(!x){msg.textContent='해당 이메일의 계정이 없습니다.';return;}
-  x.pw=pw;saveUsers(u);msg.style.color='var(--c26a)';msg.textContent='비밀번호가 초기화됐습니다.';
+  const {error}=await sb.from('users').update({pw}).eq('email',email);
+  if(error){msg.textContent='해당 이메일의 계정이 없습니다.';return;}
+  msg.style.color='var(--c26a)';msg.textContent='비밀번호가 초기화됐습니다.';
 }
 
 function renderCommentStatus(){
