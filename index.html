@@ -578,7 +578,7 @@ thead th{font-size:13px}
 
     <div class="full card">
       <div class="ch">
-        <div><div class="ct">캠퍼스별 월별 영업이익 추이</div><div class="cs">공통비 제외 · 25년 실적 vs 26년 실적 (단위: 백만원)</div></div>
+        <div><div class="ct">캠퍼스별 월별 영업이익 추이</div><div class="cs">공통비 포함 · 25년 실적 vs 26년 실적 (단위: 백만원)</div></div>
         <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap" id="hak_mtn_btns">
           <button class="mtn-btn on" onclick="switchCampMtn('hak','광진',this)">광진</button>
           <button class="mtn-btn" onclick="switchCampMtn('hak','성동',this)">성동</button>
@@ -663,7 +663,7 @@ thead th{font-size:13px}
 
     <div class="full card">
       <div class="ch">
-        <div><div class="ct">캠퍼스별 월별 영업이익 추이</div><div class="cs">공통비 제외 · 25년 실적 vs 26년 실적 (단위: 백만원)</div></div>
+        <div><div class="ct">캠퍼스별 월별 영업이익 추이</div><div class="cs">공통비 포함 · 25년 실적 vs 26년 실적 (단위: 백만원)</div></div>
         <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap" id="u2m_mtn_btns">
           <button class="mtn-btn on" onclick="switchCampMtn('u2m','중계',this)">중계</button>
           <button class="mtn-btn" onclick="switchCampMtn('u2m','송파방이',this)">송파방이</button>
@@ -1762,16 +1762,16 @@ const CC3Y = {
 };
 
 // ── 캠퍼스별 월별 영업이익 마운틴 차트 ──
-// 25년 월별 실적 (공통비 제외, 백만원) — 출처: 올림피아드교육 부서손익_2025년 12월_ver07.xlsx
+// 공통비 포함 영업이익, 단위: 백만원 — 출처: 올림피아드교육 부서손익_2025년 12월_ver07.xlsx (row59)
 const CAMP_MONTHLY = {
-  '광진':    { p25:[241,87,150,109,126,113,228,24,78,80,8,57],   p26a:[214,null,null,null,null,null,null,null,null,null,null,null] },
-  '성동':    { p25:[140,13,77,79,72,75,125,28,48,56,0,44],       p26a:[125,null,null,null,null,null,null,null,null,null,null,null] },
-  '동대문':  { p25:[173,82,122,120,116,108,153,74,97,96,60,63],  p26a:[128,null,null,null,null,null,null,null,null,null,null,null] },
-  '중랑':    { p25:[58,35,45,42,40,33,51,14,21,24,-52,7],        p26a:[55,null,null,null,null,null,null,null,null,null,null,null] },
-  '중계':    { p25:[7,-21,-7,-8,-10,-8,9,-15,-20,-18,-30,-11],   p26a:[11,null,null,null,null,null,null,null,null,null,null,null] },
-  '송파방이':{ p25:[7,10,8,6,3,4,33,-3,4,5,-18,-18],             p26a:[10,null,null,null,null,null,null,null,null,null,null,null] },
-  '미사':    { p25:[17,0,6,3,4,0,14,-11,-2,3,-16,-6],            p26a:[2,null,null,null,null,null,null,null,null,null,null,null] },
-  '위례':    { p25:[6,-11,-7,-10,-9,-6,7,-18,-7,-7,-7,-5],       p26a:[25,null,null,null,null,null,null,null,null,null,null,null] },
+  '광진':    { p25:[217,63,134,86,104,96,207,3,61,58,-14,35],    p26a:[194,null,null,null,null,null,null,null,null,null,null,null] },
+  '성동':    { p25:[123,-4,65,63,57,63,110,12,35,39,-17,28],     p26a:[113,null,null,null,null,null,null,null,null,null,null,null] },
+  '동대문':  { p25:[154,62,109,102,99,95,136,57,84,78,42,45],    p26a:[116,null,null,null,null,null,null,null,null,null,null,null] },
+  '중랑':    { p25:[45,22,36,29,28,24,40,2,13,12,-64,-4],        p26a:[48,null,null,null,null,null,null,null,null,null,null,null] },
+  '중계':    { p25:[1,-27,-11,-13,-15,-11,4,-20,-23,-23,-35,-16], p26a:[11,null,null,null,null,null,null,null,null,null,null,null] },
+  '송파방이':{ p25:[2,5,4,1,-2,0,29,-8,0,-1,-24,-23],            p26a:[6,null,null,null,null,null,null,null,null,null,null,null] },
+  '미사':    { p25:[13,-3,3,0,0,-2,11,-15,-5,-1,-19,-9],         p26a:[2,null,null,null,null,null,null,null,null,null,null,null] },
+  '위례':    { p25:[4,-14,-8,-12,-11,-7,6,-20,-9,-9,-10,-6],     p26a:[25,null,null,null,null,null,null,null,null,null,null,null] },
 };
 
 let campMtnCharts = {};  // { hak: Chart, u2m: Chart }
