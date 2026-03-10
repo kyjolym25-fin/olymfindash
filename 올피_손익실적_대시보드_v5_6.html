@@ -742,6 +742,16 @@ thead th{font-size:13px}
       <div class="mini-card c26a"><div class="mc-lbl">영업이익</div><div class="mc-val">0.45<span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--c26a)">이익률 11.5%</div></div>
     </div>
 
+    <!-- RAW_DB 기반 영업이익 추이 -->
+    <div class="full card" id="mirae_profit_mtn_card" style="display:none">
+      <div class="ch">
+        <div><div class="ct">월별 영업이익 추이</div><div class="cs">26년 실적 · RAW_DB 기반 (단위: 백만원)</div></div>
+      </div>
+      <div class="cw" style="height:210px"><canvas id="c_mirae_profit_mtn"></canvas></div>
+    </div>
+  <div id="cb-mirae-pft1" class="comment-box" style="display:none"><div class="cb-label"><span>✦</span> COMMENT</div><div class="cb-text" id="cb-text-mirae-pft1"></div><div class="cb-date" id="cb-date-mirae-pft1"></div></div>
+  <div id="ce-mirae-pft1" class="comment-editor"><div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div><textarea id="ce-text-mirae-pft1" placeholder="코멘트를 입력하세요..."></textarea><div class="cb-btns"><button class="cb-del" onclick="deleteComment('mirae-pft1')">삭제</button><button class="cb-save" onclick="saveComment('mirae-pft1')">저장</button></div></div>
+
     <!-- 마운틴 차트: 교재·원격 월별 매출 추이 -->
     <div class="full card">
       <div class="ch">
@@ -756,6 +766,7 @@ thead th{font-size:13px}
   <div id="cb-mirae-mtn" class="comment-box" style="display:none"><div class="cb-label"><span>✦</span> COMMENT</div><div class="cb-text" id="cb-text-mirae-mtn"></div><div class="cb-date" id="cb-date-mirae-mtn"></div></div>
   <div id="ce-mirae-mtn" class="comment-editor"><div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div><textarea id="ce-text-mirae-mtn" placeholder="코멘트를 입력하세요..."></textarea><div class="cb-btns"><button class="cb-del" onclick="deleteComment('mirae-mtn')">삭제</button><button class="cb-save" onclick="saveComment('mirae-mtn')">저장</button></div></div>
 
+    <!-- RAW_DB 기반 매출 추이 -->
     <div class="full card" id="mirae_sales_mtn_card" style="display:none">
       <div class="ch">
         <div><div class="ct">교재·원격 월별 매출 추이</div><div class="cs">26년 실적 · RAW_DB 기반 (단위: 백만원)</div></div>
@@ -842,6 +853,16 @@ thead th{font-size:13px}
       <div class="mini-card cr"><div class="mc-lbl">판매관리비</div><div class="mc-val">7.1<span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--loss)">매출比 107.2%</div></div>
       <div class="mini-card cr"><div class="mc-lbl">영업손실</div><div class="mc-val">-0.47<span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--loss)">이익률 -7.2%</div></div>
     </div>
+    <!-- RAW_DB 기반 영업이익 추이 -->
+    <div class="full card" id="bghu_profit_mtn_card" style="display:none">
+      <div class="ch">
+        <div><div class="ct">월별 영업이익 추이</div><div class="cs">26년 실적 · RAW_DB 기반 (단위: 백만원)</div></div>
+      </div>
+      <div class="cw" style="height:210px"><canvas id="c_bghu_profit_mtn"></canvas></div>
+    </div>
+  <div id="cb-bghu-pft1" class="comment-box" style="display:none"><div class="cb-label"><span>✦</span> COMMENT</div><div class="cb-text" id="cb-text-bghu-pft1"></div><div class="cb-date" id="cb-date-bghu-pft1"></div></div>
+  <div id="ce-bghu-pft1" class="comment-editor"><div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div><textarea id="ce-text-bghu-pft1" placeholder="코멘트를 입력하세요..."></textarea><div class="cb-btns"><button class="cb-del" onclick="deleteComment('bghu-pft1')">삭제</button><button class="cb-save" onclick="saveComment('bghu-pft1')">저장</button></div></div>
+
     <!-- 마운틴 차트: 수업료·재료비 월별 매출 추이 -->
     <div class="full card">
       <div class="ch">
@@ -856,6 +877,7 @@ thead th{font-size:13px}
   <div id="cb-bghu-mtn" class="comment-box" style="display:none"><div class="cb-label"><span>✦</span> COMMENT</div><div class="cb-text" id="cb-text-bghu-mtn"></div><div class="cb-date" id="cb-date-bghu-mtn"></div></div>
   <div id="ce-bghu-mtn" class="comment-editor"><div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div><textarea id="ce-text-bghu-mtn" placeholder="코멘트를 입력하세요..."></textarea><div class="cb-btns"><button class="cb-del" onclick="deleteComment('bghu-mtn')">삭제</button><button class="cb-save" onclick="saveComment('bghu-mtn')">저장</button></div></div>
 
+    <!-- RAW_DB 기반 매출 추이 -->
     <div class="full card" id="bghu_sales_mtn_card" style="display:none">
       <div class="ch">
         <div><div class="ct">수업료·재료비 월별 매출 추이</div><div class="cs">26년 실적 · RAW_DB 기반 (단위: 백만원)</div></div>
@@ -1941,8 +1963,8 @@ function renderCampSalesMtn(camp, canvasId, section){
           c2.font='bold 13px sans-serif';
           c2.fillStyle=ds.borderColor;
           c2.textAlign='center';
-          c2.textBaseline='bottom';
-          c2.fillText(v, pt.x, pt.y-5);
+          if(v>=0){ c2.textBaseline='bottom'; c2.fillText(v, pt.x, pt.y-5); }
+          else    { c2.textBaseline='top';    c2.fillText(v, pt.x, pt.y+5); }
           c2.restore();
         });
       });
@@ -2360,10 +2382,14 @@ function initMirae(){
 
   renderCampMountain('미래_교재', 'c_mirae_mountain', 'mirae');
 
-  // RAW_DB 기반 월별 매출 마운틴
-  const mCard = document.getElementById('mirae_sales_mtn_card');
-  const miraeHas = ['미래_교재','미래_원격'].some(k=>CAMP_SALES_MTN[k]&&CAMP_SALES_MTN[k].some(v=>v!=null));
-  if(mCard){ mCard.style.display = miraeHas?'':'none'; if(miraeHas) renderCampSalesMtn('미래_교재','c_mirae_sales_mtn','mirae_s'); }
+  // RAW_DB 기반 영업이익 추이
+  const mPCard = document.getElementById('mirae_profit_mtn_card');
+  const miraePHas = (CAMP_SALES_MTN['미래_영업이익']||[]).some(v=>v!=null);
+  if(mPCard){ mPCard.style.display = miraePHas?'':'none'; if(miraePHas) renderCampSalesMtn('미래_영업이익','c_mirae_profit_mtn','mirae_p'); }
+  // RAW_DB 기반 월별 매출 추이
+  const mSCard = document.getElementById('mirae_sales_mtn_card');
+  const miraeSHas = ['미래_교재','미래_원격'].some(k=>(CAMP_SALES_MTN[k]||[]).some(v=>v!=null));
+  if(mSCard){ mSCard.style.display = miraeSHas?'':'none'; if(miraeSHas) renderCampSalesMtn('미래_교재','c_mirae_sales_mtn','mirae_s'); }
 }
 
 // ============================================================
@@ -2474,10 +2500,14 @@ function initBgh(){
 
   renderCampMountain('방과후_수업료', 'c_bghu_mountain', 'bghu');
 
-  // RAW_DB 기반 월별 매출 마운틴
-  const bCard = document.getElementById('bghu_sales_mtn_card');
-  const bghuHas = ['방과후_수업료','방과후_재료비'].some(k=>CAMP_SALES_MTN[k]&&CAMP_SALES_MTN[k].some(v=>v!=null));
-  if(bCard){ bCard.style.display = bghuHas?'':'none'; if(bghuHas) renderCampSalesMtn('방과후_수업료','c_bghu_sales_mtn','bghu_s'); }
+  // RAW_DB 기반 영업이익 추이
+  const bPCard = document.getElementById('bghu_profit_mtn_card');
+  const bghuPHas = (CAMP_SALES_MTN['방과후_영업이익']||[]).some(v=>v!=null);
+  if(bPCard){ bPCard.style.display = bghuPHas?'':'none'; if(bghuPHas) renderCampSalesMtn('방과후_영업이익','c_bghu_profit_mtn','bghu_p'); }
+  // RAW_DB 기반 월별 매출 추이
+  const bSCard = document.getElementById('bghu_sales_mtn_card');
+  const bghuSHas = ['방과후_수업료','방과후_재료비'].some(k=>(CAMP_SALES_MTN[k]||[]).some(v=>v!=null));
+  if(bSCard){ bSCard.style.display = bghuSHas?'':'none'; if(bghuSHas) renderCampSalesMtn('방과후_수업료','c_bghu_sales_mtn','bghu_s'); }
 }
 
 // ============================================================
@@ -3645,7 +3675,7 @@ function applyRawToDashboard(){
     });
   });
 
-  // 미래교육: 교재(a에 '교재' 포함) / 원격(a에 '원격' 또는 '온라인' 포함)
+  // 미래교육: 교재/원격 월별 매출
   CAMP_SALES_MTN['미래_교재'] = months.map(mn=>{
     const s = sum(r=>r.d==='미래교육사업부' && r.m===mn && r.t==='매출' && r.a&&r.a.includes('교재'));
     return s ? Math.round(s/1e6) : null;
@@ -3654,8 +3684,14 @@ function applyRawToDashboard(){
     const s = sum(r=>r.d==='미래교육사업부' && r.m===mn && r.t==='매출' && r.a&&(r.a.includes('원격')||r.a.includes('온라인')));
     return s ? Math.round(s/1e6) : null;
   });
+  // 미래교육: 월별 영업이익 = 매출 - 판관비
+  CAMP_SALES_MTN['미래_영업이익'] = months.map(mn=>{
+    const s = sum(r=>r.d==='미래교육사업부' && r.m===mn && r.t==='매출');
+    const c = sum(r=>r.d==='미래교육사업부' && r.m===mn && r.t==='판매관리비');
+    return (s||c) ? Math.round((s-c)/1e6) : null;
+  });
 
-  // 방과후: 수업료(방과후학교) / 재료비(재료비수입)
+  // 방과후: 수업료/재료비 월별 매출
   CAMP_SALES_MTN['방과후_수업료'] = months.map(mn=>{
     const s = sum(r=>r.d==='방과후사업본부' && r.m===mn && r.t==='매출' && r.a==='방과후학교');
     return s ? Math.round(s/1e6) : null;
@@ -3664,18 +3700,25 @@ function applyRawToDashboard(){
     const s = sum(r=>r.d==='방과후사업본부' && r.m===mn && r.t==='매출' && r.a==='재료비수입');
     return s ? Math.round(s/1e6) : null;
   });
+  // 방과후: 월별 영업이익 = 매출 - 판관비
+  CAMP_SALES_MTN['방과후_영업이익'] = months.map(mn=>{
+    const s = sum(r=>r.d==='방과후사업본부' && r.m===mn && r.t==='매출');
+    const c = sum(r=>r.d==='방과후사업본부' && r.m===mn && r.t==='판매관리비');
+    return (s||c) ? Math.round((s-c)/1e6) : null;
+  });
 
   // 카드 표시/숨김
-  const hasData = (keys) => keys.some(k=>CAMP_SALES_MTN[k]&&CAMP_SALES_MTN[k].some(v=>v!=null));
-  const showCard = (id, defaultCamp, canvasId, section) => {
+  const showCard = (id, key, canvasId, section) => {
     const card = document.getElementById(id);
-    const has = hasData([defaultCamp]);
-    if(card){ card.style.display = has?'':'none'; if(has) renderCampSalesMtn(defaultCamp, canvasId, section); }
+    const has = (CAMP_SALES_MTN[key]||[]).some(v=>v!=null);
+    if(card){ card.style.display = has?'':'none'; if(has) renderCampSalesMtn(key, canvasId, section); }
   };
-  showCard('hak_sales_mtn_card',   '광진',        'c_hak_sales_mtn',   'hak_s');
-  showCard('u2m_sales_mtn_card',   '중계',        'c_u2m_sales_mtn',   'u2m_s');
-  showCard('mirae_sales_mtn_card', '미래_교재',   'c_mirae_sales_mtn', 'mirae_s');
-  showCard('bghu_sales_mtn_card',  '방과후_수업료','c_bghu_sales_mtn',  'bghu_s');
+  showCard('hak_sales_mtn_card',    '광진',          'c_hak_sales_mtn',    'hak_s');
+  showCard('u2m_sales_mtn_card',    '중계',          'c_u2m_sales_mtn',    'u2m_s');
+  showCard('mirae_profit_mtn_card', '미래_영업이익', 'c_mirae_profit_mtn', 'mirae_p');
+  showCard('mirae_sales_mtn_card',  '미래_교재',     'c_mirae_sales_mtn',  'mirae_s');
+  showCard('bghu_profit_mtn_card',  '방과후_영업이익','c_bghu_profit_mtn', 'bghu_p');
+  showCard('bghu_sales_mtn_card',   '방과후_수업료', 'c_bghu_sales_mtn',   'bghu_s');
 
   // ── 6. 초기화된 탭 리셋 → 다음 방문시 재렌더 ──
   Object.keys(inited).forEach(k=>{ inited[k]=false; });
