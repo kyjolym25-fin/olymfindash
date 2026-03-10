@@ -2999,7 +2999,6 @@ function devAdminLogin(){
 // ============================================================
 // COMMENT SYSTEM
 // ============================================================
-const CKEY='olymp_comments';
 const SECTION_LABELS={
   'ov-s1':'총괄개요 · KPI/매출',
   'ov-s2':'총괄개요 · 누적이익/파이',
@@ -3027,11 +3026,10 @@ const SECTION_LABELS={
   'stu-s4':'재원생 · 당월상세표',
   'stu-s5':'재원생 · YTD',
 };
-const getComments=()=>{try{return JSON.parse(localStorage.getItem(CKEY)||'{}')}catch{return{}}};
-const saveComments=c=>localStorage.setItem(CKEY,JSON.stringify(c));
-
-function loadComments(){
-  const comments=getComments();
+async function loadComments(){
+  const {data}=await sb.from('comments').select('*');
+  const comments={};
+  (data||[]).forEach(r=>{ comments[r.section_id]=r; });
   Object.keys(SECTION_LABELS).forEach(sid=>{
     const box=document.getElementById('cb-'+sid);
     const ed=document.getElementById('ce-'+sid);
@@ -3044,7 +3042,6 @@ function loadComments(){
     } else {
       box.style.display='none';
     }
-    // 편집기: 관리자만 표시
     if(ed){
       const s=getSession();
       const isAdmin=s&&s.role==='admin';
@@ -3052,19 +3049,23 @@ function loadComments(){
       if(isAdmin&&c&&c.text) document.getElementById('ce-text-'+sid).value=c.text||'';
     }
   });
+  return comments;
 }
 
-function saveComment(sid){
+async function saveComment(sid){
   const text=document.getElementById('ce-text-'+sid).value.trim();
   if(!text){deleteComment(sid);return;}
   const s=getSession();
-  const comments=getComments();
-  comments[sid]={text,author:s?.name||'관리자',date:new Date().toLocaleDateString('ko-KR')};
-  saveComments(comments); loadComments(); renderCommentStatus();
+  await sb.from('comments').upsert({
+    section_id:sid, text,
+    author:s?.name||'관리자',
+    date:new Date().toLocaleDateString('ko-KR')
+  },{onConflict:'section_id'});
+  loadComments(); renderCommentStatus();
 }
-function deleteComment(sid){
-  const comments=getComments(); delete comments[sid];
-  saveComments(comments); loadComments(); renderCommentStatus();
+async function deleteComment(sid){
+  await sb.from('comments').delete().eq('section_id',sid);
+  loadComments(); renderCommentStatus();
 }
 
 // ============================================================
@@ -3308,9 +3309,11 @@ async function adminResetPw(){
   msg.style.color='var(--c26a)';msg.textContent='비밀번호가 초기화됐습니다.';
 }
 
-function renderCommentStatus(){
+async function renderCommentStatus(){
   const el=document.getElementById('commentStatusList'); if(!el)return;
-  const comments=getComments();
+  const {data}=await sb.from('comments').select('*');
+  const comments={};
+  (data||[]).forEach(r=>{ comments[r.section_id]=r; });
   el.innerHTML=Object.entries(SECTION_LABELS).map(([sid,label])=>{
     const c=comments[sid];
     return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
