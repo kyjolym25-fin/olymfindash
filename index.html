@@ -3145,10 +3145,8 @@ function saveAdminStuData(){
     }
   });
 
-  // localStorage에 저장
-  const saved = {};
-  Object.keys(STU).forEach(c => { saved[c] = STU[c].yr26a; });
-  localStorage.setItem('olymp_stu26', JSON.stringify(saved));
+  // Supabase 저장
+  saveStu26();
 
   // 재원생 탭 강제 리렌더
   const stuInited = inited['students'];
@@ -3231,10 +3229,8 @@ function handleStuXlsxUpload(event){
         return;
       }
 
-      // localStorage 저장
-      const saved = {};
-      Object.keys(STU).forEach(c=>{ saved[c] = STU[c].yr26a; });
-      localStorage.setItem('olymp_stu26', JSON.stringify(saved));
+      // Supabase 저장
+      saveStu26();
 
       // 재원생 탭 리렌더
       renderAdminStuInput();
@@ -3248,16 +3244,16 @@ function handleStuXlsxUpload(event){
   event.target.value='';
 }
 
-// 저장된 데이터 복원
-(function loadSavedStuData(){
-  try {
-    const saved = JSON.parse(localStorage.getItem('olymp_stu26') || 'null');
-    if(!saved) return;
-    Object.keys(saved).forEach(c => {
-      if(STU[c]) STU[c].yr26a = saved[c];
-    });
-  } catch(e){}
-})();
+// stu26 Supabase 저장/로드 헬퍼
+async function saveStu26(){
+  const rows = Object.keys(STU).map(c=>({camp:c, data:STU[c].yr26a||{}}));
+  await sb.from('stu26').upsert(rows, {onConflict:'camp'});
+}
+async function loadStu26(){
+  const {data}=await sb.from('stu26').select('*');
+  if(!data||!data.length) return;
+  data.forEach(r=>{ if(STU[r.camp]) STU[r.camp].yr26a = r.data; });
+}
 
 function renderAdminPage(){
   renderUserTable();
@@ -3535,6 +3531,7 @@ if(RAW_DB.length) applyRawToDashboard();
 // 세션 없음 → 로그아웃 상태로 시작
 applyAuth();
 loadComments();
+loadStu26();
 </script>
 </body>
 </html>
