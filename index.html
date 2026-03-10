@@ -1793,9 +1793,10 @@ function initHakwon(){
   renderCampMountain('광진', 'c_hak_mountain', 'hak');
 
   // 캠퍼스별 월별 매출 마운틴 (RAW_DB 기반)
+  const hakHas = ['광진','성동','동대문','중랑'].some(c=>(CAMP_SALES_MTN[c]||[]).some(v=>v!=null));
   const hCard = document.getElementById('hak_sales_mtn_card');
-  const hakHas = ['광진','성동','동대문','중랑'].some(c=>CAMP_SALES_MTN[c]&&CAMP_SALES_MTN[c].some(v=>v!=null));
-  if(hCard){ hCard.style.display = hakHas?'':'none'; if(hakHas) renderCampSalesMtn('광진','c_hak_sales_mtn','hak_s'); }
+  if(hCard){ hCard.style.display = hakHas ? '' : 'none'; }
+  if(hakHas){ if(campSalesMtnChts['hak_s']){ campSalesMtnChts['hak_s'].destroy(); campSalesMtnChts['hak_s']=null; } renderCampSalesMtn('광진','c_hak_sales_mtn','hak_s'); }
 }
 
 // ── 공통: 3년 비교 트리 렌더러 ──
@@ -2179,9 +2180,10 @@ function initU2m(){
   renderCampMountain('중계', 'c_u2m_mountain', 'u2m');
 
   // 캠퍼스별 월별 매출 마운틴 (RAW_DB 기반)
+  const u2mHas = ['중계','송파방이','미사','위례'].some(c=>(CAMP_SALES_MTN[c]||[]).some(v=>v!=null));
   const uCard = document.getElementById('u2m_sales_mtn_card');
-  const u2mHas = ['중계','송파방이','미사','위례'].some(c=>CAMP_SALES_MTN[c]&&CAMP_SALES_MTN[c].some(v=>v!=null));
-  if(uCard){ uCard.style.display = u2mHas?'':'none'; if(u2mHas) renderCampSalesMtn('중계','c_u2m_sales_mtn','u2m_s'); }
+  if(uCard){ uCard.style.display = u2mHas ? '' : 'none'; }
+  if(u2mHas){ if(campSalesMtnChts['u2m_s']){ campSalesMtnChts['u2m_s'].destroy(); campSalesMtnChts['u2m_s']=null; } renderCampSalesMtn('중계','c_u2m_sales_mtn','u2m_s'); }
 }
 
 // ============================================================
@@ -2383,13 +2385,15 @@ function initMirae(){
   renderCampMountain('미래_교재', 'c_mirae_mountain', 'mirae');
 
   // RAW_DB 기반 영업이익 추이
-  const mPCard = document.getElementById('mirae_profit_mtn_card');
   const miraePHas = (CAMP_SALES_MTN['미래_영업이익']||[]).some(v=>v!=null);
-  if(mPCard){ mPCard.style.display = miraePHas?'':'none'; if(miraePHas) renderCampSalesMtn('미래_영업이익','c_mirae_profit_mtn','mirae_p'); }
+  const mPCard = document.getElementById('mirae_profit_mtn_card');
+  if(mPCard){ mPCard.style.display = miraePHas ? '' : 'none'; }
+  if(miraePHas){ if(campSalesMtnChts['mirae_p']){ campSalesMtnChts['mirae_p'].destroy(); campSalesMtnChts['mirae_p']=null; } renderCampSalesMtn('미래_영업이익','c_mirae_profit_mtn','mirae_p'); }
   // RAW_DB 기반 월별 매출 추이
-  const mSCard = document.getElementById('mirae_sales_mtn_card');
   const miraeSHas = ['미래_교재','미래_원격'].some(k=>(CAMP_SALES_MTN[k]||[]).some(v=>v!=null));
-  if(mSCard){ mSCard.style.display = miraeSHas?'':'none'; if(miraeSHas) renderCampSalesMtn('미래_교재','c_mirae_sales_mtn','mirae_s'); }
+  const mSCard = document.getElementById('mirae_sales_mtn_card');
+  if(mSCard){ mSCard.style.display = miraeSHas ? '' : 'none'; }
+  if(miraeSHas){ if(campSalesMtnChts['mirae_s']){ campSalesMtnChts['mirae_s'].destroy(); campSalesMtnChts['mirae_s']=null; } renderCampSalesMtn('미래_교재','c_mirae_sales_mtn','mirae_s'); }
 }
 
 // ============================================================
@@ -2501,13 +2505,15 @@ function initBgh(){
   renderCampMountain('방과후_수업료', 'c_bghu_mountain', 'bghu');
 
   // RAW_DB 기반 영업이익 추이
-  const bPCard = document.getElementById('bghu_profit_mtn_card');
   const bghuPHas = (CAMP_SALES_MTN['방과후_영업이익']||[]).some(v=>v!=null);
-  if(bPCard){ bPCard.style.display = bghuPHas?'':'none'; if(bghuPHas) renderCampSalesMtn('방과후_영업이익','c_bghu_profit_mtn','bghu_p'); }
+  const bPCard = document.getElementById('bghu_profit_mtn_card');
+  if(bPCard){ bPCard.style.display = bghuPHas ? '' : 'none'; }
+  if(bghuPHas){ if(campSalesMtnChts['bghu_p']){ campSalesMtnChts['bghu_p'].destroy(); campSalesMtnChts['bghu_p']=null; } renderCampSalesMtn('방과후_영업이익','c_bghu_profit_mtn','bghu_p'); }
   // RAW_DB 기반 월별 매출 추이
-  const bSCard = document.getElementById('bghu_sales_mtn_card');
   const bghuSHas = ['방과후_수업료','방과후_재료비'].some(k=>(CAMP_SALES_MTN[k]||[]).some(v=>v!=null));
-  if(bSCard){ bSCard.style.display = bghuSHas?'':'none'; if(bghuSHas) renderCampSalesMtn('방과후_수업료','c_bghu_sales_mtn','bghu_s'); }
+  const bSCard = document.getElementById('bghu_sales_mtn_card');
+  if(bSCard){ bSCard.style.display = bghuSHas ? '' : 'none'; }
+  if(bghuSHas){ if(campSalesMtnChts['bghu_s']){ campSalesMtnChts['bghu_s'].destroy(); campSalesMtnChts['bghu_s']=null; } renderCampSalesMtn('방과후_수업료','c_bghu_sales_mtn','bghu_s'); }
 }
 
 // ============================================================
@@ -3707,18 +3713,17 @@ function applyRawToDashboard(){
     return (s||c) ? Math.round((s-c)/1e6) : null;
   });
 
-  // 카드 표시/숨김
-  const showCard = (id, key, canvasId, section) => {
+  // 카드 표시/숨김만 (렌더는 각 init*() 함수에서 탭 진입 시 처리)
+  const setCardVis = (id, key) => {
     const card = document.getElementById(id);
-    const has = (CAMP_SALES_MTN[key]||[]).some(v=>v!=null);
-    if(card){ card.style.display = has?'':'none'; if(has) renderCampSalesMtn(key, canvasId, section); }
+    if(card) card.style.display = (CAMP_SALES_MTN[key]||[]).some(v=>v!=null) ? '' : 'none';
   };
-  showCard('hak_sales_mtn_card',    '광진',          'c_hak_sales_mtn',    'hak_s');
-  showCard('u2m_sales_mtn_card',    '중계',          'c_u2m_sales_mtn',    'u2m_s');
-  showCard('mirae_profit_mtn_card', '미래_영업이익', 'c_mirae_profit_mtn', 'mirae_p');
-  showCard('mirae_sales_mtn_card',  '미래_교재',     'c_mirae_sales_mtn',  'mirae_s');
-  showCard('bghu_profit_mtn_card',  '방과후_영업이익','c_bghu_profit_mtn', 'bghu_p');
-  showCard('bghu_sales_mtn_card',   '방과후_수업료', 'c_bghu_sales_mtn',   'bghu_s');
+  setCardVis('hak_sales_mtn_card',    '광진');
+  setCardVis('u2m_sales_mtn_card',    '중계');
+  setCardVis('mirae_profit_mtn_card', '미래_영업이익');
+  setCardVis('mirae_sales_mtn_card',  '미래_교재');
+  setCardVis('bghu_profit_mtn_card',  '방과후_영업이익');
+  setCardVis('bghu_sales_mtn_card',   '방과후_수업료');
 
   // ── 6. 초기화된 탭 리셋 → 다음 방문시 재렌더 ──
   Object.keys(inited).forEach(k=>{ inited[k]=false; });
