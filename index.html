@@ -175,7 +175,7 @@ tbody td.indent{padding-left:26px;color:var(--muted2)}
 .comment-box .cb-label{font-size:10px;font-weight:700;color:var(--c26a);letter-spacing:.8px;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px}
 .comment-box .cb-text{font-size:13px;color:var(--fg);line-height:1.7;white-space:pre-wrap}
 .comment-box .cb-date{font-size:10px;color:var(--muted);margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
-.comment-editor{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin:14px 0 0}
+.comment-editor{display:none;background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin:14px 0 0}
 .comment-editor .ce-hd{display:flex;align-items:center;gap:8px;margin-bottom:12px}
 .comment-editor .ce-hd-title{font-size:12px;font-weight:600;color:var(--fg)}
 .comment-editor .ce-hd-badge{font-size:10px;font-weight:600;color:var(--c26a);background:#22bf8518;border:1px solid #22bf8540;border-radius:10px;padding:2px 8px}
@@ -564,7 +564,7 @@ thead th{font-size:13px}
       <div class="cw" style="height:210px"><canvas id="c_hak_mountain"></canvas></div>
     </div>
 
-    <div class="full card" id="hak_sales_mtn_card" style="display:none">
+    <div class="full card" id="hak_sales_mtn_card">
       <div class="ch">
         <div><div class="ct">캠퍼스별 월별 매출 추이</div><div class="cs">26년 실적 · RAW_DB 기반 (단위: 백만원)</div></div>
         <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap" id="hak_s_btns">
@@ -660,7 +660,7 @@ thead th{font-size:13px}
       <div class="cw" style="height:210px"><canvas id="c_u2m_mountain"></canvas></div>
     </div>
 
-    <div class="full card" id="u2m_sales_mtn_card" style="display:none">
+    <div class="full card" id="u2m_sales_mtn_card">
       <div class="ch">
         <div><div class="ct">캠퍼스별 월별 매출 추이</div><div class="cs">26년 실적 · RAW_DB 기반 (단위: 백만원)</div></div>
         <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap" id="u2m_s_btns">
@@ -743,7 +743,7 @@ thead th{font-size:13px}
     </div>
 
     <!-- RAW_DB 기반 영업이익 추이 -->
-    <div class="full card" id="mirae_profit_mtn_card" style="display:none">
+    <div class="full card" id="mirae_profit_mtn_card">
       <div class="ch">
         <div><div class="ct">월별 영업이익 추이</div><div class="cs">26년 실적 · RAW_DB 기반 (단위: 백만원)</div></div>
       </div>
@@ -767,7 +767,7 @@ thead th{font-size:13px}
   <div id="ce-mirae-mtn" class="comment-editor"><div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div><textarea id="ce-text-mirae-mtn" placeholder="코멘트를 입력하세요..."></textarea><div class="cb-btns"><button class="cb-del" onclick="deleteComment('mirae-mtn')">삭제</button><button class="cb-save" onclick="saveComment('mirae-mtn')">저장</button></div></div>
 
     <!-- RAW_DB 기반 매출 추이 -->
-    <div class="full card" id="mirae_sales_mtn_card" style="display:none">
+    <div class="full card" id="mirae_sales_mtn_card">
       <div class="ch">
         <div><div class="ct">교재·원격 월별 매출 추이</div><div class="cs">26년 실적 · RAW_DB 기반 (단위: 백만원)</div></div>
         <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap" id="mirae_s_btns">
@@ -854,7 +854,7 @@ thead th{font-size:13px}
       <div class="mini-card cr"><div class="mc-lbl">영업손실</div><div class="mc-val">-0.47<span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--loss)">이익률 -7.2%</div></div>
     </div>
     <!-- RAW_DB 기반 영업이익 추이 -->
-    <div class="full card" id="bghu_profit_mtn_card" style="display:none">
+    <div class="full card" id="bghu_profit_mtn_card">
       <div class="ch">
         <div><div class="ct">월별 영업이익 추이</div><div class="cs">26년 실적 · RAW_DB 기반 (단위: 백만원)</div></div>
       </div>
@@ -878,7 +878,7 @@ thead th{font-size:13px}
   <div id="ce-bghu-mtn" class="comment-editor"><div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div><textarea id="ce-text-bghu-mtn" placeholder="코멘트를 입력하세요..."></textarea><div class="cb-btns"><button class="cb-del" onclick="deleteComment('bghu-mtn')">삭제</button><button class="cb-save" onclick="saveComment('bghu-mtn')">저장</button></div></div>
 
     <!-- RAW_DB 기반 매출 추이 -->
-    <div class="full card" id="bghu_sales_mtn_card" style="display:none">
+    <div class="full card" id="bghu_sales_mtn_card">
       <div class="ch">
         <div><div class="ct">수업료·재료비 월별 매출 추이</div><div class="cs">26년 실적 · RAW_DB 기반 (단위: 백만원)</div></div>
         <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap" id="bghu_s_btns">
@@ -1792,11 +1792,9 @@ function initHakwon(){
   renderHakwonTree();
   renderCampMountain('광진', 'c_hak_mountain', 'hak');
 
-  // 캠퍼스별 월별 매출 마운틴 (RAW_DB 기반)
-  const hakHas = ['광진','성동','동대문','중랑'].some(c=>(CAMP_SALES_MTN[c]||[]).some(v=>v!=null));
-  const hCard = document.getElementById('hak_sales_mtn_card');
-  if(hCard){ hCard.style.display = hakHas ? '' : 'none'; }
-  if(hakHas){ if(campSalesMtnChts['hak_s']){ campSalesMtnChts['hak_s'].destroy(); campSalesMtnChts['hak_s']=null; } renderCampSalesMtn('광진','c_hak_sales_mtn','hak_s'); }
+  // 캠퍼스별 월별 매출 마운틴 (RAW_DB 기반) - 항상 렌더
+  if(campSalesMtnChts['hak_s']){ campSalesMtnChts['hak_s'].destroy(); campSalesMtnChts['hak_s']=null; }
+  renderCampSalesMtn('광진','c_hak_sales_mtn','hak_s');
 }
 
 // ── 공통: 3년 비교 트리 렌더러 ──
@@ -2179,11 +2177,9 @@ function initU2m(){
   renderU2mTree();
   renderCampMountain('중계', 'c_u2m_mountain', 'u2m');
 
-  // 캠퍼스별 월별 매출 마운틴 (RAW_DB 기반)
-  const u2mHas = ['중계','송파방이','미사','위례'].some(c=>(CAMP_SALES_MTN[c]||[]).some(v=>v!=null));
-  const uCard = document.getElementById('u2m_sales_mtn_card');
-  if(uCard){ uCard.style.display = u2mHas ? '' : 'none'; }
-  if(u2mHas){ if(campSalesMtnChts['u2m_s']){ campSalesMtnChts['u2m_s'].destroy(); campSalesMtnChts['u2m_s']=null; } renderCampSalesMtn('중계','c_u2m_sales_mtn','u2m_s'); }
+  // 캠퍼스별 월별 매출 마운틴 (RAW_DB 기반) - 항상 렌더
+  if(campSalesMtnChts['u2m_s']){ campSalesMtnChts['u2m_s'].destroy(); campSalesMtnChts['u2m_s']=null; }
+  renderCampSalesMtn('중계','c_u2m_sales_mtn','u2m_s');
 }
 
 // ============================================================
@@ -2384,16 +2380,12 @@ function initMirae(){
 
   renderCampMountain('미래_교재', 'c_mirae_mountain', 'mirae');
 
-  // RAW_DB 기반 영업이익 추이
-  const miraePHas = (CAMP_SALES_MTN['미래_영업이익']||[]).some(v=>v!=null);
-  const mPCard = document.getElementById('mirae_profit_mtn_card');
-  if(mPCard){ mPCard.style.display = miraePHas ? '' : 'none'; }
-  if(miraePHas){ if(campSalesMtnChts['mirae_p']){ campSalesMtnChts['mirae_p'].destroy(); campSalesMtnChts['mirae_p']=null; } renderCampSalesMtn('미래_영업이익','c_mirae_profit_mtn','mirae_p'); }
-  // RAW_DB 기반 월별 매출 추이
-  const miraeSHas = ['미래_교재','미래_원격'].some(k=>(CAMP_SALES_MTN[k]||[]).some(v=>v!=null));
-  const mSCard = document.getElementById('mirae_sales_mtn_card');
-  if(mSCard){ mSCard.style.display = miraeSHas ? '' : 'none'; }
-  if(miraeSHas){ if(campSalesMtnChts['mirae_s']){ campSalesMtnChts['mirae_s'].destroy(); campSalesMtnChts['mirae_s']=null; } renderCampSalesMtn('미래_교재','c_mirae_sales_mtn','mirae_s'); }
+  // RAW_DB 기반 영업이익 추이 - 항상 렌더
+  if(campSalesMtnChts['mirae_p']){ campSalesMtnChts['mirae_p'].destroy(); campSalesMtnChts['mirae_p']=null; }
+  renderCampSalesMtn('미래_영업이익','c_mirae_profit_mtn','mirae_p');
+  // RAW_DB 기반 월별 매출 추이 - 항상 렌더
+  if(campSalesMtnChts['mirae_s']){ campSalesMtnChts['mirae_s'].destroy(); campSalesMtnChts['mirae_s']=null; }
+  renderCampSalesMtn('미래_교재','c_mirae_sales_mtn','mirae_s');
 }
 
 // ============================================================
@@ -2504,16 +2496,12 @@ function initBgh(){
 
   renderCampMountain('방과후_수업료', 'c_bghu_mountain', 'bghu');
 
-  // RAW_DB 기반 영업이익 추이
-  const bghuPHas = (CAMP_SALES_MTN['방과후_영업이익']||[]).some(v=>v!=null);
-  const bPCard = document.getElementById('bghu_profit_mtn_card');
-  if(bPCard){ bPCard.style.display = bghuPHas ? '' : 'none'; }
-  if(bghuPHas){ if(campSalesMtnChts['bghu_p']){ campSalesMtnChts['bghu_p'].destroy(); campSalesMtnChts['bghu_p']=null; } renderCampSalesMtn('방과후_영업이익','c_bghu_profit_mtn','bghu_p'); }
-  // RAW_DB 기반 월별 매출 추이
-  const bghuSHas = ['방과후_수업료','방과후_재료비'].some(k=>(CAMP_SALES_MTN[k]||[]).some(v=>v!=null));
-  const bSCard = document.getElementById('bghu_sales_mtn_card');
-  if(bSCard){ bSCard.style.display = bghuSHas ? '' : 'none'; }
-  if(bghuSHas){ if(campSalesMtnChts['bghu_s']){ campSalesMtnChts['bghu_s'].destroy(); campSalesMtnChts['bghu_s']=null; } renderCampSalesMtn('방과후_수업료','c_bghu_sales_mtn','bghu_s'); }
+  // RAW_DB 기반 영업이익 추이 - 항상 렌더
+  if(campSalesMtnChts['bghu_p']){ campSalesMtnChts['bghu_p'].destroy(); campSalesMtnChts['bghu_p']=null; }
+  renderCampSalesMtn('방과후_영업이익','c_bghu_profit_mtn','bghu_p');
+  // RAW_DB 기반 월별 매출 추이 - 항상 렌더
+  if(campSalesMtnChts['bghu_s']){ campSalesMtnChts['bghu_s'].destroy(); campSalesMtnChts['bghu_s']=null; }
+  renderCampSalesMtn('방과후_수업료','c_bghu_sales_mtn','bghu_s');
 }
 
 // ============================================================
@@ -3154,6 +3142,11 @@ function applyAuth(){
     tabs.style.display='none';
     if(authBtn) authBtn.style.display='none';
   }
+
+  // 코멘트 에디터: 관리자만 표시
+  document.querySelectorAll('.comment-editor').forEach(el=>{
+    el.style.display = isAdmin ? 'block' : 'none';
+  });
 
   // admin-only 요소 (탭 포함)
   document.querySelectorAll('.admin-only').forEach(el=>{
