@@ -576,6 +576,8 @@ thead th{font-size:13px}
       </div>
       <div class="cw" style="height:210px"><canvas id="c_hak_sales_mtn"></canvas></div>
     </div>
+  <div id="cb-hak-rs1" class="comment-box" style="display:none"><div class="cb-label"><span>✦</span> COMMENT</div><div class="cb-text" id="cb-text-hak-rs1"></div><div class="cb-date" id="cb-date-hak-rs1"></div></div>
+  <div id="ce-hak-rs1" class="comment-editor"><div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div><textarea id="ce-text-hak-rs1" placeholder="코멘트를 입력하세요..."></textarea><div class="cb-btns"><button class="cb-del" onclick="deleteComment('hak-rs1')">삭제</button><button class="cb-save" onclick="saveComment('hak-rs1')">저장</button></div></div>
 
   <div id="cb-hak-m1" class="comment-box" style="display:none"><div class="cb-label"><span>✦</span> COMMENT</div><div class="cb-text" id="cb-text-hak-m1"></div><div class="cb-date" id="cb-date-hak-m1"></div></div>
   <div id="ce-hak-m1" class="comment-editor"><div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div><textarea id="ce-text-hak-m1" placeholder="코멘트를 입력하세요..."></textarea><div class="cb-btns"><button class="cb-del" onclick="deleteComment('hak-m1')">삭제</button><button class="cb-save" onclick="saveComment('hak-m1')">저장</button></div></div>
@@ -670,6 +672,8 @@ thead th{font-size:13px}
       </div>
       <div class="cw" style="height:210px"><canvas id="c_u2m_sales_mtn"></canvas></div>
     </div>
+  <div id="cb-u2m-rs1" class="comment-box" style="display:none"><div class="cb-label"><span>✦</span> COMMENT</div><div class="cb-text" id="cb-text-u2m-rs1"></div><div class="cb-date" id="cb-date-u2m-rs1"></div></div>
+  <div id="ce-u2m-rs1" class="comment-editor"><div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div><textarea id="ce-text-u2m-rs1" placeholder="코멘트를 입력하세요..."></textarea><div class="cb-btns"><button class="cb-del" onclick="deleteComment('u2m-rs1')">삭제</button><button class="cb-save" onclick="saveComment('u2m-rs1')">저장</button></div></div>
 
   <div id="cb-u2m-m1" class="comment-box" style="display:none"><div class="cb-label"><span>✦</span> COMMENT</div><div class="cb-text" id="cb-text-u2m-m1"></div><div class="cb-date" id="cb-date-u2m-m1"></div></div>
   <div id="ce-u2m-m1" class="comment-editor"><div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div><textarea id="ce-text-u2m-m1" placeholder="코멘트를 입력하세요..."></textarea><div class="cb-btns"><button class="cb-del" onclick="deleteComment('u2m-m1')">삭제</button><button class="cb-save" onclick="saveComment('u2m-m1')">저장</button></div></div>
@@ -751,6 +755,19 @@ thead th{font-size:13px}
     </div>
   <div id="cb-mirae-mtn" class="comment-box" style="display:none"><div class="cb-label"><span>✦</span> COMMENT</div><div class="cb-text" id="cb-text-mirae-mtn"></div><div class="cb-date" id="cb-date-mirae-mtn"></div></div>
   <div id="ce-mirae-mtn" class="comment-editor"><div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div><textarea id="ce-text-mirae-mtn" placeholder="코멘트를 입력하세요..."></textarea><div class="cb-btns"><button class="cb-del" onclick="deleteComment('mirae-mtn')">삭제</button><button class="cb-save" onclick="saveComment('mirae-mtn')">저장</button></div></div>
+
+    <div class="full card" id="mirae_sales_mtn_card" style="display:none">
+      <div class="ch">
+        <div><div class="ct">교재·원격 월별 매출 추이</div><div class="cs">26년 실적 · RAW_DB 기반 (단위: 백만원)</div></div>
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap" id="mirae_s_btns">
+          <button class="mtn-btn on" onclick="switchCampSalesMtn('mirae_s','미래_교재',this)">교재</button>
+          <button class="mtn-btn" onclick="switchCampSalesMtn('mirae_s','미래_원격',this)">원격</button>
+        </div>
+      </div>
+      <div class="cw" style="height:210px"><canvas id="c_mirae_sales_mtn"></canvas></div>
+    </div>
+  <div id="cb-mirae-rs1" class="comment-box" style="display:none"><div class="cb-label"><span>✦</span> COMMENT</div><div class="cb-text" id="cb-text-mirae-rs1"></div><div class="cb-date" id="cb-date-mirae-rs1"></div></div>
+  <div id="ce-mirae-rs1" class="comment-editor"><div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div><textarea id="ce-text-mirae-rs1" placeholder="코멘트를 입력하세요..."></textarea><div class="cb-btns"><button class="cb-del" onclick="deleteComment('mirae-rs1')">삭제</button><button class="cb-save" onclick="saveComment('mirae-rs1')">저장</button></div></div>
 
     <div class="period-section-hd">
       <span class="period-badge monthly">📅 당월 (1월)</span>
@@ -838,6 +855,19 @@ thead th{font-size:13px}
     </div>
   <div id="cb-bghu-mtn" class="comment-box" style="display:none"><div class="cb-label"><span>✦</span> COMMENT</div><div class="cb-text" id="cb-text-bghu-mtn"></div><div class="cb-date" id="cb-date-bghu-mtn"></div></div>
   <div id="ce-bghu-mtn" class="comment-editor"><div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div><textarea id="ce-text-bghu-mtn" placeholder="코멘트를 입력하세요..."></textarea><div class="cb-btns"><button class="cb-del" onclick="deleteComment('bghu-mtn')">삭제</button><button class="cb-save" onclick="saveComment('bghu-mtn')">저장</button></div></div>
+
+    <div class="full card" id="bghu_sales_mtn_card" style="display:none">
+      <div class="ch">
+        <div><div class="ct">수업료·재료비 월별 매출 추이</div><div class="cs">26년 실적 · RAW_DB 기반 (단위: 백만원)</div></div>
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap" id="bghu_s_btns">
+          <button class="mtn-btn on" onclick="switchCampSalesMtn('bghu_s','방과후_수업료',this)">수업료</button>
+          <button class="mtn-btn" onclick="switchCampSalesMtn('bghu_s','방과후_재료비',this)">재료비</button>
+        </div>
+      </div>
+      <div class="cw" style="height:210px"><canvas id="c_bghu_sales_mtn"></canvas></div>
+    </div>
+  <div id="cb-bghu-rs1" class="comment-box" style="display:none"><div class="cb-label"><span>✦</span> COMMENT</div><div class="cb-text" id="cb-text-bghu-rs1"></div><div class="cb-date" id="cb-date-bghu-rs1"></div></div>
+  <div id="ce-bghu-rs1" class="comment-editor"><div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div><textarea id="ce-text-bghu-rs1" placeholder="코멘트를 입력하세요..."></textarea><div class="cb-btns"><button class="cb-del" onclick="deleteComment('bghu-rs1')">삭제</button><button class="cb-save" onclick="saveComment('bghu-rs1')">저장</button></div></div>
 
     <div class="g2">
       <div class="card">
@@ -1950,7 +1980,7 @@ function renderCampSalesMtn(camp, canvasId, section){
 }
 
 function switchCampSalesMtn(section, camp, btn){
-  const MAP = {hak_s:'c_hak_sales_mtn', u2m_s:'c_u2m_sales_mtn'};
+  const MAP = {hak_s:'c_hak_sales_mtn', u2m_s:'c_u2m_sales_mtn', mirae_s:'c_mirae_sales_mtn', bghu_s:'c_bghu_sales_mtn'};
   const canvasId = MAP[section];
   document.querySelectorAll(`#${section}_btns .mtn-btn`).forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');
@@ -2329,6 +2359,11 @@ function initMirae(){
     </table></div>`;
 
   renderCampMountain('미래_교재', 'c_mirae_mountain', 'mirae');
+
+  // RAW_DB 기반 월별 매출 마운틴
+  const mCard = document.getElementById('mirae_sales_mtn_card');
+  const miraeHas = ['미래_교재','미래_원격'].some(k=>CAMP_SALES_MTN[k]&&CAMP_SALES_MTN[k].some(v=>v!=null));
+  if(mCard){ mCard.style.display = miraeHas?'':'none'; if(miraeHas) renderCampSalesMtn('미래_교재','c_mirae_sales_mtn','mirae_s'); }
 }
 
 // ============================================================
@@ -2438,6 +2473,11 @@ function initBgh(){
   ], Math.round(PL['방과후사업본부'].sales/1e3));
 
   renderCampMountain('방과후_수업료', 'c_bghu_mountain', 'bghu');
+
+  // RAW_DB 기반 월별 매출 마운틴
+  const bCard = document.getElementById('bghu_sales_mtn_card');
+  const bghuHas = ['방과후_수업료','방과후_재료비'].some(k=>CAMP_SALES_MTN[k]&&CAMP_SALES_MTN[k].some(v=>v!=null));
+  if(bCard){ bCard.style.display = bghuHas?'':'none'; if(bghuHas) renderCampSalesMtn('방과후_수업료','c_bghu_sales_mtn','bghu_s'); }
 }
 
 // ============================================================
@@ -3593,24 +3633,49 @@ function applyRawToDashboard(){
     if(elF) elF.textContent = franchise.toFixed(2);
   }
 
-  // ── 5. 캠퍼스별 월별 매출 집계 (CAMP_SALES_MTN) ──
+  // ── 5. 캠퍼스/카테고리별 월별 매출 집계 (CAMP_SALES_MTN) ──
   const allCamps = ['광진','성동','동대문','중랑','중계','송파방이','미사','위례'];
   CAMP_SALES_MTN = {};
+
+  // 학원·U2M: cp(캠퍼스) 기준
   allCamps.forEach(camp=>{
-    const vals = months.map(mn=>{
+    CAMP_SALES_MTN[camp] = months.map(mn=>{
       const s = sum(r=>r.cp===camp && r.m===mn && r.t==='매출');
       return s ? Math.round(s/1e6) : null;
     });
-    CAMP_SALES_MTN[camp] = vals;
+  });
+
+  // 미래교육: 교재(a에 '교재' 포함) / 원격(a에 '원격' 또는 '온라인' 포함)
+  CAMP_SALES_MTN['미래_교재'] = months.map(mn=>{
+    const s = sum(r=>r.d==='미래교육사업부' && r.m===mn && r.t==='매출' && r.a&&r.a.includes('교재'));
+    return s ? Math.round(s/1e6) : null;
+  });
+  CAMP_SALES_MTN['미래_원격'] = months.map(mn=>{
+    const s = sum(r=>r.d==='미래교육사업부' && r.m===mn && r.t==='매출' && r.a&&(r.a.includes('원격')||r.a.includes('온라인')));
+    return s ? Math.round(s/1e6) : null;
+  });
+
+  // 방과후: 수업료(방과후학교) / 재료비(재료비수입)
+  CAMP_SALES_MTN['방과후_수업료'] = months.map(mn=>{
+    const s = sum(r=>r.d==='방과후사업본부' && r.m===mn && r.t==='매출' && r.a==='방과후학교');
+    return s ? Math.round(s/1e6) : null;
+  });
+  CAMP_SALES_MTN['방과후_재료비'] = months.map(mn=>{
+    const s = sum(r=>r.d==='방과후사업본부' && r.m===mn && r.t==='매출' && r.a==='재료비수입');
+    return s ? Math.round(s/1e6) : null;
   });
 
   // 카드 표시/숨김
-  const hakHas = ['광진','성동','동대문','중랑'].some(c=>CAMP_SALES_MTN[c]&&CAMP_SALES_MTN[c].some(v=>v!=null));
-  const u2mHas = ['중계','송파방이','미사','위례'].some(c=>CAMP_SALES_MTN[c]&&CAMP_SALES_MTN[c].some(v=>v!=null));
-  const hCard = document.getElementById('hak_sales_mtn_card');
-  const uCard = document.getElementById('u2m_sales_mtn_card');
-  if(hCard){ hCard.style.display = hakHas?'':'none'; if(hakHas) renderCampSalesMtn('광진','c_hak_sales_mtn','hak_s'); }
-  if(uCard){ uCard.style.display = u2mHas?'':'none'; if(u2mHas) renderCampSalesMtn('중계','c_u2m_sales_mtn','u2m_s'); }
+  const hasData = (keys) => keys.some(k=>CAMP_SALES_MTN[k]&&CAMP_SALES_MTN[k].some(v=>v!=null));
+  const showCard = (id, defaultCamp, canvasId, section) => {
+    const card = document.getElementById(id);
+    const has = hasData([defaultCamp]);
+    if(card){ card.style.display = has?'':'none'; if(has) renderCampSalesMtn(defaultCamp, canvasId, section); }
+  };
+  showCard('hak_sales_mtn_card',   '광진',        'c_hak_sales_mtn',   'hak_s');
+  showCard('u2m_sales_mtn_card',   '중계',        'c_u2m_sales_mtn',   'u2m_s');
+  showCard('mirae_sales_mtn_card', '미래_교재',   'c_mirae_sales_mtn', 'mirae_s');
+  showCard('bghu_sales_mtn_card',  '방과후_수업료','c_bghu_sales_mtn',  'bghu_s');
 
   // ── 6. 초기화된 탭 리셋 → 다음 방문시 재렌더 ──
   Object.keys(inited).forEach(k=>{ inited[k]=false; });
