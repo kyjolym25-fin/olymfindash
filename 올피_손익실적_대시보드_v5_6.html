@@ -1807,7 +1807,7 @@ function renderCampMountain(camp, canvasId, section) {
           const pt = meta.data[pi];
           if(!pt) return;
           c2.save();
-          c2.font = 'bold 9px sans-serif';
+          c2.font = 'bold 13px sans-serif';
           c2.fillStyle = ds.borderColor;
           c2.textAlign = 'center';
           if(v >= 0){ c2.textBaseline='bottom'; c2.fillText(v, pt.x, pt.y-5); }
@@ -1839,15 +1839,7 @@ function renderCampMountain(camp, canvasId, section) {
       plugins:{
         legend:{
           display:true, position:'top',
-          labels:{color:'#d0d8f0', font:{size:11}, boxWidth:12, padding:12,
-            generateLabels(chart){
-              return chart.data.datasets.map((ds,i)=>({
-                text:ds.label, fillStyle:ds.backgroundColor,
-                strokeStyle:ds.borderColor, lineWidth:2,
-                color:'#d0d8f0', hidden:false, datasetIndex:i
-              }));
-            }
-          }
+          labels:{color:'#d0d8f0', font:{size:12}, boxWidth:14, padding:12}
         },
         tooltip:{mode:'index',intersect:false}
       },
