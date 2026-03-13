@@ -337,7 +337,7 @@ thead th{font-size:13px}
     </div>
   </div>
   <div style="display:flex;align-items:center;gap:10px">
-    <div class="pill">최종수정일 : 26.03.09</div>
+    <div class="pill" id="lastModPill">최종수정일 : -</div>
     <div class="dot-live"><div class="dot"></div>Live</div>
     <button onclick="openAuth()" id="authBtn" style="display:none;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:5px 14px;font-size:11px;color:var(--muted);cursor:pointer;align-items:center;gap:6px">
       🔑 <span id="authBtnLabel">로그인</span>
@@ -3832,7 +3832,18 @@ async function loadRawDB(){
     const {data,error} = await sb.from('raw_db').select('*');
     if(error) throw error;
     RAW_DB = [];
-    if(data) data.forEach(row=>{ RAW_DB = RAW_DB.concat(row.data||[]); });
+    if(data){
+      data.forEach(row=>{ RAW_DB = RAW_DB.concat(row.data||[]); });
+      const latest = data.reduce((max,r)=>r.uploaded_at>max?r.uploaded_at:max,'');
+      if(latest){
+        const d = new Date(latest);
+        const yy = String(d.getFullYear()).slice(2);
+        const mm = String(d.getMonth()+1).padStart(2,'0');
+        const dd = String(d.getDate()).padStart(2,'0');
+        const el = document.getElementById('lastModPill');
+        if(el) el.textContent = `최종수정일 : ${yy}.${mm}.${dd}`;
+      }
+    }
   }catch(e){ console.warn('raw_db load error:',e); RAW_DB = []; }
 }
 async function saveRawDB(months){
@@ -3843,7 +3854,12 @@ async function saveRawDB(months){
     uploaded_at: now
   }));
   const {error} = await sb.from('raw_db').upsert(rows, {onConflict:'month'});
-  if(error) console.warn('raw_db save error:',error);
+  if(error){ console.warn('raw_db save error:',error); return; }
+  // 최종수정일 즉시 갱신
+  const d = new Date(now);
+  const yy=String(d.getFullYear()).slice(2), mm=String(d.getMonth()+1).padStart(2,'0'), dd=String(d.getDate()).padStart(2,'0');
+  const el=document.getElementById('lastModPill');
+  if(el) el.textContent=`최종수정일 : ${yy}.${mm}.${dd}`;
 }
 
 function handleXlsxUpload(event){
