@@ -1907,7 +1907,6 @@ let campMtnCharts = {};  // { hak: Chart, u2m: Chart }
 
 // 2025년 캠퍼스별 월별 매출 (단위: 백만원, 출처: 부서손익_2025년 12월_ver07.xlsx)
 // 학원: 수학+영어 합산 / U2M: 수학만
-let CAMP_SALES_MTN = {};   // {camp: [12 monthly sales in 백만원]}
 let campSalesMtnChts = {}; // { hak_s: Chart, u2m_s: Chart }
 
 function renderCampMountain(camp, canvasId, section) {
@@ -1993,16 +1992,20 @@ function switchCampMtn(section, camp, btn) {
 }
 
 function renderCampSalesMtn(camp, canvasId, section){
-  const raw26 = CAMP_SALES_MTN[camp];
-  const profit25Map = {'미래_영업이익': DEPT_DATA.mirae.영업이익.yr25, '방과후_영업이익': DEPT_DATA.bghu.영업이익.yr25};
-  const raw25 = (DEPT_DATA.camps[camp] && DEPT_DATA.camps[camp].매출.yr25) || profit25Map[camp] || null;
-  const profit26Map = {'미래_영업이익': DEPT_DATA.mirae.영업이익.yr26base, '방과후_영업이익': DEPT_DATA.bghu.영업이익.yr26base};
-  const base26 = (DEPT_DATA.camps[camp] && DEPT_DATA.camps[camp].매출.yr26base) || profit26Map[camp] || Array(12).fill(null);
+  const METRIC_MAP = {
+    '미래_교재':     DEPT_DATA.mirae.교재매출,
+    '미래_원격':     DEPT_DATA.mirae.원격매출,
+    '방과후_수업료':  DEPT_DATA.bghu.수업료매출,
+    '방과후_재료비':  DEPT_DATA.bghu.재료비매출,
+    '미래_영업이익':  DEPT_DATA.mirae.영업이익,
+    '방과후_영업이익': DEPT_DATA.bghu.영업이익,
+  };
+  const metric = METRIC_MAP[camp] || (DEPT_DATA.camps[camp] && DEPT_DATA.camps[camp].매출);
   const ctx = document.getElementById(canvasId);
   if(!ctx) return;
   if(campSalesMtnChts[section]){ campSalesMtnChts[section].destroy(); campSalesMtnChts[section]=null; }
-  const fromDB = raw26 || Array(12).fill(null);
-  const data26 = base26.map((v,i) => fromDB[i] != null ? fromDB[i] : v);
+  const raw25 = metric ? metric.yr25 : null;
+  const data26 = metric ? Array.from({length:12}, (_,i) => getVal(metric, i)) : Array(12).fill(null);
 
   const lblPlugin = {
     id:'campSalesLbl',
@@ -3851,61 +3854,51 @@ function applyRawToDashboard(){
     renderFranchiseProfitChart();
   }
 
-  // ── 5. 캠퍼스/카테고리별 월별 매출 집계 (CAMP_SALES_MTN) ──
+  // ── 5. 캠퍼스/카테고리별 월별 매출·영업이익 → DEPT_DATA.yr26actual 갱신 ──
   const allCamps = ['광진','성동','동대문','중랑','중계','송파방이','미사','위례'];
-  CAMP_SALES_MTN = {};
 
-  // 학원·U2M: cp(캠퍼스) 기준
+  // 학원·U2M: cp 기준 매출
   allCamps.forEach(camp=>{
-    CAMP_SALES_MTN[camp] = months.map(mn=>{
+    months.forEach((mn,mi)=>{
       const s = sum(r=>r.cp===camp && r.m===mn && r.t==='매출');
-      return s ? Math.round(s/1e6) : null;
+      if(s) DEPT_DATA.camps[camp].매출.yr26actual[mi] = Math.round(s/1e6);
     });
   });
 
-  // 미래교육: 교재/원격 월별 매출
-  CAMP_SALES_MTN['미래_교재'] = months.map(mn=>{
-    const s = sum(r=>r.d==='미래교육사업부' && r.m===mn && r.t==='매출' && r.a&&r.a.includes('교재'));
-    return s ? Math.round(s/1e6) : null;
-  });
-  CAMP_SALES_MTN['미래_원격'] = months.map(mn=>{
-    const s = sum(r=>r.d==='미래교육사업부' && r.m===mn && r.t==='매출' && r.a&&(r.a.includes('원격')||r.a.includes('온라인')));
-    return s ? Math.round(s/1e6) : null;
-  });
-  // 미래교육: 월별 영업이익 = 매출 - 판관비
-  CAMP_SALES_MTN['미래_영업이익'] = months.map(mn=>{
-    const s = sum(r=>r.d==='미래교육사업부' && r.m===mn && r.t==='매출');
-    const c = sum(r=>r.d==='미래교육사업부' && r.m===mn && r.t==='판매관리비');
-    return (s||c) ? Math.round((s-c)/1e6) : null;
+  // 미래교육
+  months.forEach((mn,mi)=>{
+    const 교재 = sum(r=>r.d==='미래교육사업부' && r.m===mn && r.t==='매출' && r.a&&r.a.includes('교재'));
+    const 원격 = sum(r=>r.d==='미래교육사업부' && r.m===mn && r.t==='매출' && r.a&&(r.a.includes('원격')||r.a.includes('온라인')));
+    const ms   = sum(r=>r.d==='미래교육사업부' && r.m===mn && r.t==='매출');
+    const mc   = sum(r=>r.d==='미래교육사업부' && r.m===mn && r.t==='판매관리비');
+    if(교재)  DEPT_DATA.mirae.교재매출.yr26actual[mi] = Math.round(교재/1e6);
+    if(원격)  DEPT_DATA.mirae.원격매출.yr26actual[mi] = Math.round(원격/1e6);
+    if(ms||mc) DEPT_DATA.mirae.영업이익.yr26actual[mi] = Math.round((ms-mc)/1e6);
   });
 
-  // 방과후: 수업료/재료비 월별 매출
-  CAMP_SALES_MTN['방과후_수업료'] = months.map(mn=>{
-    const s = sum(r=>r.d==='방과후사업본부' && r.m===mn && r.t==='매출' && r.a==='방과후학교');
-    return s ? Math.round(s/1e6) : null;
-  });
-  CAMP_SALES_MTN['방과후_재료비'] = months.map(mn=>{
-    const s = sum(r=>r.d==='방과후사업본부' && r.m===mn && r.t==='매출' && r.a==='재료비수입');
-    return s ? Math.round(s/1e6) : null;
-  });
-  // 방과후: 월별 영업이익 = 매출 - 판관비
-  CAMP_SALES_MTN['방과후_영업이익'] = months.map(mn=>{
-    const s = sum(r=>r.d==='방과후사업본부' && r.m===mn && r.t==='매출');
-    const c = sum(r=>r.d==='방과후사업본부' && r.m===mn && r.t==='판매관리비');
-    return (s||c) ? Math.round((s-c)/1e6) : null;
+  // 방과후
+  months.forEach((mn,mi)=>{
+    const 수업료 = sum(r=>r.d==='방과후사업본부' && r.m===mn && r.t==='매출' && r.a==='방과후학교');
+    const 재료비 = sum(r=>r.d==='방과후사업본부' && r.m===mn && r.t==='매출' && r.a==='재료비수입');
+    const bs    = sum(r=>r.d==='방과후사업본부' && r.m===mn && r.t==='매출');
+    const bc    = sum(r=>r.d==='방과후사업본부' && r.m===mn && r.t==='판매관리비');
+    if(수업료)  DEPT_DATA.bghu.수업료매출.yr26actual[mi] = Math.round(수업료/1e6);
+    if(재료비)  DEPT_DATA.bghu.재료비매출.yr26actual[mi] = Math.round(재료비/1e6);
+    if(bs||bc)  DEPT_DATA.bghu.영업이익.yr26actual[mi] = Math.round((bs-bc)/1e6);
   });
 
-  // 카드 표시/숨김만 (렌더는 각 init*() 함수에서 탭 진입 시 처리)
-  const setCardVis = (id, key) => {
+  // 카드 표시/숨김 (RAW_DB 실적 있는 항목만 노출)
+  const hasActual = m => m.yr26actual.some(v=>v!=null);
+  const setCardVis = (id, hasData) => {
     const card = document.getElementById(id);
-    if(card) card.style.display = (CAMP_SALES_MTN[key]||[]).some(v=>v!=null) ? '' : 'none';
+    if(card) card.style.display = hasData ? '' : 'none';
   };
-  setCardVis('hak_sales_mtn_card',    '광진');
-  setCardVis('u2m_sales_mtn_card',    '중계');
-  setCardVis('mirae_profit_mtn_card', '미래_영업이익');
-  setCardVis('mirae_sales_mtn_card',  '미래_교재');
-  setCardVis('bghu_profit_mtn_card',  '방과후_영업이익');
-  setCardVis('bghu_sales_mtn_card',   '방과후_수업료');
+  setCardVis('hak_sales_mtn_card',    hasActual(DEPT_DATA.camps['광진'].매출));
+  setCardVis('u2m_sales_mtn_card',    hasActual(DEPT_DATA.camps['중계'].매출));
+  setCardVis('mirae_profit_mtn_card', hasActual(DEPT_DATA.mirae.영업이익));
+  setCardVis('mirae_sales_mtn_card',  hasActual(DEPT_DATA.mirae.교재매출));
+  setCardVis('bghu_profit_mtn_card',  hasActual(DEPT_DATA.bghu.영업이익));
+  setCardVis('bghu_sales_mtn_card',   hasActual(DEPT_DATA.bghu.수업료매출));
 
   // ── 6. 초기화된 탭 리셋 → 다음 방문시 재렌더 ──
   Object.keys(inited).forEach(k=>{ inited[k]=false; });
