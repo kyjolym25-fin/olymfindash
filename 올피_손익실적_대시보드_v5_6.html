@@ -1829,6 +1829,18 @@ const CAMP_MONTHLY = {
 };
 
 let campMtnCharts = {};  // { hak: Chart, u2m: Chart }
+// 2025년 캠퍼스별 월별 매출 (단위: 백만원, 출처: 부서손익_2025년 12월_ver07.xlsx)
+// 학원: 수학+영어 합산 / U2M: 수학만
+const CAMP_SALES_25 = {
+  '광진':     [631,524,521,476,493,474,565,422,434,412,415,439],
+  '성동':     [379,304,316,315,306,315,352,291,295,289,286,308],
+  '동대문':   [393,324,329,329,326,321,369,308,305,301,293,311],
+  '중랑':     [250,232,223,223,214,211,217,187,190,188,184,195],
+  '중계':     [140,119,110,110,107,107,138,109,103, 98,100, 99],
+  '송파방이': [110,103, 93, 93, 91, 93,120, 93, 95, 96, 95, 95],
+  '미사':     [ 82, 74, 64, 64, 62, 62, 77, 59, 60, 59, 55, 55],
+  '위례':     [ 52, 40, 38, 37, 38, 35, 50, 34, 34, 33, 33, 34],
+};
 let CAMP_SALES_MTN = {};   // {camp: [12 monthly sales in 백만원]}
 let campSalesMtnChts = {}; // { hak_s: Chart, u2m_s: Chart }
 
@@ -1908,12 +1920,13 @@ function switchCampMtn(section, camp, btn) {
 }
 
 function renderCampSalesMtn(camp, canvasId, section){
-  const raw = CAMP_SALES_MTN[camp];
+  const raw26 = CAMP_SALES_MTN[camp];
+  const raw25 = CAMP_SALES_25[camp] || null;
   const ctx = document.getElementById(canvasId);
   if(!ctx) return;
   if(campSalesMtnChts[section]){ campSalesMtnChts[section].destroy(); campSalesMtnChts[section]=null; }
   const M = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
-  const data = raw || Array(12).fill(null);
+  const data26 = raw26 || Array(12).fill(null);
 
   const lblPlugin = {
     id:'campSalesLbl',
@@ -1936,20 +1949,30 @@ function renderCampSalesMtn(camp, canvasId, section){
     }
   };
 
+  const datasets = [];
+  if(raw25){
+    datasets.push({
+      label:'25년 실적',
+      data: raw25,
+      borderColor:'rgba(77,150,240,0.75)',
+      backgroundColor:'rgba(77,150,240,0.18)',
+      fill:true, borderWidth:1.5, tension:.35, order:1,
+      pointRadius:3, pointBackgroundColor:'rgba(77,150,240,0.75)'
+    });
+  }
+  datasets.push({
+    label:'26년 실적',
+    data: data26,
+    borderColor:'#22bf85',
+    backgroundColor:'rgba(34,191,133,0.28)',
+    fill:true, borderWidth:2.5, tension:.35, spanGaps:false, order:0,
+    pointRadius:5, pointBackgroundColor:'#22bf85',
+    pointBorderColor:'#fff', pointBorderWidth:2
+  });
+
   campSalesMtnChts[section] = new Chart(ctx.getContext('2d'),{
     type:'line',
-    data:{
-      labels:M,
-      datasets:[{
-        label:'26년 실적',
-        data,
-        borderColor:'#22bf85',
-        backgroundColor:'rgba(34,191,133,0.28)',
-        fill:true, borderWidth:2.5, tension:.35, spanGaps:false,
-        pointRadius:5, pointBackgroundColor:'#22bf85',
-        pointBorderColor:'#fff', pointBorderWidth:2
-      }]
-    },
+    data:{ labels:M, datasets },
     options:{
       responsive:true, maintainAspectRatio:false,
       plugins:{
