@@ -2815,7 +2815,7 @@ function renderStuCards(month){
     return `<div style="background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:16px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
         <div style="font-size:13px;font-weight:700">📍 ${c}</div>
-        <div style="font-size:10px;color:${diff>=0?'var(--c26a)':'var(--loss)'}">${diff>=0?'▲':'▼'}${Math.abs(diff)}명 (${Math.abs(pct)}%)</div>
+        <div style="font-size:10px;color:${diff>=0?'var(--c26a)':'var(--loss)'}">${diff>=0?'▲':'▼'}${Math.abs(diff).toLocaleString()}명 (${Math.abs(pct)}%)</div>
       </div>
       <div style="font-size:26px;font-weight:900;color:var(--c26a);line-height:1;margin-bottom:3px">${d.a26.toLocaleString()}<span style="font-size:11px;font-weight:400;color:var(--muted);margin-left:3px">명</span></div>
       <div style="font-size:11px;color:var(--muted);margin-bottom:9px">25년 ${d.a25.toLocaleString()}명</div>
@@ -2823,13 +2823,13 @@ function renderStuCards(month){
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
         <div style="background:var(--s3);border-radius:7px;padding:8px 10px">
           <div style="font-size:10px;color:var(--muted);margin-bottom:2px">수학</div>
-          <div style="font-size:15px;font-weight:700;color:var(--c25)">${d.ms26}<span style="font-size:10px;color:var(--muted);margin-left:2px">명</span></div>
-          <div style="font-size:10px;color:var(--muted);margin-top:3px;line-height:1.5">초중 ${d.mc26}${d.mg26?` / 영재 ${d.mg26}`:''}${d.md26?` / 고등 ${d.md26}`:''}</div>
+          <div style="font-size:15px;font-weight:700;color:var(--c25)">${d.ms26.toLocaleString()}<span style="font-size:10px;color:var(--muted);margin-left:2px">명</span></div>
+          <div style="font-size:10px;color:var(--muted);margin-top:3px;line-height:1.5">초중 ${d.mc26.toLocaleString()}${d.mg26?` / 영재 ${d.mg26.toLocaleString()}`:''}${d.md26?` / 고등 ${d.md26.toLocaleString()}`:''}</div>
         </div>
         <div style="background:var(--s3);border-radius:7px;padding:8px 10px">
           <div style="font-size:10px;color:var(--muted);margin-bottom:2px">영어</div>
-          <div style="font-size:15px;font-weight:700;color:var(--c26p)">${d.es26||'-'}<span style="font-size:10px;color:var(--muted);margin-left:2px">${d.es26?'명':''}</span></div>
-          <div style="font-size:10px;color:var(--muted);margin-top:3px;line-height:1.5">${d.es26?`초중 ${d.ec26} / 고등 ${d.ed26}`:'영어반 없음'}</div>
+          <div style="font-size:15px;font-weight:700;color:var(--c26p)">${d.es26?d.es26.toLocaleString():'-'}<span style="font-size:10px;color:var(--muted);margin-left:2px">${d.es26?'명':''}</span></div>
+          <div style="font-size:10px;color:var(--muted);margin-top:3px;line-height:1.5">${d.es26?`초중 ${d.ec26.toLocaleString()} / 고등 ${d.ed26.toLocaleString()}`:'영어반 없음'}</div>
         </div>
       </div>
     </div>`;
@@ -2845,15 +2845,15 @@ function renderStuCards(month){
     return `<div style="background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:16px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
         <div style="font-size:13px;font-weight:700">📍 ${c}</div>
-        <div style="font-size:10px;color:${diff>=0?'var(--c26a)':'var(--loss)'}">${diff>=0?'▲':'▼'}${Math.abs(diff)}명 (${Math.abs(pct)}%)</div>
+        <div style="font-size:10px;color:${diff>=0?'var(--c26a)':'var(--loss)'}">${diff>=0?'▲':'▼'}${Math.abs(diff).toLocaleString()}명 (${Math.abs(pct)}%)</div>
       </div>
       <div style="font-size:26px;font-weight:900;color:var(--c26a);line-height:1;margin-bottom:3px">${d.a26.toLocaleString()}<span style="font-size:11px;font-weight:400;color:var(--muted);margin-left:3px">명</span></div>
       <div style="font-size:11px;color:var(--muted);margin-bottom:9px">25년 ${d.a25.toLocaleString()}명</div>
       <div style="height:4px;background:var(--border);border-radius:2px;margin-bottom:10px;overflow:hidden"><div style="height:100%;width:${barW}%;background:var(--c26a)"></div></div>
       <div style="background:var(--s3);border-radius:7px;padding:8px 10px">
         <div style="font-size:10px;color:var(--muted);margin-bottom:2px">수학 (고등 포함)</div>
-        <div style="font-size:15px;font-weight:700;color:var(--c25)">${d.ms26}<span style="font-size:10px;color:var(--muted);margin-left:2px">명</span></div>
-        <div style="font-size:10px;color:var(--muted);margin-top:3px">25년 ${d.ms25}명</div>
+        <div style="font-size:15px;font-weight:700;color:var(--c25)">${d.ms26.toLocaleString()}<span style="font-size:10px;color:var(--muted);margin-left:2px">명</span></div>
+        <div style="font-size:10px;color:var(--muted);margin-top:3px">25년 ${d.ms25.toLocaleString()}명</div>
       </div>
     </div>`;
   }).join('');
@@ -2884,10 +2884,10 @@ function renderStuKpi(month){
   let worstC='', worstD=0;
   CAMPS_ALL.forEach(c=>{const d=getStu(c,month).a26-getStu(c,month).a25; if(d<worstD){worstD=d;worstC=c;}});
   document.getElementById('stu_kpi_cards').innerHTML=`
-    <div class="mini-card c26a"><div class="mc-lbl">전체 재원생 (${mn}월)</div><div class="mc-val">${tot26.toLocaleString()}<span class="mc-unit">명</span></div><div class="mc-meta" style="color:${diff>=0?'var(--c26a)':'var(--loss)'}">${diff>=0?'▲':'▼'} 25년比 ${diff}명 (${pct}%)</div></div>
-    <div class="mini-card cy"><div class="mc-lbl">수학 합계 (${mn}월)</div><div class="mc-val">${math26.toLocaleString()}<span class="mc-unit">명</span></div><div class="mc-meta" style="color:${mDiff>=0?'var(--c26a)':'var(--loss)'}">${mDiff>=0?'▲':'▼'} 25년比 ${mDiff}명 (${mPct}%)</div></div>
-    <div class="mini-card cy"><div class="mc-lbl">영어 합계 (${mn}월)</div><div class="mc-val">${eng26.toLocaleString()}<span class="mc-unit">명</span></div><div class="mc-meta" style="color:${eDiff>=0?'var(--c26a)':'var(--loss)'}">${eDiff>=0?'▲':'▼'} 25년比 ${eDiff}명 (${ePct}%)</div></div>
-    <div class="mini-card cr"><div class="mc-lbl">YoY 최다 감소</div><div class="mc-val">${worstC||'-'}<span class="mc-unit" style="font-size:13px"> (${worstD}명)</span></div><div class="mc-meta" style="color:var(--loss)">${mn}월 기준</div></div>`;
+    <div class="mini-card c26a"><div class="mc-lbl">전체 재원생 (${mn}월)</div><div class="mc-val">${tot26.toLocaleString()}<span class="mc-unit">명</span></div><div class="mc-meta" style="color:${diff>=0?'var(--c26a)':'var(--loss)'}">${diff>=0?'▲':'▼'} 25년比 ${diff.toLocaleString()}명 (${pct}%)</div></div>
+    <div class="mini-card cy"><div class="mc-lbl">수학 합계 (${mn}월)</div><div class="mc-val">${math26.toLocaleString()}<span class="mc-unit">명</span></div><div class="mc-meta" style="color:${mDiff>=0?'var(--c26a)':'var(--loss)'}">${mDiff>=0?'▲':'▼'} 25년比 ${mDiff.toLocaleString()}명 (${mPct}%)</div></div>
+    <div class="mini-card cy"><div class="mc-lbl">영어 합계 (${mn}월)</div><div class="mc-val">${eng26.toLocaleString()}<span class="mc-unit">명</span></div><div class="mc-meta" style="color:${eDiff>=0?'var(--c26a)':'var(--loss)'}">${eDiff>=0?'▲':'▼'} 25년比 ${eDiff.toLocaleString()}명 (${ePct}%)</div></div>
+    <div class="mini-card cr"><div class="mc-lbl">YoY 최다 감소</div><div class="mc-val">${worstC||'-'}<span class="mc-unit" style="font-size:13px"> (${worstD.toLocaleString()}명)</span></div><div class="mc-meta" style="color:var(--loss)">${mn}월 기준</div></div>`;
 }
 
 function renderStuBar(month){
