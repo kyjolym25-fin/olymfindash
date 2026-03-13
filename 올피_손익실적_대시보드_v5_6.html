@@ -1829,6 +1829,10 @@ const CAMP_MONTHLY = {
 };
 
 let campMtnCharts = {};  // { hak: Chart, u2m: Chart }
+// 2025년 미래교육/방과후 월별 영업이익 (단위: 백만원, 출처: 부서손익_2025년 12월_ver07.xlsx)
+const MIRAE_PROFIT_25 = [79, 266, 16, 19, 107, -108, 92, 206, -166, 3, 81, -214];
+const BGHU_PROFIT_25  = [16, 3, -139, 184, 261, 7, -114, 246, 52, -120, 258, -229];
+
 // 2025년 캠퍼스별 월별 매출 (단위: 백만원, 출처: 부서손익_2025년 12월_ver07.xlsx)
 // 학원: 수학+영어 합산 / U2M: 수학만
 const CAMP_SALES_25 = {
@@ -1921,7 +1925,8 @@ function switchCampMtn(section, camp, btn) {
 
 function renderCampSalesMtn(camp, canvasId, section){
   const raw26 = CAMP_SALES_MTN[camp];
-  const raw25 = CAMP_SALES_25[camp] || null;
+  const profit25Map = {'미래_영업이익': MIRAE_PROFIT_25, '방과후_영업이익': BGHU_PROFIT_25};
+  const raw25 = CAMP_SALES_25[camp] || profit25Map[camp] || null;
   const ctx = document.getElementById(canvasId);
   if(!ctx) return;
   if(campSalesMtnChts[section]){ campSalesMtnChts[section].destroy(); campSalesMtnChts[section]=null; }
