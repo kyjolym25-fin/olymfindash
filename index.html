@@ -728,6 +728,14 @@ thead th{font-size:13px}
 
   <!-- ── 가맹사업 ── -->
   <div class="subpage" id="sp-franchise">
+    <div class="period-section-hd">
+      <span class="period-badge monthly" id="fr_month_badge">📅 당월 (1월)</span>
+      <div style="display:flex;gap:4px" id="fr_month_btns">
+        <button class="pbtn on" onclick="setFranchiseMonth(0,this)">1월</button>
+        <button class="pbtn" onclick="setFranchiseMonth(1,this)">2월</button>
+      </div>
+      <div class="period-line"></div>
+    </div>
     <div class="mini-cards">
       <div class="mini-card c26a"><div class="mc-lbl">신규가맹 수</div><div class="mc-val"><span id="fr-val-new">0</span><span class="mc-unit">개</span></div><div class="mc-meta" style="color:var(--muted)">26년 당월</div></div>
       <div class="mini-card c26a"><div class="mc-lbl">재가맹 수</div><div class="mc-val"><span id="fr-val-renew">1</span><span class="mc-unit">개</span></div><div class="mc-meta" style="color:var(--muted)">26년 당월</div></div>
@@ -2223,6 +2231,16 @@ function renderU2mTree(){
 // ============================================================
 // DEPT: 가맹사업
 // ============================================================
+let frMonth = 0;
+
+function setFranchiseMonth(idx, btn){
+  document.querySelectorAll('#fr_month_btns .pbtn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById('fr_month_badge').textContent=`📅 당월 (${idx+1}월)`;
+  frMonth = idx;
+  renderFranchiseKpi();
+}
+
 function initFranchise(){
   renderFranchiseKpi();
   renderFranchiseCountChart();
@@ -2230,12 +2248,8 @@ function initFranchise(){
 }
 
 function renderFranchiseKpi(){
-  const MI = (k,i) => FRANCHISE_26[k] && FRANCHISE_26[k][i] != null ? FRANCHISE_26[k][i] : null;
-  // 첫 번째 non-null 월 기준으로 KPI 표시
-  const MONTHS = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
-  let mi = 0;
-  for(let i=0;i<12;i++){ if(FRANCHISE_26.매출[i]!=null){ mi=i; break; } }
-  const set = (id,v,digits=1) => { const el=document.getElementById(id); if(el&&v!=null) el.textContent=typeof digits==='number'?Number(v).toFixed(digits):v; };
+  const mi = frMonth;
+  const set = (id,v,digits=1) => { const el=document.getElementById(id); if(el&&v!=null) el.textContent=Number(v).toFixed(digits); };
   set('fr-val-new',    FRANCHISE_26.신규가맹[mi],  0);
   set('fr-val-renew',  FRANCHISE_26.재가맹[mi],    0);
   set('fr-val-sales',  FRANCHISE_26.매출[mi],      1);
