@@ -1847,6 +1847,18 @@ const CAMP_SALES_25 = {
   '미사':     [ 82, 74, 64, 64, 62, 62, 77, 59, 60, 59, 55, 55],
   '위례':     [ 52, 40, 38, 37, 38, 35, 50, 34, 34, 33, 33, 34],
 };
+// 2026년 캠퍼스별 월별 매출 기본값 (단위: 백만원, 1월 손익계산서 기반)
+// RAW_DB 업로드 시 해당 월은 RAW_DB 값으로 덮어씀
+const CAMP_SALES_26 = {
+  '광진':     [597,null,null,null,null,null,null,null,null,null,null,null],
+  '성동':     [360,null,null,null,null,null,null,null,null,null,null,null],
+  '동대문':   [359,null,null,null,null,null,null,null,null,null,null,null],
+  '중랑':     [233,null,null,null,null,null,null,null,null,null,null,null],
+  '중계':     [127,null,null,null,null,null,null,null,null,null,null,null],
+  '송파방이': [123,null,null,null,null,null,null,null,null,null,null,null],
+  '미사':     [ 67,null,null,null,null,null,null,null,null,null,null,null],
+  '위례':     [ 60,null,null,null,null,null,null,null,null,null,null,null],
+};
 let CAMP_SALES_MTN = {};   // {camp: [12 monthly sales in 백만원]}
 let campSalesMtnChts = {}; // { hak_s: Chart, u2m_s: Chart }
 
