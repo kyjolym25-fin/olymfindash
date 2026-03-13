@@ -1337,18 +1337,6 @@ thead th{font-size:13px}
 const M=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
 const C25='#4d96f0', C26P='#9474f0', C26A='#22bf85';
 
-// 총괄 3년 데이터
-const OV={
-  yr25s:[3405.75,3318.62,3087.16,3189.54,3411.73,3174.85,3412.74,3372.74,3019.91,2842.92,3310.19,2851.69],
-  yr26ps:[2923.91,2648.04,2737.86,2885.37,3071.69,2891.40,3010.78,3161.34,2920.83,2652.01,3113.57,2847.12],
-  yr26as:[2982.94,0,0,0,0,0,0,0,0,0,0,0],
-  yr25c:[2777.79,3083.33,3028.58,2809.51,2898.91,3198.10,2982.56,3053.83,3108.52,2850.99,3323.62,3672.24],
-  yr26pc:[2545.90,2560.10,2623.87,2656.06,2700.71,2723.91,2675.17,2824.19,2708.72,2497.39,2664.80,2581.58],
-  yr26ac:[2561.98,0,0,0,0,0,0,0,0,0,0,0],
-};
-OV.yr25p=OV.yr25s.map((s,i)=>s-OV.yr25c[i]);
-OV.yr26pp=OV.yr26ps.map((s,i)=>s-OV.yr26pc[i]);
-OV.yr26ap=OV.yr26as.map((s,i)=>s-OV.yr26ac[i]);
 
 // 손익계산서 실적 (1월, 단위: 원)
 const PL={
@@ -1398,10 +1386,10 @@ const DEPT_DATA = {
   overview: {
     매출:   { yr25:[3405.75,3318.62,3087.16,3189.54,3411.73,3174.85,3412.74,3372.74,3019.91,2842.92,3310.19,2851.69],
               yr26base:[2923.91,2648.04,2737.86,2885.37,3071.69,2891.40,3010.78,3161.34,2920.83,2652.01,3113.57,2847.12],
-              yr26actual:N12() },
+              yr26actual:[2982.94,null,null,null,null,null,null,null,null,null,null,null] },
     판관비: { yr25:[2777.79,3083.33,3028.58,2809.51,2898.91,3198.10,2982.56,3053.83,3108.52,2850.99,3323.62,3672.24],
               yr26base:[2545.90,2560.10,2623.87,2656.06,2700.71,2723.91,2675.17,2824.19,2708.72,2497.39,2664.80,2581.58],
-              yr26actual:N12() },
+              yr26actual:[2561.98,null,null,null,null,null,null,null,null,null,null,null] },
     // 영업이익 = 매출 - 판관비 (파생값)
   },
 
@@ -1639,16 +1627,21 @@ function initOverview(){
     }
   });
 
+  const ov = DEPT_DATA.overview;
+  const yr25p  = ov.매출.yr25.map((s,i) => s - ov.판관비.yr25[i]);
+  const yr26pp = ov.매출.yr26base.map((s,i) => s - ov.판관비.yr26base[i]);
+  const yr26ap = ov.매출.yr26actual.map((s,i) => s != null ? s - (ov.판관비.yr26actual[i] ?? 0) : null);
+
   // 누적 매출 비교
   (function(){
     const ctxEl = document.getElementById('c_overall_sales');
     if(!ctxEl) return;
-    const yr26aData = cumSum(OV.yr26as).map((v,i)=>OV.yr26as[i]>0?v:null);
+    const yr26aData = cumSum(ov.매출.yr26actual.map(v=>v??0)).map((v,i)=>ov.매출.yr26actual[i]!=null?v:null);
     new Chart(ctxEl.getContext('2d'),{type:'line',
       data:{labels:M,datasets:[
         dsLine('26년 실적', yr26aData, C26A),
-        dsLine('25년 실적', cumSum(OV.yr25s), C25),
-        dsLine('26년 계획', cumSum(OV.yr26ps), C26P, true),
+        dsLine('25년 실적', cumSum(ov.매출.yr25), C25),
+        dsLine('26년 계획', cumSum(ov.매출.yr26base), C26P, true),
       ]},
       options:ovOpts, plugins:[ovLblPlugin(yr26aData,C26A,'saleLbl')]});
   })();
@@ -1656,12 +1649,12 @@ function initOverview(){
   (function(){
     const ctxEl = document.getElementById('c_overall_profit');
     if(!ctxEl) return;
-    const yr26aData = cumSum(OV.yr26ap).map((v,i)=>OV.yr26ap[i]!==0?v:null);
+    const yr26aData = cumSum(yr26ap.map(v=>v??0)).map((v,i)=>yr26ap[i]!=null?v:null);
     new Chart(ctxEl.getContext('2d'),{type:'line',
       data:{labels:M,datasets:[
         dsLine('26년 실적', yr26aData, C26A),
-        dsLine('25년 실적', cumSum(OV.yr25p), C25),
-        dsLine('26년 계획', cumSum(OV.yr26pp), C26P, true),
+        dsLine('25년 실적', cumSum(yr25p), C25),
+        dsLine('26년 계획', cumSum(yr26pp), C26P, true),
       ]},
       options:ovOpts, plugins:[ovLblPlugin(yr26aData,C26A,'profitLbl')]});
   })();
@@ -3784,16 +3777,14 @@ function applyRawToDashboard(){
   const sum = (filter) => RAW_DB.filter(filter).reduce((s,r)=>s+r.v, 0);
   const CAMPS_LIST = ['광진','성동','동대문','중랑','중계','송파방이','미사','위례'];
 
-  // ── 1. 월별 총괄 매출·판관비 갱신 (OV 데이터) ──
+  // ── 1. 월별 총괄 매출·판관비 갱신 ──
   const months = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
   months.forEach((mn,mi)=>{
     const hasMon = RAW_DB.some(r=>r.m===mn);
     if(!hasMon) return;
-    // 총 매출
-    OV.yr26as[mi] = sum(r=>r.m===mn && r.t==='매출') / 1e6;
-    OV.yr26ac[mi] = sum(r=>r.m===mn && r.t==='판매관리비') / 1e6;
+    DEPT_DATA.overview.매출.yr26actual[mi]   = sum(r=>r.m===mn && r.t==='매출') / 1e6;
+    DEPT_DATA.overview.판관비.yr26actual[mi] = sum(r=>r.m===mn && r.t==='판매관리비') / 1e6;
   });
-  OV.yr26ap = OV.yr26as.map((s,i)=>s - OV.yr26ac[i]);
 
   // ── 2. 사업부별 PL 갱신 ──
   const deptMap = {
