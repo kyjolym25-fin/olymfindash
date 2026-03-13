@@ -352,7 +352,7 @@ thead th{font-size:13px}
 </div>
 
 <!-- ══ 로그인 전 랜딩 ══ -->
-<div id="landing-screen" style="display:none;min-height:calc(100vh - 110px);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;gap:32px">
+<div id="landing-screen" style="min-height:calc(100vh - 110px);flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;gap:32px;display:none">
   <div style="text-align:center">
     <div style="font-size:52px;margin-bottom:16px">🏫</div>
     <div style="font-size:22px;font-weight:700;color:var(--fg);margin-bottom:8px">올림피아드교육 손익실적 대시보드</div>
@@ -566,7 +566,7 @@ thead th{font-size:13px}
 
     <div class="full card" id="hak_sales_mtn_card">
       <div class="ch">
-        <div><div class="ct">캠퍼스별 월별 매출 추이</div><div class="cs">26년 실적 · RAW_DB 기반 (단위: 백만원)</div></div>
+        <div><div class="ct">캠퍼스별 월별 매출 추이</div><div class="cs">25년 실적 vs 26년 실적 (백만원)</div></div>
         <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap" id="hak_s_btns">
           <button class="mtn-btn on" onclick="switchCampSalesMtn('hak_s','광진',this)">광진</button>
           <button class="mtn-btn" onclick="switchCampSalesMtn('hak_s','성동',this)">성동</button>
@@ -659,7 +659,7 @@ thead th{font-size:13px}
 
     <div class="full card" id="u2m_sales_mtn_card">
       <div class="ch">
-        <div><div class="ct">캠퍼스별 월별 매출 추이</div><div class="cs">26년 실적 · RAW_DB 기반 (단위: 백만원)</div></div>
+        <div><div class="ct">캠퍼스별 월별 매출 추이</div><div class="cs">25년 실적 vs 26년 실적 (백만원)</div></div>
         <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap" id="u2m_s_btns">
           <button class="mtn-btn on" onclick="switchCampSalesMtn('u2m_s','중계',this)">중계</button>
           <button class="mtn-btn" onclick="switchCampSalesMtn('u2m_s','송파방이',this)">송파방이</button>
@@ -739,7 +739,7 @@ thead th{font-size:13px}
     <!-- RAW_DB 기반 영업이익 추이 -->
     <div class="full card" id="mirae_profit_mtn_card">
       <div class="ch">
-        <div><div class="ct">월별 영업이익 추이</div><div class="cs">26년 실적 · RAW_DB 기반 (단위: 백만원)</div></div>
+        <div><div class="ct">월별 영업이익 추이</div><div class="cs">25년 실적 vs 26년 실적 (백만원)</div></div>
       </div>
       <div class="cw" style="height:210px"><canvas id="c_mirae_profit_mtn"></canvas></div>
     </div>
@@ -836,7 +836,7 @@ thead th{font-size:13px}
     <!-- RAW_DB 기반 영업이익 추이 -->
     <div class="full card" id="bghu_profit_mtn_card">
       <div class="ch">
-        <div><div class="ct">월별 영업이익 추이</div><div class="cs">26년 실적 · RAW_DB 기반 (단위: 백만원)</div></div>
+        <div><div class="ct">월별 영업이익 추이</div><div class="cs">25년 실적 vs 26년 실적 (백만원)</div></div>
       </div>
       <div class="cw" style="height:210px"><canvas id="c_bghu_profit_mtn"></canvas></div>
     </div>
@@ -1832,6 +1832,8 @@ let campMtnCharts = {};  // { hak: Chart, u2m: Chart }
 // 2025년 미래교육/방과후 월별 영업이익 (단위: 백만원, 출처: 부서손익_2025년 12월_ver07.xlsx)
 const MIRAE_PROFIT_25 = [79, 266, 16, 19, 107, -108, 92, 206, -166, 3, 81, -214];
 const BGHU_PROFIT_25  = [16, 3, -139, 184, 261, 7, -114, 246, 52, -120, 258, -229];
+const MIRAE_PROFIT_26 = [45,null,null,null,null,null,null,null,null,null,null,null];
+const BGHU_PROFIT_26  = [-47,null,null,null,null,null,null,null,null,null,null,null];
 
 // 2025년 캠퍼스별 월별 매출 (단위: 백만원, 출처: 부서손익_2025년 12월_ver07.xlsx)
 // 학원: 수학+영어 합산 / U2M: 수학만
@@ -1927,11 +1929,13 @@ function renderCampSalesMtn(camp, canvasId, section){
   const raw26 = CAMP_SALES_MTN[camp];
   const profit25Map = {'미래_영업이익': MIRAE_PROFIT_25, '방과후_영업이익': BGHU_PROFIT_25};
   const raw25 = CAMP_SALES_25[camp] || profit25Map[camp] || null;
+  const profit26Map = {'미래_영업이익': MIRAE_PROFIT_26, '방과후_영업이익': BGHU_PROFIT_26};
+  const base26 = CAMP_SALES_26[camp] || profit26Map[camp] || Array(12).fill(null);
   const ctx = document.getElementById(canvasId);
   if(!ctx) return;
   if(campSalesMtnChts[section]){ campSalesMtnChts[section].destroy(); campSalesMtnChts[section]=null; }
-  const M = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
-  const data26 = raw26 || Array(12).fill(null);
+  const fromDB = raw26 || Array(12).fill(null);
+  const data26 = base26.map((v,i) => fromDB[i] != null ? fromDB[i] : v);
 
   const lblPlugin = {
     id:'campSalesLbl',
@@ -2993,6 +2997,7 @@ function goMain(id,el){
   document.querySelectorAll('#mainTabs .tab').forEach(t=>t.classList.remove('on'));
   document.getElementById('pg-'+id).classList.add('on');
   el.classList.add('on');
+  location.hash = 'main-'+id;
   if(!inited[id]){
     inited[id]=true;
     if(id==='students') initStudents();
@@ -3005,6 +3010,7 @@ function goDept(id,el){
   document.querySelectorAll('#deptSubtabs .subtab').forEach(t=>t.classList.remove('on'));
   document.getElementById('sp-'+id).classList.add('on');
   el.classList.add('on');
+  location.hash = 'dept-'+id;
   if(!inited['dept_'+id]){
     inited['dept_'+id]=true;
     if(id==='u2m')   initU2m();
@@ -3756,14 +3762,31 @@ goMain=function(id,el){
 // ============================================================
 // STARTUP
 // ============================================================
+applyAuth();
 (async()=>{
   await loadRawDB();
   if(RAW_DB.length) applyRawToDashboard();
-  // 세션 없음 → 로그아웃 상태로 시작
   applyAuth();
   loadComments();
   loadStu26();
+  // 탭 위치 복원
+  const h = location.hash;
+  if(h && getSession()){
+    const parts = h.replace('#','').split('-');
+    if(parts[0]==='dept'){
+      const mainEl = document.querySelector('#mainTabs .tab[onclick*="\'dept\'"]');
+      if(mainEl) goMain('dept', mainEl);
+      const subEl = document.querySelector(`#deptSubtabs .subtab[onclick*="'${parts[1]}'"]`);
+      if(subEl) goDept(parts[1], subEl);
+    } else if(parts[0]==='main'){
+      const mainEl = document.querySelector(`#mainTabs .tab[onclick*="'${parts[1]}'"]`);
+      if(mainEl) goMain(parts[1], mainEl);
+    }
+    const sy = sessionStorage.getItem('olymp_scrollY');
+    if(sy) setTimeout(()=>window.scrollTo(0, parseInt(sy)), 150);
+  }
 })();
+window.addEventListener('beforeunload',()=>sessionStorage.setItem('olymp_scrollY', window.scrollY));
 </script>
 </body>
 </html>
