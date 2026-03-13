@@ -523,6 +523,7 @@ thead th{font-size:13px}
     <div class="subtab"     onclick="goDept('mirae',this)">📡 미래교육사업본부</div>
     <div class="subtab"     onclick="goDept('bghu',this)">🧒 방과후사업본부</div>
     <div class="subtab"     onclick="goDept('mgmt',this)">🗂 경영기획실</div>
+    <div class="subtab"     onclick="goDept('franchise',this)">🤝 가맹사업</div>
   </div>
 
   <!-- ── 학원사업본부 ── -->
@@ -641,7 +642,6 @@ thead th{font-size:13px}
       <div class="mini-card cr"><div class="mc-lbl">판매관리비</div><div class="mc-val">3.3<span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--muted)">매출比 88.0%</div></div>
       <div class="mini-card c26a"><div class="mc-lbl">영업이익(공통비 불포함)</div><div class="mc-val">0.26<span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--c26a)">이익률 6.8%</div></div>
       <div class="mini-card cy"><div class="mc-lbl">캠퍼스 수</div><div class="mc-val">4<span class="mc-unit">개</span></div><div class="mc-meta" style="color:var(--muted)">미사·송파방이·위례·중계</div></div>
-      <div class="mini-card c26a"><div class="mc-lbl">가맹사업 매출</div><div class="mc-val"><span id="u2m-val-franchise">0.05</span><span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--muted)">교육넷 가맹비수입</div></div>
     </div>
 
     <div class="full card">
@@ -725,6 +725,27 @@ thead th{font-size:13px}
     </div>
   </div>
   </div><!-- /sp-u2m -->
+
+  <!-- ── 가맹사업 ── -->
+  <div class="subpage" id="sp-franchise">
+    <div class="mini-cards">
+      <div class="mini-card c26a"><div class="mc-lbl">신규가맹 수</div><div class="mc-val"><span id="fr-val-new">0</span><span class="mc-unit">개</span></div><div class="mc-meta" style="color:var(--muted)">26년 당월</div></div>
+      <div class="mini-card c26a"><div class="mc-lbl">재가맹 수</div><div class="mc-val"><span id="fr-val-renew">1</span><span class="mc-unit">개</span></div><div class="mc-meta" style="color:var(--muted)">26년 당월</div></div>
+      <div class="mini-card cy"><div class="mc-lbl">가맹사업 매출</div><div class="mc-val"><span id="fr-val-sales">4.5</span><span class="mc-unit">백만</span></div><div class="mc-meta" style="color:var(--muted)">교육넷 가맹비수입</div></div>
+      <div class="mini-card cr"><div class="mc-lbl">판매관리비</div><div class="mc-val"><span id="fr-val-cost">33.5</span><span class="mc-unit">백만</span></div><div class="mc-meta" style="color:var(--muted)">당월</div></div>
+      <div class="mini-card cr"><div class="mc-lbl">영업이익</div><div class="mc-val"><span id="fr-val-profit">-28.9</span><span class="mc-unit">백만</span></div><div class="mc-meta" style="color:var(--muted)">매출 - 판관비</div></div>
+    </div>
+
+    <div class="full card">
+      <div class="ch"><div><div class="ct">신규·재가맹 수 추이</div><div class="cs">25년 실적 vs 26년 실적 (개)</div></div></div>
+      <div class="cw" style="height:210px"><canvas id="c_fr_count"></canvas></div>
+    </div>
+
+    <div class="full card">
+      <div class="ch"><div><div class="ct">가맹사업 매출·영업이익 추이</div><div class="cs">25년 실적 vs 26년 실적 (백만원)</div></div></div>
+      <div class="cw" style="height:210px"><canvas id="c_fr_profit"></canvas></div>
+    </div>
+  </div><!-- /sp-franchise -->
 
   <!-- ── 미래교육사업본부 ── -->
   <div class="subpage" id="sp-mirae">
@@ -1352,6 +1373,21 @@ const PL={
   'FC수학':{sales:297817840,cost:152900000,profit:144917840},
   '경영기획실':{sales:0,cost:40151742,profit:-40151742},
 };
+
+// ── 가맹사업 데이터 ──
+const FRANCHISE_25 = {
+  신규가맹: [4,1,1,2,0,2,2,0,4,1,3,1],
+  재가맹:   [2,3,0,0,20,4,0,1,0,2,32,15],
+  매출:     [44,24,9,46,7,4,2,4,12,100,3,1], // 백만원
+};
+let FRANCHISE_26 = {
+  신규가맹: [0,null,null,null,null,null,null,null,null,null,null,null],
+  재가맹:   [1,null,null,null,null,null,null,null,null,null,null,null],
+  매출:     [4.5,null,null,null,null,null,null,null,null,null,null,null],   // 백만원
+  판관비:   [33.5,null,null,null,null,null,null,null,null,null,null,null],  // 백만원
+  영업이익: [-28.9,null,null,null,null,null,null,null,null,null,null,null], // 백만원
+};
+let frCharts = {};
 
 // 재원생 데이터 (출처: 202601_올피_손익실적분석 실측값 - 25년 12개월 전체)
 // 25년 수학합계 = 수학소계행(행90), 영어합계 = 영어행(행101) 등
@@ -2183,6 +2219,95 @@ function renderU2mTree(){
 // ============================================================
 // DEPT: U2M
 // ============================================================
+// ============================================================
+// DEPT: 가맹사업
+// ============================================================
+function initFranchise(){
+  renderFranchiseKpi();
+  renderFranchiseCountChart();
+  renderFranchiseProfitChart();
+}
+
+function renderFranchiseKpi(){
+  const MI = (k,i) => FRANCHISE_26[k] && FRANCHISE_26[k][i] != null ? FRANCHISE_26[k][i] : null;
+  // 첫 번째 non-null 월 기준으로 KPI 표시
+  const MONTHS = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  let mi = 0;
+  for(let i=0;i<12;i++){ if(FRANCHISE_26.매출[i]!=null){ mi=i; break; } }
+  const set = (id,v,digits=1) => { const el=document.getElementById(id); if(el&&v!=null) el.textContent=typeof digits==='number'?Number(v).toFixed(digits):v; };
+  set('fr-val-new',    FRANCHISE_26.신규가맹[mi],  0);
+  set('fr-val-renew',  FRANCHISE_26.재가맹[mi],    0);
+  set('fr-val-sales',  FRANCHISE_26.매출[mi],      1);
+  set('fr-val-cost',   FRANCHISE_26.판관비[mi],    1);
+  set('fr-val-profit', FRANCHISE_26.영업이익[mi],  1);
+}
+
+function renderFranchiseCountChart(){
+  const ctx = document.getElementById('c_fr_count'); if(!ctx) return;
+  if(frCharts.count){ frCharts.count.destroy(); frCharts.count=null; }
+  const M = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  frCharts.count = new Chart(ctx.getContext('2d'), {
+    type:'line',
+    data:{
+      labels:M,
+      datasets:[
+        { label:'25년 신규가맹', data:FRANCHISE_25.신규가맹,
+          borderColor:'rgba(77,150,240,0.75)', backgroundColor:'rgba(77,150,240,0.12)',
+          fill:false, borderWidth:1.5, tension:.35, borderDash:[4,3],
+          pointRadius:3, pointBackgroundColor:'rgba(77,150,240,0.75)' },
+        { label:'26년 신규가맹', data:FRANCHISE_26.신규가맹,
+          borderColor:'#22bf85', backgroundColor:'rgba(34,191,133,0.25)',
+          fill:false, borderWidth:2, tension:.35, spanGaps:false,
+          pointRadius:4, pointBackgroundColor:'#22bf85', pointBorderColor:'#fff', pointBorderWidth:2 },
+        { label:'25년 재가맹', data:FRANCHISE_25.재가맹,
+          borderColor:'rgba(240,180,77,0.75)', backgroundColor:'rgba(240,180,77,0.12)',
+          fill:false, borderWidth:1.5, tension:.35, borderDash:[4,3],
+          pointRadius:3, pointBackgroundColor:'rgba(240,180,77,0.75)' },
+        { label:'26년 재가맹', data:FRANCHISE_26.재가맹,
+          borderColor:'#f0b44d', backgroundColor:'rgba(240,180,77,0.25)',
+          fill:false, borderWidth:2, tension:.35, spanGaps:false,
+          pointRadius:4, pointBackgroundColor:'#f0b44d', pointBorderColor:'#fff', pointBorderWidth:2 },
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:true,position:'top',labels:{color:'#d0d8f0',font:{size:11},boxWidth:12,padding:10}}, tooltip:{mode:'index',intersect:false} },
+      scales:{ x:{grid:{color:'#1d2340'},ticks:{color:'#8b98c7',font:{size:12}}}, y:{grid:{color:'#1d2340'},ticks:{color:'#8b98c7',font:{size:12}},beginAtZero:true} }
+    }
+  });
+}
+
+function renderFranchiseProfitChart(){
+  const ctx = document.getElementById('c_fr_profit'); if(!ctx) return;
+  if(frCharts.profit){ frCharts.profit.destroy(); frCharts.profit=null; }
+  const M = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  frCharts.profit = new Chart(ctx.getContext('2d'), {
+    type:'line',
+    data:{
+      labels:M,
+      datasets:[
+        { label:'25년 매출', data:FRANCHISE_25.매출,
+          borderColor:'rgba(77,150,240,0.75)', backgroundColor:'rgba(77,150,240,0.12)',
+          fill:false, borderWidth:1.5, tension:.35, borderDash:[4,3],
+          pointRadius:3, pointBackgroundColor:'rgba(77,150,240,0.75)' },
+        { label:'26년 매출', data:FRANCHISE_26.매출,
+          borderColor:'#22bf85', backgroundColor:'rgba(34,191,133,0.25)',
+          fill:false, borderWidth:2, tension:.35, spanGaps:false,
+          pointRadius:4, pointBackgroundColor:'#22bf85', pointBorderColor:'#fff', pointBorderWidth:2 },
+        { label:'26년 영업이익', data:FRANCHISE_26.영업이익,
+          borderColor:'#f06060', backgroundColor:'rgba(240,96,96,0.15)',
+          fill:true, borderWidth:2, tension:.35, spanGaps:false,
+          pointRadius:4, pointBackgroundColor:'#f06060', pointBorderColor:'#fff', pointBorderWidth:2 },
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:true,position:'top',labels:{color:'#d0d8f0',font:{size:11},boxWidth:12,padding:10}}, tooltip:{mode:'index',intersect:false} },
+      scales:{ x:{grid:{color:'#1d2340'},ticks:{color:'#8b98c7',font:{size:12}}}, y:{grid:{color:'#1d2340'},ticks:{color:'#8b98c7',font:{size:12}}} }
+    }
+  });
+}
+
 function initU2m(){
   renderU2mTree();
   renderCampMountain('중계', 'c_u2m_mountain', 'u2m');
@@ -3025,10 +3150,11 @@ function goDept(id,el){
   location.hash = 'dept-'+id;
   if(!inited['dept_'+id]){
     inited['dept_'+id]=true;
-    if(id==='u2m')   initU2m();
-    if(id==='mirae') initMirae();
-    if(id==='bghu')  initBgh();
-    if(id==='mgmt')  initMgmt();
+    if(id==='u2m')       initU2m();
+    if(id==='mirae')     initMirae();
+    if(id==='bghu')      initBgh();
+    if(id==='mgmt')      initMgmt();
+    if(id==='franchise') initFranchise();
   }
 }
 
@@ -3583,6 +3709,22 @@ function handleXlsxUpload(event){
 
       await saveRawDB(uploadedMonths);
 
+      // 손익실적분석 시트가 있으면 가맹사업 신규/재가맹 수 파싱
+      const plWs = wb.Sheets['손익실적분석'];
+      if(plWs){
+        const plRows = XLSX.utils.sheet_to_json(plWs, {header:1});
+        // Row 268(0-based:267)=신규가맹, Row 269(0-based:268)=재가맹
+        // 컬럼 인덱스 10 = 26년 당월 실적
+        const MMAP = {'1월':0,'2월':1,'3월':2,'4월':3,'5월':4,'6월':5,'7월':6,'8월':7,'9월':8,'10월':9,'11월':10,'12월':11};
+        uploadedMonths.forEach(mn=>{
+          const mi = MMAP[mn];
+          if(mi == null) return;
+          const r268 = plRows[267]; const r269 = plRows[268];
+          if(r268){ const v=r268[10]; if(v!=null&&v!=='') FRANCHISE_26.신규가맹[mi]=Number(v); }
+          if(r269){ const v=r269[10]; if(v!=null&&v!=='') FRANCHISE_26.재가맹[mi]=Number(v); }
+        });
+      }
+
       // 대시보드 데이터 갱신
       applyRawToDashboard();
 
@@ -3661,11 +3803,22 @@ function applyRawToDashboard(){
     if(elJ) elJ.textContent = jae.toFixed(1);
   }
 
-  // ── U2M 가맹사업 매출 갱신 ──
-  if(RAW_DB.some(r=>r.d==='U2M사업부' && r.t==='매출')){
-    const franchise = sum(r=>r.d==='U2M사업부' && r.t==='매출' && r.a==='가맹비수입') / 1e8;
-    const elF = document.getElementById('u2m-val-franchise');
-    if(elF) elF.textContent = franchise.toFixed(2);
+  // ── 가맹사업 월별 재무 데이터 갱신 (RAW_DB → FRANCHISE_26) ──
+  months.forEach((mn,mi)=>{
+    if(!RAW_DB.some(r=>r.m===mn && r.cp==='교육넷')) return;
+    const s = sum(r=>r.m===mn && r.t==='매출' && r.a==='가맹비수입');
+    const c = sum(r=>r.m===mn && r.cp==='교육넷' && r.t==='판매관리비');
+    if(s || c){
+      FRANCHISE_26.매출[mi]     = parseFloat((s/1e6).toFixed(1));
+      FRANCHISE_26.판관비[mi]   = parseFloat((c/1e6).toFixed(1));
+      FRANCHISE_26.영업이익[mi] = parseFloat(((s-c)/1e6).toFixed(1));
+    }
+  });
+  // 가맹 탭이 이미 열려있으면 재렌더
+  if(inited['dept_franchise']){
+    renderFranchiseKpi();
+    renderFranchiseCountChart();
+    renderFranchiseProfitChart();
   }
 
   // ── 5. 캠퍼스/카테고리별 월별 매출 집계 (CAMP_SALES_MTN) ──
