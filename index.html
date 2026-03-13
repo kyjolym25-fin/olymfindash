@@ -220,6 +220,14 @@ tbody td.indent{padding-left:26px;color:var(--muted2)}
 .rbadge.viewer{background:#0891b222;color:#0891b2}
 .sbadge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700}
 .sbadge.active{background:#22bf8522;color:#22bf85}
+.dde-sel{background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:7px 12px;font-size:12px;cursor:pointer}
+.dde-tbl{width:100%;border-collapse:collapse;font-size:11px;margin-top:10px}
+.dde-tbl th{background:var(--s3);padding:5px 4px;text-align:center;color:var(--muted);font-weight:600;min-width:52px;border:1px solid var(--border)}
+.dde-tbl td{padding:3px;border:1px solid var(--border);vertical-align:middle}
+.dde-tbl td.dde-m{font-size:11px;font-weight:700;color:var(--text);padding:6px 10px;white-space:nowrap;background:var(--s2)}
+.dde-tbl td.dde-y{font-size:10px;color:var(--muted);padding:4px 10px;white-space:nowrap}
+.dde-inp{width:100%;background:transparent;border:none;color:var(--text);padding:3px 4px;font-size:11px;text-align:right;font-family:inherit}
+.dde-inp:focus{outline:1px solid var(--c26a);border-radius:2px;background:var(--s3)}
 .sbadge.pending{background:#f59e0b22;color:#f59e0b}
 /* admin-only: CSS로 기본 숨김, applyAuth()에서 관리자 시 표시 */
 .admin-only{display:none}
@@ -1259,6 +1267,29 @@ thead th{font-size:13px}
       <button class="auth-btn-primary" style="width:auto;padding:9px 22px" onclick="saveAdminStuData()">💾 저장</button>
       <span id="adminStuMsg" style="font-size:11px;color:var(--muted)"></span>
     </div>
+  </div>
+  <div class="admin-sec">
+    <h3>📊 계획/실적 데이터 편집</h3>
+    <p style="font-size:12px;color:var(--muted);margin:0 0 12px">25년 실적·26년 계획 데이터를 DB에서 관리합니다. 최초 1회 <strong style="color:var(--text)">초기 데이터 업로드</strong>로 현재 내장값을 DB에 저장하세요.</p>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:16px">
+      <button class="auth-btn-primary" style="width:auto;padding:9px 22px" onclick="seedDeptData(this)">📤 초기 데이터 업로드</button>
+      <span id="seedMsg" style="font-size:11px"></span>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px">
+      <select id="dde-section" class="dde-sel" onchange="ddeOnSection()">
+        <option value="overview">전사 총괄</option>
+        <option value="camps">캠퍼스별</option>
+        <option value="mirae">미래교육</option>
+        <option value="bghu">방과후</option>
+        <option value="franchise">가맹사업</option>
+      </select>
+      <select id="dde-camp" class="dde-sel" style="display:none">
+        <option>광진</option><option>성동</option><option>동대문</option><option>중랑</option>
+        <option>중계</option><option>송파방이</option><option>미사</option><option>위례</option>
+      </select>
+      <button class="auth-btn-primary" style="width:auto;padding:8px 18px" onclick="renderDeptEditor()">불러오기</button>
+    </div>
+    <div id="dde-area"></div>
   </div>
   <div class="admin-sec">
     <h3>💬 코멘트 현황</h3>
@@ -3684,6 +3715,118 @@ const MONTH_IDX={'1월':0,'2월':1,'3월':2,'4월':3,'5월':4,'6월':5,'7월':6,
 // 업로드된 로우 데이터 저장소 (월별 누적)
 let RAW_DB = [];  // [{t,a,cc,m,d,cp,s,gr,v}, ...]
 
+// ============================================================
+// DEPT_DATA DB 연동 (dept_data 테이블)
+// ============================================================
+function getDeptMetric(section, camp, metric){
+  if(section==='overview')  return DEPT_DATA.overview[metric];
+  if(section==='camps')     return DEPT_DATA.camps[camp] && DEPT_DATA.camps[camp][metric];
+  if(section==='mirae')     return DEPT_DATA.mirae[metric];
+  if(section==='bghu')      return DEPT_DATA.bghu[metric];
+  if(section==='franchise') return DEPT_DATA.franchise[metric];
+  return null;
+}
+
+async function loadDeptData(){
+  try{
+    const {data,error} = await sb.from('dept_data').select('*');
+    if(error) throw error;
+    if(!data||!data.length) return;
+    data.forEach(row=>{
+      const m = getDeptMetric(row.section, row.camp||'', row.metric);
+      if(!m) return;
+      if(row.year===2025 && row.dtype==='actual') m.yr25     = row.values;
+      else if(row.year===2026 && row.dtype==='base')   m.yr26base = row.values;
+    });
+  }catch(e){ console.warn('dept_data load error:',e); }
+}
+
+async function seedDeptData(btn){
+  const msg = document.getElementById('seedMsg');
+  msg.style.color='var(--muted)'; msg.textContent='업로드 중...';
+  if(btn) btn.disabled=true;
+  try{
+    const rows=[];
+    const add=(section,camp,obj)=>{
+      Object.entries(obj).forEach(([metric,m])=>{
+        if(!m||!m.yr25) return;
+        rows.push({section,camp,metric,year:2025,dtype:'actual',values:m.yr25});
+        rows.push({section,camp,metric,year:2026,dtype:'base',  values:m.yr26base});
+      });
+    };
+    add('overview','',DEPT_DATA.overview);
+    Object.entries(DEPT_DATA.camps).forEach(([camp,obj])=>add('camps',camp,obj));
+    add('mirae','',DEPT_DATA.mirae);
+    add('bghu','',DEPT_DATA.bghu);
+    add('franchise','',DEPT_DATA.franchise);
+    const {error}=await sb.from('dept_data').upsert(rows,{onConflict:'section,camp,metric,year,dtype'});
+    if(error) throw error;
+    msg.style.color='var(--c26a)'; msg.textContent=`✓ ${rows.length}건 업로드 완료`;
+  }catch(e){
+    msg.style.color='var(--loss)'; msg.textContent='오류: '+e.message;
+  }finally{ if(btn) btn.disabled=false; }
+}
+
+function ddeOnSection(){
+  const s=document.getElementById('dde-section').value;
+  document.getElementById('dde-camp').style.display=s==='camps'?'':'none';
+  document.getElementById('dde-area').innerHTML='';
+}
+
+function renderDeptEditor(){
+  const section=document.getElementById('dde-section').value;
+  const camp=section==='camps'?document.getElementById('dde-camp').value:'';
+  const obj = section==='overview'  ? DEPT_DATA.overview
+             :section==='camps'     ? DEPT_DATA.camps[camp]
+             :section==='mirae'     ? DEPT_DATA.mirae
+             :section==='bghu'      ? DEPT_DATA.bghu
+             :section==='franchise' ? DEPT_DATA.franchise : null;
+  if(!obj) return;
+  const area=document.getElementById('dde-area');
+  let html='<div style="overflow-x:auto"><table class="dde-tbl"><thead><tr>'
+    +'<th colspan="2" style="text-align:left;min-width:160px">항목 / 연도</th>';
+  for(let i=1;i<=12;i++) html+=`<th>${i}월</th>`;
+  html+='</tr></thead><tbody>';
+  Object.entries(obj).forEach(([metric,m])=>{
+    html+=`<tr><td class="dde-m" rowspan="2">${metric}</td><td class="dde-y">25년 실적</td>`;
+    for(let i=0;i<12;i++) html+=`<td><input class="dde-inp" data-section="${section}" data-camp="${camp}" data-metric="${metric}" data-year="2025" data-idx="${i}" value="${m.yr25[i]??''}"></td>`;
+    html+=`</tr><tr><td class="dde-y" style="color:var(--c26p)">26년 계획</td>`;
+    for(let i=0;i<12;i++) html+=`<td><input class="dde-inp" data-section="${section}" data-camp="${camp}" data-metric="${metric}" data-year="2026" data-idx="${i}" value="${m.yr26base[i]??''}"></td>`;
+    html+='</tr>';
+  });
+  html+='</tbody></table></div>'
+    +'<div style="display:flex;gap:8px;margin-top:12px;align-items:center">'
+    +'<button class="auth-btn-primary" style="width:auto;padding:9px 22px" onclick="saveDeptEditor()">💾 저장</button>'
+    +'<span id="ddeMsg" style="font-size:11px"></span></div>';
+  area.innerHTML=html;
+}
+
+async function saveDeptEditor(){
+  const msg=document.getElementById('ddeMsg');
+  msg.style.color='var(--muted)'; msg.textContent='저장 중...';
+  try{
+    const rowMap={};
+    document.querySelectorAll('.dde-inp').forEach(inp=>{
+      const {section,camp,metric,year,idx}=inp.dataset;
+      const key=`${section}||${camp}||${metric}||${year}`;
+      if(!rowMap[key]) rowMap[key]={section,camp,metric,year:Number(year),dtype:Number(year)===2025?'actual':'base',values:Array(12).fill(null)};
+      const v=inp.value.trim();
+      rowMap[key].values[Number(idx)]=v===''?null:Number(v);
+    });
+    const rows=Object.values(rowMap).map(r=>({...r,updated_at:new Date().toISOString()}));
+    const {error}=await sb.from('dept_data').upsert(rows,{onConflict:'section,camp,metric,year,dtype'});
+    if(error) throw error;
+    // 메모리 DEPT_DATA도 즉시 반영
+    rows.forEach(row=>{
+      const m=getDeptMetric(row.section,row.camp,row.metric);
+      if(!m) return;
+      if(row.year===2025) m.yr25=row.values;
+      else m.yr26base=row.values;
+    });
+    msg.style.color='var(--c26a)'; msg.textContent=`✓ ${rows.length}건 저장 완료`;
+  }catch(e){ msg.style.color='var(--loss)'; msg.textContent='오류: '+e.message; }
+}
+
 async function loadRawDB(){
   try{
     const {data,error} = await sb.from('raw_db').select('*');
@@ -3952,6 +4095,7 @@ goMain=function(id,el){
 // ============================================================
 applyAuth();
 (async()=>{
+  await loadDeptData();   // yr25·yr26base를 DB에서 로드 (하드코딩 덮어쓰기)
   await loadRawDB();
   if(RAW_DB.length) applyRawToDashboard();
   applyAuth();
