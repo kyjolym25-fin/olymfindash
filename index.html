@@ -775,12 +775,12 @@ thead th{font-size:13px}
   </div>
 
     <div class="period-section-hd">
-      <span class="period-badge ytd">📊 YTD 누적 (1~1월)</span>
+      <span class="period-badge ytd" id="mirae-badge-ytd">📊 YTD 누적 (1~1월)</span>
       <div class="period-line"></div>
     </div>
     <div class="full card">
       <div class="ch"><div><div class="ct">YTD 교재·원격 매출 누적</div><div class="cs">25년 실적 / 26년 계획 / 26년 실적 누적합계</div></div></div>
-      <div id="mirae_rev_ytd"><p style="padding:20px;text-align:center;color:var(--muted);font-size:12px;margin:0">1월 기준: 당월 = YTD</p></div>
+      <div id="mirae_rev_ytd"></div>
     </div>
 
   <div id="cb-mirae-s2" class="comment-box" style="display:none">
@@ -2213,19 +2213,65 @@ function buildCC3YMonth(mi){
   return result;
 }
 
+// ── CC별 YTD 누적 빌더 (0~mi 누적, 실적은 0~min(mi,latestActMi)) ──
+function buildCC3YYtd(mi){
+  const M=1e6;
+  const actCap=latestActMi>=0?Math.min(mi,latestActMi):-1;
+  const CAMP_CC={
+    '광진':{ccs:['광진수학','광진영어'],src:CC3Y},'성동':{ccs:['성동수학','성동영어'],src:CC3Y},
+    '동대문':{ccs:['동대문수학','동대문영어'],src:CC3Y},'중랑':{ccs:['중랑수학','중랑영어'],src:CC3Y},
+    '중계':{ccs:['중계수학'],src:CC3Y_U2M},'송파방이':{ccs:['송파방이수학'],src:CC3Y_U2M},
+    '미사':{ccs:['미사수학'],src:CC3Y_U2M},'위례':{ccs:['위례수학'],src:CC3Y_U2M},
+  };
+  const sumArr=(arr,to)=>arr.slice(0,to+1).reduce((s,v)=>s+(v??0),0);
+  const result={};
+  for(const [camp,{ccs,src}] of Object.entries(CAMP_CC)){
+    const cd=DEPT_DATA.camps[camp]; if(!cd) continue;
+    const ref25s=ccs.reduce((s,cc)=>s+(src[cc]?.yr25.s||0),0);
+    const ref25p=ccs.reduce((s,cc)=>s+(src[cc]?.yr25.p2||0),0);
+    const ref26ps=ccs.reduce((s,cc)=>s+(src[cc]?.yr26p.s||0),0);
+    const ref26pp=ccs.reduce((s,cc)=>s+(src[cc]?.yr26p.p2||0),0);
+    const cs25=sumArr(cd.매출.yr25,mi)*M, cp25=sumArr(cd.영업이익.yr25,mi)*M;
+    const cs26p=sumArr(cd.매출.yr26base,mi)*M, cp26p=sumArr(cd.영업이익.yr26base,mi)*M;
+    ccs.forEach(cc=>{
+      const ref=src[cc]; if(!ref) return;
+      const rs25=ref25s>0?ref.yr25.s/ref25s:1/ccs.length;
+      const rp25=ref25p!==0?ref.yr25.p2/ref25p:1/ccs.length;
+      const rs26p=ref26ps>0?ref.yr26p.s/ref26ps:1/ccs.length;
+      const rp26p=ref26pp!==0?ref.yr26p.p2/ref26pp:1/ccs.length;
+      let ytdS=0,ytdP=0,hasAny=false;
+      if(actCap>=0){
+        for(let i=0;i<=actCap;i++){
+          const a=CC_MONTH_ACTUAL[cc]?.[i];
+          if(a){ytdS+=a.s;ytdP+=a.p2;hasAny=true;}
+        }
+      }
+      result[cc]={
+        yr25: {s:Math.round(cs25*rs25), p2:Math.round(cp25*rp25)},
+        yr26p:{s:Math.round(cs26p*rs26p), p2:Math.round(cp26p*rp26p)},
+        yr26a: hasAny?{s:ytdS,p2:ytdP}:null,
+      };
+    });
+  }
+  return result;
+}
+
 // ── 학원사업본부 렌더 ──
 function renderHakwonTree(mi=0){
-  renderCC3YTree('hakwon_tree', [
-    {name:'학원사업본부', color:'#2d74e8', emoji:'🏫',
-     ccs:['광진수학','광진영어','성동수학','성동영어','동대문수학','동대문영어','중랑수학','중랑영어'],
-     groups:[
-       {label:'📍 광진', color:'#2d74e8', ccs:['광진수학','광진영어']},
-       {label:'📍 성동', color:'#e08c00', ccs:['성동수학','성동영어']},
-       {label:'📍 동대문', color:'#0ea872', ccs:['동대문수학','동대문영어']},
-       {label:'📍 중랑', color:'#9474f0', ccs:['중랑수학','중랑영어']},
-     ]
-    },
-  ], buildCC3YMonth(mi));
+  const MN=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  const hakDef=[{name:'학원사업본부', color:'#2d74e8', emoji:'🏫',
+    ccs:['광진수학','광진영어','성동수학','성동영어','동대문수학','동대문영어','중랑수학','중랑영어'],
+    groups:[
+      {label:'📍 광진', color:'#2d74e8', ccs:['광진수학','광진영어']},
+      {label:'📍 성동', color:'#e08c00', ccs:['성동수학','성동영어']},
+      {label:'📍 동대문', color:'#0ea872', ccs:['동대문수학','동대문영어']},
+      {label:'📍 중랑', color:'#9474f0', ccs:['중랑수학','중랑영어']},
+    ]}];
+  renderCC3YTree('hakwon_tree', hakDef, buildCC3YMonth(mi));
+  const ytdCap=latestActMi>=0?Math.min(mi,latestActMi):mi;
+  const ytdLbl=ytdCap<mi?`YTD (1~${MN[ytdCap]}, 실적기준)`:`YTD (1~${MN[mi]})`;
+  document.getElementById('hakwon_tree_ytd')&&renderCC3YTree('hakwon_tree_ytd',
+    hakDef.map(g=>({...g,name:`${g.name} ${ytdLbl}`})), buildCC3YYtd(mi));
 }
 
 // ── U2M CC별 3년 손익 데이터 ──
@@ -2238,9 +2284,13 @@ const CC3Y_U2M = {
 
 // ── U2M사업부 렌더 ──
 function renderU2mTree(mi=0){
-  renderCC3YTree('u2m_tree', [
-    {name:'U2M사업부', color:'#6a28d9', emoji:'🏢', ccs:['중계수학','송파방이수학','위례수학','미사수학']},
-  ], buildCC3YMonth(mi));
+  const MN=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  const u2mDef=[{name:'U2M사업부', color:'#6a28d9', emoji:'🏢', ccs:['중계수학','송파방이수학','위례수학','미사수학']}];
+  renderCC3YTree('u2m_tree', u2mDef, buildCC3YMonth(mi));
+  const ytdCap=latestActMi>=0?Math.min(mi,latestActMi):mi;
+  const ytdLbl=ytdCap<mi?`YTD (1~${MN[ytdCap]}, 실적기준)`:`YTD (1~${MN[mi]})`;
+  document.getElementById('u2m_tree_ytd')&&renderCC3YTree('u2m_tree_ytd',
+    u2mDef.map(g=>({...g,name:`${g.name} ${ytdLbl}`})), buildCC3YYtd(mi));
 }
 
 // ============================================================
@@ -2278,6 +2328,47 @@ function autoSelectLatestMonth(){
   let lmi=0;
   if(ov) for(let i=11;i>=0;i--){if(ov[i]!=null){lmi=i;break;}}
   setCurrentMonth(lmi);
+}
+
+// ── 미래교육 YTD 테이블 렌더 ──
+function renderMiraeYtd(mi){
+  const el=document.getElementById('mirae_rev_ytd'); if(!el) return;
+  const cap=latestActMi>=0?Math.min(mi,latestActMi):-1;
+  const mr=DEPT_DATA.mirae;
+  const MN=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  const sum=(arr,to)=>arr.slice(0,to+1).reduce((s,v)=>s+(v??0),0);
+  const b25=sum(mr.교재매출.yr25,mi), b26p=sum(mr.교재매출.yr26base,mi);
+  const r25=sum(mr.원격매출.yr25,mi), r26p=sum(mr.원격매출.yr26base,mi);
+  const p25=sum(mr.영업이익.yr25,mi), p26p=sum(mr.영업이익.yr26base,mi);
+  const b26a=cap>=0?sum(mr.교재매출.yr26actual,cap):null;
+  const r26a=cap>=0?sum(mr.원격매출.yr26actual,cap):null;
+  const p26a=cap>=0?sum(mr.영업이익.yr26actual,cap):null;
+  const s25=b25+r25, s26p=b26p+r26p, s26a=b26a!=null?(b26a+r26a):null;
+  const actLbl=cap>=0&&cap<mi?`실적(1~${MN[cap]})`:`실적(1~${MN[mi]})`;
+  const fx=v=>v!=null?fmt억(v):'-';
+  const pct=(a,b)=>a!=null&&b>0?`<span style="color:${a>=b?'var(--c26a)':'var(--loss)'}">${((a-b)/Math.abs(b)*100).toFixed(1)}%</span>`:'-';
+  const row=(lbl,v25,v26p,v26a)=>`<tr>
+    <td style="padding:5px 10px;font-weight:600;font-size:11px;border:1px solid var(--border)">${lbl}</td>
+    <td style="padding:5px 10px;text-align:right;color:var(--c25);border:1px solid var(--border)">${fx(v25)}</td>
+    <td style="padding:5px 10px;text-align:right;color:var(--c26p);border:1px solid var(--border)">${fx(v26p)}</td>
+    <td style="padding:5px 10px;text-align:right;color:var(--c26a);font-weight:700;border:1px solid var(--border)">${fx(v26a)}</td>
+    <td style="padding:5px 10px;text-align:right;font-size:11px;border:1px solid var(--border)">${pct(v26a,v26p)}</td>
+  </tr>`;
+  el.innerHTML=`<table style="width:100%;border-collapse:collapse;font-size:12px">
+    <thead><tr style="background:var(--s3)">
+      <th style="padding:5px 10px;text-align:left;color:var(--muted);border:1px solid var(--border)">항목</th>
+      <th style="padding:5px 10px;text-align:right;color:var(--c25);border:1px solid var(--border)">25년</th>
+      <th style="padding:5px 10px;text-align:right;color:var(--c26p);border:1px solid var(--border)">26년 계획</th>
+      <th style="padding:5px 10px;text-align:right;color:var(--c26a);border:1px solid var(--border)">${actLbl}</th>
+      <th style="padding:5px 10px;text-align:right;color:var(--muted);border:1px solid var(--border)">계획比</th>
+    </tr></thead>
+    <tbody>
+      ${row('교재매출',b25,b26p,b26a)}
+      ${row('원격매출',r25,r26p,r26a)}
+      ${row('매출합계',s25,s26p,s26a)}
+      ${row('영업이익',p25,p26p,p26a)}
+    </tbody>
+  </table>`;
 }
 
 function renderMonthKpi(mi){
@@ -2412,12 +2503,15 @@ function renderMonthKpi(mi){
   set('bghu-meta-p',bgTotal>0?`이익률 ${(bgProfit/bgTotal*100).toFixed(1)}%`:'');
 
   // ── 학원/U2M 당월 배지 + 트리 업데이트 ──
+  const ytdMn=latestActMi>=0&&latestActMi<mi?MN[latestActMi]:mn;
   set('hak-badge-m',  `📅 당월 (${mn})`);
-  set('hak-badge-ytd',`📊 YTD 누적 (1~${mn})`);
+  set('hak-badge-ytd',`📊 YTD 누적 (1~${ytdMn})`);
   set('u2m-badge-m',  `📅 당월 (${mn})`);
-  set('u2m-badge-ytd',`📊 YTD 누적 (1~${mn})`);
+  set('u2m-badge-ytd',`📊 YTD 누적 (1~${ytdMn})`);
+  set('mirae-badge-ytd',`📊 YTD 누적 (1~${ytdMn})`);
   if(inited['dept'])     renderHakwonTree(mi);
   if(inited['dept_u2m']) renderU2mTree(mi);
+  renderMiraeYtd(mi);
 
   // ── 가맹사업 ──
   frMonth=mi;
