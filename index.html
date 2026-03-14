@@ -2319,7 +2319,8 @@ function buildMonthBar(barId){
 
 function setCurrentMonth(mi){
   currentMonth = mi;
-  document.querySelectorAll('.month-bar .mtn-btn').forEach((b,i)=>b.classList.toggle('on',i===mi));
+  document.querySelectorAll('.month-bar').forEach(bar=>
+    bar.querySelectorAll('.mtn-btn').forEach((b,i)=>b.classList.toggle('on',i===mi)));
   renderMonthKpi(mi);
 }
 
