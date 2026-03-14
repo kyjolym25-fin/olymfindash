@@ -220,6 +220,8 @@ tbody td.indent{padding-left:26px;color:var(--muted2)}
 .rbadge.viewer{background:#0891b222;color:#0891b2}
 .sbadge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700}
 .sbadge.active{background:#22bf8522;color:#22bf85}
+.month-bar{display:flex;align-items:center;gap:5px;flex-wrap:wrap;padding:8px 0 14px;border-bottom:1px solid var(--border);margin-bottom:16px}
+.month-bar-lbl{font-size:11px;color:var(--muted);margin-right:2px;white-space:nowrap}
 .dde-sel{background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:7px 12px;font-size:12px;cursor:pointer}
 .dde-tbl{width:100%;border-collapse:collapse;font-size:11px;margin-top:10px}
 .dde-tbl th{background:var(--s3);padding:5px 4px;text-align:center;color:var(--muted);font-weight:600;min-width:52px;border:1px solid var(--border)}
@@ -379,89 +381,26 @@ thead th{font-size:13px}
 <!-- ═══════════════════════════ 총괄 개요 ═══════════════════════════ -->
 <div class="page on" id="pg-overview">
 
+  <!-- 월 선택 바 -->
+  <div class="month-bar" id="ov-month-bar"></div>
+
   <!-- KPI 통합 2열 -->
   <div class="g2" style="margin-bottom:14px">
-    <!-- 1월 실적 -->
+    <!-- 당월 실적 -->
     <div class="kpi-box">
       <div class="kpi-box-hd">
-        <div class="kpi-box-title">📅 1월 실적</div>
+        <div class="kpi-box-title" id="ov-month-title">📅 1월 실적</div>
         <div class="cbg">단위: 백만원</div>
       </div>
-      <div class="kpi-grid">
-        <div class="kpi-item">
-          <div class="kpi-item-lbl">매출액</div>
-          <div class="kpi-row"><span class="kpi-row-lbl" style="color:var(--c25)">25년</span><span class="kpi-row-val" style="color:var(--c25)">34.1억</span></div>
-          <div class="kpi-row"><span class="kpi-row-lbl" style="color:var(--c26p)">계획</span><span class="kpi-row-val" style="color:var(--c26p)">29.2억</span></div>
-          <div class="kpi-divider"></div>
-          <div class="kpi-main-row"><span class="kpi-row-lbl" style="color:var(--c26a)">실적</span><span class="kpi-main-val" style="color:var(--c26a)">29.8억</span></div>
-          <div class="kpi-delta" style="color:var(--c26a)">계획比 +2.0%</div>
-        </div>
-        <div class="kpi-item">
-          <div class="kpi-item-lbl">판매관리비</div>
-          <div class="kpi-row"><span class="kpi-row-lbl" style="color:var(--c25)">25년</span><span class="kpi-row-val" style="color:var(--c25)">27.8억</span></div>
-          <div class="kpi-row"><span class="kpi-row-lbl" style="color:var(--c26p)">계획</span><span class="kpi-row-val" style="color:var(--c26p)">25.5억</span></div>
-          <div class="kpi-divider"></div>
-          <div class="kpi-main-row"><span class="kpi-row-lbl" style="color:var(--c26a)">실적</span><span class="kpi-main-val" style="color:var(--c26a)">25.6억</span></div>
-          <div class="kpi-delta" style="color:var(--loss)">매출比 85.9%</div>
-        </div>
-        <div class="kpi-item">
-          <div class="kpi-item-lbl">영업이익</div>
-          <div class="kpi-row"><span class="kpi-row-lbl" style="color:var(--c25)">25년</span><span class="kpi-row-val" style="color:var(--c25)">6.3억</span></div>
-          <div class="kpi-row"><span class="kpi-row-lbl" style="color:var(--c26p)">계획</span><span class="kpi-row-val" style="color:var(--c26p)">3.8억</span></div>
-          <div class="kpi-divider"></div>
-          <div class="kpi-main-row"><span class="kpi-row-lbl" style="color:var(--c26a)">실적</span><span class="kpi-main-val" style="color:var(--c26a)">4.2억</span></div>
-          <div class="kpi-delta" style="color:var(--c26a)">계획比 +11.4%</div>
-        </div>
-        <div class="kpi-item">
-          <div class="kpi-item-lbl">영업이익률</div>
-          <div class="kpi-row"><span class="kpi-row-lbl" style="color:var(--c25)">25년</span><span class="kpi-row-val" style="color:var(--c25)">18.5%</span></div>
-          <div class="kpi-row"><span class="kpi-row-lbl" style="color:var(--c26p)">계획</span><span class="kpi-row-val" style="color:var(--c26p)">13.0%</span></div>
-          <div class="kpi-divider"></div>
-          <div class="kpi-main-row"><span class="kpi-row-lbl" style="color:var(--c26a)">실적</span><span class="kpi-main-val" style="color:var(--c26a)">14.1%</span></div>
-          <div class="kpi-delta" style="color:var(--c26a)">계획比 +1.1%p</div>
-        </div>
-      </div>
+      <div class="kpi-grid" id="ov-kpi-monthly"></div>
     </div>
     <!-- YTD -->
     <div class="kpi-box">
       <div class="kpi-box-hd">
-        <div class="kpi-box-title">📊 YTD 실적 <span style="font-size:11px;font-weight:400;color:var(--muted)">(1월 누적)</span></div>
+        <div class="kpi-box-title" id="ov-ytd-title">📊 YTD 실적 <span style="font-size:11px;font-weight:400;color:var(--muted)">(1월 누적)</span></div>
         <div class="cbg">단위: 백만원</div>
       </div>
-      <div class="kpi-grid">
-        <div class="kpi-item">
-          <div class="kpi-item-lbl">매출액 YTD</div>
-          <div class="kpi-row"><span class="kpi-row-lbl" style="color:var(--c25)">25년</span><span class="kpi-row-val" style="color:var(--c25)">34.1억</span></div>
-          <div class="kpi-row"><span class="kpi-row-lbl" style="color:var(--c26p)">계획</span><span class="kpi-row-val" style="color:var(--c26p)">29.2억</span></div>
-          <div class="kpi-divider"></div>
-          <div class="kpi-main-row"><span class="kpi-row-lbl" style="color:var(--c26a)">실적</span><span class="kpi-main-val" style="color:var(--c26a)">29.8억</span></div>
-          <div class="kpi-delta" style="color:var(--c26a)">계획比 +2.0%</div>
-        </div>
-        <div class="kpi-item">
-          <div class="kpi-item-lbl">판관비 YTD</div>
-          <div class="kpi-row"><span class="kpi-row-lbl" style="color:var(--c25)">25년</span><span class="kpi-row-val" style="color:var(--c25)">27.8억</span></div>
-          <div class="kpi-row"><span class="kpi-row-lbl" style="color:var(--c26p)">계획</span><span class="kpi-row-val" style="color:var(--c26p)">25.5억</span></div>
-          <div class="kpi-divider"></div>
-          <div class="kpi-main-row"><span class="kpi-row-lbl" style="color:var(--c26a)">실적</span><span class="kpi-main-val" style="color:var(--c26a)">25.6억</span></div>
-          <div class="kpi-delta" style="color:var(--loss)">매출比 85.9%</div>
-        </div>
-        <div class="kpi-item">
-          <div class="kpi-item-lbl">영업이익 YTD</div>
-          <div class="kpi-row"><span class="kpi-row-lbl" style="color:var(--c25)">25년</span><span class="kpi-row-val" style="color:var(--c25)">6.3억</span></div>
-          <div class="kpi-row"><span class="kpi-row-lbl" style="color:var(--c26p)">계획</span><span class="kpi-row-val" style="color:var(--c26p)">3.8억</span></div>
-          <div class="kpi-divider"></div>
-          <div class="kpi-main-row"><span class="kpi-row-lbl" style="color:var(--c26a)">실적</span><span class="kpi-main-val" style="color:var(--c26a)">4.2억</span></div>
-          <div class="kpi-delta" style="color:var(--c26a)">계획比 +11.4%</div>
-        </div>
-        <div class="kpi-item">
-          <div class="kpi-item-lbl">이익률 YTD</div>
-          <div class="kpi-row"><span class="kpi-row-lbl" style="color:var(--c25)">25년</span><span class="kpi-row-val" style="color:var(--c25)">18.5%</span></div>
-          <div class="kpi-row"><span class="kpi-row-lbl" style="color:var(--c26p)">계획</span><span class="kpi-row-val" style="color:var(--c26p)">13.0%</span></div>
-          <div class="kpi-divider"></div>
-          <div class="kpi-main-row"><span class="kpi-row-lbl" style="color:var(--c26a)">실적</span><span class="kpi-main-val" style="color:var(--c26a)">14.1%</span></div>
-          <div class="kpi-delta" style="color:var(--c26a)">계획比 +1.1%p</div>
-        </div>
-      </div>
+      <div class="kpi-grid" id="ov-kpi-ytd"></div>
     </div>
   </div>
 
@@ -533,24 +472,25 @@ thead th{font-size:13px}
     <div class="subtab"     onclick="goDept('bghu',this)">🧒 방과후사업본부</div>
     <div class="subtab"     onclick="goDept('mgmt',this)">🗂 경영기획실</div>
   </div>
+  <div class="month-bar" id="dept-month-bar"></div>
 
   <!-- ── 학원사업본부 ── -->
   <div class="subpage on" id="sp-hakwon">
     <div class="mini-cards" style="grid-template-columns:repeat(4,1fr)">
       <div class="mini-card c26a">
         <div class="mc-lbl">학원사업본부 매출</div>
-        <div class="mc-val">15.5<span class="mc-unit">억</span></div>
-        <div class="mc-meta" style="color:var(--c25)">25년比 -1.0억 (-6.3%) &nbsp;|&nbsp; <span style="color:var(--c26p)">계획比 +0.2억 (+1.2%)</span></div>
+        <div class="mc-val"><span id="hak-val-s">15.5</span><span class="mc-unit">억</span></div>
+        <div class="mc-meta" id="hak-meta-s" style="color:var(--c25)">25년比 -1.0억 (-6.3%) &nbsp;|&nbsp; <span style="color:var(--c26p)">계획比 +0.2억 (+1.2%)</span></div>
       </div>
       <div class="mini-card cr">
         <div class="mc-lbl">판매관리비</div>
-        <div class="mc-val">10.5<span class="mc-unit">억</span></div>
-        <div class="mc-meta" style="color:var(--muted)">매출比 67.4%</div>
+        <div class="mc-val"><span id="hak-val-c">10.5</span><span class="mc-unit">억</span></div>
+        <div class="mc-meta" id="hak-meta-c" style="color:var(--muted)">매출比 67.4%</div>
       </div>
       <div class="mini-card c26a">
         <div class="mc-lbl">영업이익(공통비 불포함)</div>
-        <div class="mc-val">5.05<span class="mc-unit">억</span></div>
-        <div class="mc-meta" style="color:var(--c26a)">이익률 32.6%</div>
+        <div class="mc-val"><span id="hak-val-p">5.05</span><span class="mc-unit">억</span></div>
+        <div class="mc-meta" id="hak-meta-p" style="color:var(--c26a)">이익률 32.6%</div>
       </div>
       <div class="mini-card cy">
         <div class="mc-lbl">캠퍼스 수</div>
@@ -646,9 +586,9 @@ thead th{font-size:13px}
   <!-- ── U2M사업본부 ── -->
   <div class="subpage" id="sp-u2m">
     <div class="mini-cards" style="grid-template-columns:repeat(4,1fr)">
-      <div class="mini-card c26a"><div class="mc-lbl">U2M 매출</div><div class="mc-val">3.8<span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--c25)">25년比 -0.05억 (-1.2%) &nbsp;|&nbsp; <span style="color:var(--c26p)">계획比 +0.6억 (+18.9%)</span></div></div>
-      <div class="mini-card cr"><div class="mc-lbl">판매관리비</div><div class="mc-val">3.3<span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--muted)">매출比 88.0%</div></div>
-      <div class="mini-card c26a"><div class="mc-lbl">영업이익(공통비 불포함)</div><div class="mc-val">0.26<span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--c26a)">이익률 6.8%</div></div>
+      <div class="mini-card c26a"><div class="mc-lbl">U2M 매출</div><div class="mc-val"><span id="u2m-val-s">3.8</span><span class="mc-unit">억</span></div><div class="mc-meta" id="u2m-meta-s" style="color:var(--c25)">25년比 -0.05억 (-1.2%) &nbsp;|&nbsp; <span style="color:var(--c26p)">계획比 +0.6억 (+18.9%)</span></div></div>
+      <div class="mini-card cr"><div class="mc-lbl">판매관리비</div><div class="mc-val"><span id="u2m-val-c">3.3</span><span class="mc-unit">억</span></div><div class="mc-meta" id="u2m-meta-c" style="color:var(--muted)">매출比 88.0%</div></div>
+      <div class="mini-card c26a"><div class="mc-lbl">영업이익(공통비 불포함)</div><div class="mc-val"><span id="u2m-val-p">0.26</span><span class="mc-unit">억</span></div><div class="mc-meta" id="u2m-meta-p" style="color:var(--c26a)">이익률 6.8%</div></div>
       <div class="mini-card cy"><div class="mc-lbl">캠퍼스 수</div><div class="mc-val">4<span class="mc-unit">개</span></div><div class="mc-meta" style="color:var(--muted)">미사·송파방이·위례·중계</div></div>
     </div>
 
@@ -738,10 +678,6 @@ thead th{font-size:13px}
   <div class="subpage" id="sp-franchise">
     <div class="period-section-hd">
       <span class="period-badge monthly" id="fr_month_badge">📅 당월 (1월)</span>
-      <div style="display:flex;gap:4px" id="fr_month_btns">
-        <button class="pbtn on" onclick="setFranchiseMonth(0,this)">1월</button>
-        <button class="pbtn" onclick="setFranchiseMonth(1,this)">2월</button>
-      </div>
       <div class="period-line"></div>
     </div>
     <div class="mini-cards">
@@ -766,11 +702,11 @@ thead th{font-size:13px}
   <!-- ── 미래교육사업본부 ── -->
   <div class="subpage" id="sp-mirae">
     <div class="mini-cards">
-      <div class="mini-card c26a"><div class="mc-lbl">미래교육 전체 매출</div><div class="mc-val">3.9<span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--muted)">26년 1월 실적</div></div>
-      <div class="mini-card c26a"><div class="mc-lbl">교재 매출</div><div class="mc-val">1.1<span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--c26a)">계획比 +0.18억 (+21.2%)</div></div>
-      <div class="mini-card c26a"><div class="mc-lbl">원격 매출</div><div class="mc-val">2.9<span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--c26a)">계획比 +0.29억 (+11.4%)</div></div>
-      <div class="mini-card cr"><div class="mc-lbl">판매관리비</div><div class="mc-val">3.5<span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--muted)">매출比 88.5%</div></div>
-      <div class="mini-card c26a"><div class="mc-lbl">영업이익</div><div class="mc-val">0.45<span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--c26a)">이익률 11.5%</div></div>
+      <div class="mini-card c26a"><div class="mc-lbl">미래교육 전체 매출</div><div class="mc-val"><span id="mirae-val-s">3.9</span><span class="mc-unit">억</span></div><div class="mc-meta" id="mirae-meta-s" style="color:var(--muted)">26년 1월 실적</div></div>
+      <div class="mini-card c26a"><div class="mc-lbl">교재 매출</div><div class="mc-val"><span id="mirae-val-book">1.1</span><span class="mc-unit">억</span></div><div class="mc-meta" id="mirae-meta-book" style="color:var(--c26a)">계획比 +0.18억 (+21.2%)</div></div>
+      <div class="mini-card c26a"><div class="mc-lbl">원격 매출</div><div class="mc-val"><span id="mirae-val-remote">2.9</span><span class="mc-unit">억</span></div><div class="mc-meta" id="mirae-meta-remote" style="color:var(--c26a)">계획比 +0.29억 (+11.4%)</div></div>
+      <div class="mini-card cr"><div class="mc-lbl">판매관리비</div><div class="mc-val"><span id="mirae-val-c">3.5</span><span class="mc-unit">억</span></div><div class="mc-meta" id="mirae-meta-c" style="color:var(--muted)">매출比 88.5%</div></div>
+      <div class="mini-card c26a"><div class="mc-lbl">영업이익</div><div class="mc-val"><span id="mirae-val-p">0.45</span><span class="mc-unit">억</span></div><div class="mc-meta" id="mirae-meta-p" style="color:var(--c26a)">이익률 11.5%</div></div>
     </div>
 
     <!-- RAW_DB 기반 영업이익 추이 -->
@@ -867,8 +803,8 @@ thead th{font-size:13px}
       <div class="mini-card c26a"><div class="mc-lbl">전체 매출</div><div class="mc-val"><span id="bghu-val-total">6.6</span><span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--muted)">26년 1월 실적</div></div>
       <div class="mini-card c26a"><div class="mc-lbl">수업료</div><div class="mc-val"><span id="bghu-val-suup">5.8</span><span class="mc-unit">억</span></div><div class="mc-meta" id="bghu-meta-suup" style="color:var(--muted)">계정: 방과후학교</div></div>
       <div class="mini-card c26a"><div class="mc-lbl">재료비 매출</div><div class="mc-val"><span id="bghu-val-jae">0.8</span><span class="mc-unit">억</span></div><div class="mc-meta" id="bghu-meta-jae" style="color:var(--muted)">계정: 재료비수입</div></div>
-      <div class="mini-card cr"><div class="mc-lbl">판매관리비</div><div class="mc-val">7.1<span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--loss)">매출比 107.2%</div></div>
-      <div class="mini-card cr"><div class="mc-lbl">영업손실</div><div class="mc-val">-0.47<span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--loss)">이익률 -7.2%</div></div>
+      <div class="mini-card cr"><div class="mc-lbl">판매관리비</div><div class="mc-val"><span id="bghu-val-c">7.1</span><span class="mc-unit">억</span></div><div class="mc-meta" id="bghu-meta-c" style="color:var(--loss)">매출比 107.2%</div></div>
+      <div class="mini-card cr"><div class="mc-lbl">영업손실</div><div class="mc-val"><span id="bghu-val-p">-0.47</span><span class="mc-unit">억</span></div><div class="mc-meta" id="bghu-meta-p" style="color:var(--loss)">이익률 -7.2%</div></div>
     </div>
     <!-- RAW_DB 기반 영업이익 추이 -->
     <div class="full card" id="bghu_profit_mtn_card">
@@ -1628,6 +1564,8 @@ const fp=v=>v==null?'-':v.toFixed(1)+'%';
 // OVERVIEW
 // ============================================================
 function initOverview(){
+  buildMonthBar('ov-month-bar');
+  buildMonthBar('dept-month-bar');
   // 누적 매출: 26년 실적 맨 앞
   // 누적 차트 공통 옵션 (x offset으로 첫 포인트 y축 겹침 방지, y축 폰트 축소)
   const ovOpts = {
@@ -2273,17 +2211,168 @@ function renderU2mTree(){
 // DEPT: U2M
 // ============================================================
 // ============================================================
+// 전역 월 선택
+// ============================================================
+let currentMonth = 0;
+
+function fmt억(v){
+  if(v==null||isNaN(v)) return '-';
+  const a = v/100, abs = Math.abs(a);
+  if(abs>=10) return a.toFixed(1)+'억';
+  if(abs>=0.1) return a.toFixed(2)+'억';
+  return v.toFixed(1)+'백만';
+}
+
+function buildMonthBar(barId){
+  const bar = document.getElementById(barId); if(!bar) return;
+  const MN=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  bar.innerHTML='<span class="month-bar-lbl">월 선택</span>'+
+    MN.map((m,i)=>`<button class="mtn-btn${i===currentMonth?' on':''}" onclick="setCurrentMonth(${i})">${m}</button>`).join('');
+}
+
+function setCurrentMonth(mi){
+  currentMonth = mi;
+  document.querySelectorAll('.month-bar .mtn-btn').forEach((b,i)=>b.classList.toggle('on',i===mi));
+  renderMonthKpi(mi);
+}
+
+function renderMonthKpi(mi){
+  const MN=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  const mn=MN[mi];
+  const gv=(m,i)=>m.yr26actual[i]??m.yr26base[i];
+  const ytdGv=(m,to)=>{let s=0;for(let i=0;i<=to;i++)s+=gv(m,i)??0;return s;};
+  const ytd25=(m,to)=>m.yr25.slice(0,to+1).reduce((s,v)=>s+(v??0),0);
+  const ytd26p=(m,to)=>m.yr26base.slice(0,to+1).reduce((s,v)=>s+(v??0),0);
+
+  const pctStr=(a,b,lbl='계획比')=>{
+    if(a==null||!b) return '';
+    const p=(a-b)/Math.abs(b)*100, sg=p>=0?'+':'';
+    return `${lbl} ${sg}${p.toFixed(1)}%`;
+  };
+  const kpiHtml=(lbl,v25,v26p,v26a,delta='',dc='var(--c26a)')=>`
+    <div class="kpi-item">
+      <div class="kpi-item-lbl">${lbl}</div>
+      <div class="kpi-row"><span class="kpi-row-lbl" style="color:var(--c25)">25년</span><span class="kpi-row-val" style="color:var(--c25)">${v25}</span></div>
+      <div class="kpi-row"><span class="kpi-row-lbl" style="color:var(--c26p)">계획</span><span class="kpi-row-val" style="color:var(--c26p)">${v26p}</span></div>
+      <div class="kpi-divider"></div>
+      <div class="kpi-main-row"><span class="kpi-row-lbl" style="color:var(--c26a)">실적</span><span class="kpi-main-val" style="color:var(--c26a)">${v26a}</span></div>
+      <div class="kpi-delta" style="color:${dc}">${delta}</div>
+    </div>`;
+  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  const setH=(id,v)=>{const el=document.getElementById(id);if(el)el.innerHTML=v;};
+
+  // ── Overview monthly ──
+  set('ov-month-title',`📅 ${mn} 실적`);
+  setH('ov-ytd-title',`📊 YTD 실적 <span style="font-size:11px;font-weight:400;color:var(--muted)">(1~${mn} 누적)</span>`);
+  const ov=DEPT_DATA.overview;
+  const s25=ov.매출.yr25[mi], s26p=ov.매출.yr26base[mi], s26a=gv(ov.매출,mi);
+  const c25=ov.판관비.yr25[mi], c26p=ov.판관비.yr26base[mi], c26a=gv(ov.판관비,mi);
+  const p25=s25-c25, p26p=s26p-c26p, p26a=s26a!=null?s26a-c26a:null;
+  const r25=s25>0?p25/s25*100:0, r26p=s26p>0?p26p/s26p*100:0;
+  const r26a=s26a>0&&p26a!=null?p26a/s26a*100:null;
+  const cRatio=s26a>0&&c26a!=null?`매출比 ${(c26a/s26a*100).toFixed(1)}%`:'';
+  const g=document.getElementById('ov-kpi-monthly');
+  if(g) g.innerHTML=
+    kpiHtml('매출액',fmt억(s25),fmt억(s26p),fmt억(s26a),pctStr(s26a,s26p))+
+    kpiHtml('판관비',fmt억(c25),fmt억(c26p),fmt억(c26a),cRatio,c26a/s26a>0.85?'var(--loss)':'var(--c26a)')+
+    kpiHtml('영업이익',fmt억(p25),fmt억(p26p),fmt억(p26a),pctStr(p26a,p26p),p26a<0?'var(--loss)':'var(--c26a)')+
+    kpiHtml('영업이익률',r25.toFixed(1)+'%',r26p.toFixed(1)+'%',r26a!=null?r26a.toFixed(1)+'%':'-',
+      r26a!=null?`계획比 ${(r26a-r26p)>=0?'+':''}${(r26a-r26p).toFixed(1)}%p`:'');
+
+  // ── Overview YTD ──
+  const ys25=ytd25(ov.매출,mi), ys26p=ytd26p(ov.매출,mi), ys26a=ytdGv(ov.매출,mi);
+  const yc25=ytd25(ov.판관비,mi), yc26p=ytd26p(ov.판관비,mi), yc26a=ytdGv(ov.판관비,mi);
+  const yp25=ys25-yc25, yp26p=ys26p-yc26p, yp26a=ys26a-yc26a;
+  const yr25=ys25>0?yp25/ys25*100:0, yr26pp=ys26p>0?yp26p/ys26p*100:0;
+  const yr26a=ys26a>0?yp26a/ys26a*100:null;
+  const ycRatio=ys26a>0?`매출比 ${(yc26a/ys26a*100).toFixed(1)}%`:'';
+  const yg=document.getElementById('ov-kpi-ytd');
+  if(yg) yg.innerHTML=
+    kpiHtml('매출액 YTD',fmt억(ys25),fmt억(ys26p),fmt억(ys26a),pctStr(ys26a,ys26p))+
+    kpiHtml('판관비 YTD',fmt억(yc25),fmt억(yc26p),fmt억(yc26a),ycRatio,yc26a/ys26a>0.85?'var(--loss)':'var(--c26a)')+
+    kpiHtml('영업이익 YTD',fmt억(yp25),fmt억(yp26p),fmt억(yp26a),pctStr(yp26a,yp26p),yp26a<0?'var(--loss)':'var(--c26a)')+
+    kpiHtml('이익률 YTD',yr25.toFixed(1)+'%',yr26pp.toFixed(1)+'%',yr26a!=null?yr26a.toFixed(1)+'%':'-',
+      yr26a!=null?`계획比 ${(yr26a-yr26pp)>=0?'+':''}${(yr26a-yr26pp).toFixed(1)}%p`:'');
+
+  // ── 학원 mini-cards ──
+  const hakCamps=['광진','성동','동대문','중랑'];
+  const hS=hakCamps.reduce((s,c)=>s+(gv(DEPT_DATA.camps[c].매출,mi)??0),0);
+  const hP=hakCamps.reduce((s,c)=>s+(gv(DEPT_DATA.camps[c].영업이익,mi)??0),0);
+  const hC=hS-hP;
+  const hS25=hakCamps.reduce((s,c)=>s+(DEPT_DATA.camps[c].매출.yr25[mi]??0),0);
+  const hS26p=hakCamps.reduce((s,c)=>s+(DEPT_DATA.camps[c].매출.yr26base[mi]??0),0);
+  set('hak-val-s',fmt억(hS));
+  set('hak-val-c',fmt억(hC));
+  set('hak-val-p',fmt억(hP));
+  const hYoY=hS25>0?`<span style="color:${hS>=hS25?'var(--c26a)':'var(--loss)'}">25년比 ${hS>=hS25?'+':''}${fmt억(hS-hS25)} (${((hS-hS25)/hS25*100).toFixed(1)}%)</span>`:'-';
+  const hPlan=hS26p>0?`<span style="color:var(--c26p)">계획比 ${hS>=hS26p?'+':''}${((hS-hS26p)/hS26p*100).toFixed(1)}%</span>`:'';
+  setH('hak-meta-s',`${hYoY}&nbsp;|&nbsp;${hPlan}`);
+  setH('hak-meta-c',hS>0?`매출比 ${(hC/hS*100).toFixed(1)}%`:'');
+  setH('hak-meta-p',hS>0?`이익률 ${(hP/hS*100).toFixed(1)}%`:'');
+
+  // ── U2M mini-cards ──
+  const u2mCamps=['중계','송파방이','미사','위례'];
+  const uS=u2mCamps.reduce((s,c)=>s+(gv(DEPT_DATA.camps[c].매출,mi)??0),0);
+  const uP=u2mCamps.reduce((s,c)=>s+(gv(DEPT_DATA.camps[c].영업이익,mi)??0),0);
+  const uC=uS-uP;
+  const uS25=u2mCamps.reduce((s,c)=>s+(DEPT_DATA.camps[c].매출.yr25[mi]??0),0);
+  const uS26p=u2mCamps.reduce((s,c)=>s+(DEPT_DATA.camps[c].매출.yr26base[mi]??0),0);
+  set('u2m-val-s',fmt억(uS));
+  set('u2m-val-c',fmt억(uC));
+  set('u2m-val-p',fmt억(uP));
+  const uYoY=uS25>0?`<span style="color:${uS>=uS25?'var(--c26a)':'var(--loss)'}">25년比 ${uS>=uS25?'+':''}${fmt억(uS-uS25)} (${((uS-uS25)/uS25*100).toFixed(1)}%)</span>`:'-';
+  const uPlan=uS26p>0?`<span style="color:var(--c26p)">계획比 ${uS>=uS26p?'+':''}${((uS-uS26p)/uS26p*100).toFixed(1)}%</span>`:'';
+  setH('u2m-meta-s',`${uYoY}&nbsp;|&nbsp;${uPlan}`);
+  setH('u2m-meta-c',uS>0?`매출比 ${(uC/uS*100).toFixed(1)}%`:'');
+  setH('u2m-meta-p',uS>0?`이익률 ${(uP/uS*100).toFixed(1)}%`:'');
+
+  // ── 미래교육 mini-cards ──
+  const mr=DEPT_DATA.mirae;
+  const mrBook=gv(mr.교재매출,mi), mrRemote=gv(mr.원격매출,mi), mrProfit=gv(mr.영업이익,mi);
+  const mrS=(mrBook??0)+(mrRemote??0);
+  const mrC=mrS-(mrProfit??0);
+  const mrBook26p=mr.교재매출.yr26base[mi], mrRemote26p=mr.원격매출.yr26base[mi];
+  set('mirae-val-s',fmt억(mrS));
+  set('mirae-val-book',fmt억(mrBook));
+  set('mirae-val-remote',fmt억(mrRemote));
+  set('mirae-val-c',fmt억(mrC));
+  set('mirae-val-p',fmt억(mrProfit));
+  set('mirae-meta-s',`26년 ${mn} 실적`);
+  const bookDelta=mrBook26p>0?`계획比 ${mrBook>=mrBook26p?'+':''}${((mrBook-mrBook26p)/mrBook26p*100).toFixed(1)}%`:'';
+  const remoteDelta=mrRemote26p>0?`계획比 ${mrRemote>=mrRemote26p?'+':''}${((mrRemote-mrRemote26p)/mrRemote26p*100).toFixed(1)}%`:'';
+  set('mirae-meta-book',bookDelta);
+  set('mirae-meta-remote',remoteDelta);
+  set('mirae-meta-c',mrS>0?`매출比 ${(mrC/mrS*100).toFixed(1)}%`:'');
+  set('mirae-meta-p',mrS>0?`이익률 ${(mrProfit/mrS*100).toFixed(1)}%`:'');
+
+  // ── 방과후 mini-cards ──
+  const bg=DEPT_DATA.bghu;
+  const bgSuup=gv(bg.수업료매출,mi), bgJae=gv(bg.재료비매출,mi), bgProfit=gv(bg.영업이익,mi);
+  const bgTotal=(bgSuup??0)+(bgJae??0);
+  const bgC=bgTotal-(bgProfit??0);
+  set('bghu-val-total',fmt억(bgTotal));
+  set('bghu-val-suup',fmt억(bgSuup));
+  set('bghu-val-jae',fmt억(bgJae));
+  set('bghu-val-c',fmt억(bgC));
+  set('bghu-val-p',fmt억(bgProfit));
+  setH('bghu-meta-suup',bg.수업료매출.yr25[mi]>0?
+    `<span style="color:${bgSuup>=(bg.수업료매출.yr25[mi]??0)?'var(--c26a)':'var(--loss)'}">25년比 ${((bgSuup-(bg.수업료매출.yr25[mi]??0))/(bg.수업료매출.yr25[mi]??1)*100).toFixed(1)}%</span>`:'계정: 방과후학교');
+  setH('bghu-meta-jae',bg.재료비매출.yr25[mi]>0?
+    `<span style="color:${bgJae>=(bg.재료비매출.yr25[mi]??0)?'var(--c26a)':'var(--loss)'}">25년比 ${((bgJae-(bg.재료비매출.yr25[mi]??0))/(bg.재료비매출.yr25[mi]??1)*100).toFixed(1)}%</span>`:'계정: 재료비수입');
+  set('bghu-meta-c',bgTotal>0?`매출比 ${(bgC/bgTotal*100).toFixed(1)}%`:'');
+  set('bghu-meta-p',bgTotal>0?`이익률 ${(bgProfit/bgTotal*100).toFixed(1)}%`:'');
+
+  // ── 가맹사업 ──
+  frMonth=mi;
+  const frBadge=document.getElementById('fr_month_badge');
+  if(frBadge) frBadge.textContent=`📅 당월 (${mn})`;
+  renderFranchiseKpi();
+}
+
+// ============================================================
 // DEPT: 가맹사업
 // ============================================================
 let frMonth = 0;
-
-function setFranchiseMonth(idx, btn){
-  document.querySelectorAll('#fr_month_btns .pbtn').forEach(b=>b.classList.remove('on'));
-  btn.classList.add('on');
-  document.getElementById('fr_month_badge').textContent=`📅 당월 (${idx+1}월)`;
-  frMonth = idx;
-  renderFranchiseKpi();
-}
 
 function initFranchise(){
   renderFranchiseKpi();
@@ -3921,6 +4010,7 @@ function handleXlsxUpload(event){
 
       // 대시보드 데이터 갱신
       applyRawToDashboard();
+      renderMonthKpi(currentMonth);
 
       msg.style.color='var(--c26a)';
       msg.textContent=`✓ ${uploadedMonths.join(', ')} 데이터 ${newRows}건 적용 완료`;
@@ -4064,6 +4154,7 @@ function applyRawToDashboard(){
   inited['overview'] = false;
   // overview는 즉시 재렌더
   initOverview();
+  renderMonthKpi(currentMonth);
 }
 
 function renderUploadSummary(){
@@ -4114,6 +4205,7 @@ applyAuth();
   await loadDeptData();   // yr25·yr26base를 DB에서 로드 (하드코딩 덮어쓰기)
   await loadRawDB();
   if(RAW_DB.length) applyRawToDashboard();
+  renderMonthKpi(0);
   applyAuth();
   loadComments();
   loadStu26();
