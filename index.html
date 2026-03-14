@@ -49,6 +49,7 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
 .mtn-btn{padding:3px 12px;font-size:11px;font-weight:500;color:var(--muted);background:var(--s3);border:1px solid var(--border);border-radius:12px;cursor:pointer;transition:all .2s}
 .mtn-btn:hover{color:var(--text);border-color:var(--border2)}
 .mtn-btn.on{color:#fff;background:var(--c26a);border-color:var(--c26a)}
+.month-bar .mtn-btn.on{color:#fff;background:var(--c25);border-color:var(--c25)}
 
 /* ── LAYOUT ── */
 .main{padding:20px 28px;padding-bottom:60px}
@@ -2212,7 +2213,7 @@ function buildCC3YMonth(mi){
       result[cc]={
         yr25: {s:Math.round(cs25*rs25), p2:Math.round(cp25*rp25)},
         yr26p:{s:Math.round(cs26p*rs26p), p2:Math.round(cp26p*rp26p)},
-        yr26a: CC_MONTH_ACTUAL[cc]?.[mi]||null,
+        yr26a: CC_MONTH_ACTUAL[cc]?.[mi]||(latestActMi>=0?CC_MONTH_ACTUAL[cc]?.[latestActMi]:null)||null,
       };
     });
   }
@@ -2256,6 +2257,7 @@ function renderU2mTree(mi=0){
 // 전역 월 선택
 // ============================================================
 let currentMonth = 0;
+let latestActMi = -1;
 
 function fmt억(v){
   if(v==null||isNaN(v)) return '-';
@@ -2278,13 +2280,25 @@ function setCurrentMonth(mi){
   renderMonthKpi(mi);
 }
 
+function autoSelectLatestMonth(){
+  const ov=DEPT_DATA.overview?.매출?.yr26actual;
+  let lmi=0;
+  if(ov) for(let i=11;i>=0;i--){if(ov[i]!=null){lmi=i;break;}}
+  setCurrentMonth(lmi);
+}
+
 function renderMonthKpi(mi){
   const MN=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
   const mn=MN[mi];
-  const gv=(m,i)=>m.yr26actual[i]??m.yr26base[i];
-  const ytdGv=(m,to)=>{let s=0;for(let i=0;i<=to;i++)s+=gv(m,i)??0;return s;};
+  // 최신 실적 월 계산
+  latestActMi=(()=>{const ov=DEPT_DATA.overview?.매출?.yr26actual;if(!ov)return -1;for(let i=11;i>=0;i--)if(ov[i]!=null)return i;return -1;})();
+  // 선택 월에 실적 없으면 최신 실적 월 값 사용
+  const getAct=m=>m.yr26actual[mi]??(latestActMi>=0?m.yr26actual[latestActMi]:null);
+  const actLbl=latestActMi>=0&&latestActMi<mi?`실적(${MN[latestActMi]})`:'실적';
   const ytd25=(m,to)=>m.yr25.slice(0,to+1).reduce((s,v)=>s+(v??0),0);
   const ytd26p=(m,to)=>m.yr26base.slice(0,to+1).reduce((s,v)=>s+(v??0),0);
+  // 실적 YTD: 최신 실적 월까지만 합산
+  const ytdAct=(m,to)=>{const cap=latestActMi>=0?Math.min(to,latestActMi):to;let s=0;for(let i=0;i<=cap;i++)s+=(m.yr26actual[i]??0);return s;};
 
   const pctStr=(a,b,lbl='계획比')=>{
     if(a==null||!b) return '';
@@ -2297,7 +2311,7 @@ function renderMonthKpi(mi){
       <div class="kpi-row"><span class="kpi-row-lbl" style="color:var(--c25)">25년</span><span class="kpi-row-val" style="color:var(--c25)">${v25}</span></div>
       <div class="kpi-row"><span class="kpi-row-lbl" style="color:var(--c26p)">계획</span><span class="kpi-row-val" style="color:var(--c26p)">${v26p}</span></div>
       <div class="kpi-divider"></div>
-      <div class="kpi-main-row"><span class="kpi-row-lbl" style="color:var(--c26a)">실적</span><span class="kpi-main-val" style="color:var(--c26a)">${v26a}</span></div>
+      <div class="kpi-main-row"><span class="kpi-row-lbl" style="color:var(--c26a)">${actLbl}</span><span class="kpi-main-val" style="color:var(--c26a)">${v26a}</span></div>
       <div class="kpi-delta" style="color:${dc}">${delta}</div>
     </div>`;
   const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
@@ -2307,8 +2321,8 @@ function renderMonthKpi(mi){
   set('ov-month-title',`📅 ${mn} 실적`);
   setH('ov-ytd-title',`📊 YTD 실적 <span style="font-size:11px;font-weight:400;color:var(--muted)">(1~${mn} 누적)</span>`);
   const ov=DEPT_DATA.overview;
-  const s25=ov.매출.yr25[mi], s26p=ov.매출.yr26base[mi], s26a=gv(ov.매출,mi);
-  const c25=ov.판관비.yr25[mi], c26p=ov.판관비.yr26base[mi], c26a=gv(ov.판관비,mi);
+  const s25=ov.매출.yr25[mi], s26p=ov.매출.yr26base[mi], s26a=getAct(ov.매출);
+  const c25=ov.판관비.yr25[mi], c26p=ov.판관비.yr26base[mi], c26a=getAct(ov.판관비);
   const p25=s25-c25, p26p=s26p-c26p, p26a=s26a!=null?s26a-c26a:null;
   const r25=s25>0?p25/s25*100:0, r26p=s26p>0?p26p/s26p*100:0;
   const r26a=s26a>0&&p26a!=null?p26a/s26a*100:null;
@@ -2322,8 +2336,8 @@ function renderMonthKpi(mi){
       r26a!=null?`계획比 ${(r26a-r26p)>=0?'+':''}${(r26a-r26p).toFixed(1)}%p`:'');
 
   // ── Overview YTD ──
-  const ys25=ytd25(ov.매출,mi), ys26p=ytd26p(ov.매출,mi), ys26a=ytdGv(ov.매출,mi);
-  const yc25=ytd25(ov.판관비,mi), yc26p=ytd26p(ov.판관비,mi), yc26a=ytdGv(ov.판관비,mi);
+  const ys25=ytd25(ov.매출,mi), ys26p=ytd26p(ov.매출,mi), ys26a=ytdAct(ov.매출,mi);
+  const yc25=ytd25(ov.판관비,mi), yc26p=ytd26p(ov.판관비,mi), yc26a=ytdAct(ov.판관비,mi);
   const yp25=ys25-yc25, yp26p=ys26p-yc26p, yp26a=ys26a-yc26a;
   const yr25=ys25>0?yp25/ys25*100:0, yr26pp=ys26p>0?yp26p/ys26p*100:0;
   const yr26a=ys26a>0?yp26a/ys26a*100:null;
@@ -2338,8 +2352,8 @@ function renderMonthKpi(mi){
 
   // ── 학원 mini-cards ──
   const hakCamps=['광진','성동','동대문','중랑'];
-  const hS=hakCamps.reduce((s,c)=>s+(gv(DEPT_DATA.camps[c].매출,mi)??0),0);
-  const hP=hakCamps.reduce((s,c)=>s+(gv(DEPT_DATA.camps[c].영업이익,mi)??0),0);
+  const hS=hakCamps.reduce((s,c)=>s+(getAct(DEPT_DATA.camps[c].매출)??0),0);
+  const hP=hakCamps.reduce((s,c)=>s+(getAct(DEPT_DATA.camps[c].영업이익)??0),0);
   const hC=hS-hP;
   const hS25=hakCamps.reduce((s,c)=>s+(DEPT_DATA.camps[c].매출.yr25[mi]??0),0);
   const hS26p=hakCamps.reduce((s,c)=>s+(DEPT_DATA.camps[c].매출.yr26base[mi]??0),0);
@@ -2354,8 +2368,8 @@ function renderMonthKpi(mi){
 
   // ── U2M mini-cards ──
   const u2mCamps=['중계','송파방이','미사','위례'];
-  const uS=u2mCamps.reduce((s,c)=>s+(gv(DEPT_DATA.camps[c].매출,mi)??0),0);
-  const uP=u2mCamps.reduce((s,c)=>s+(gv(DEPT_DATA.camps[c].영업이익,mi)??0),0);
+  const uS=u2mCamps.reduce((s,c)=>s+(getAct(DEPT_DATA.camps[c].매출)??0),0);
+  const uP=u2mCamps.reduce((s,c)=>s+(getAct(DEPT_DATA.camps[c].영업이익)??0),0);
   const uC=uS-uP;
   const uS25=u2mCamps.reduce((s,c)=>s+(DEPT_DATA.camps[c].매출.yr25[mi]??0),0);
   const uS26p=u2mCamps.reduce((s,c)=>s+(DEPT_DATA.camps[c].매출.yr26base[mi]??0),0);
@@ -2370,7 +2384,7 @@ function renderMonthKpi(mi){
 
   // ── 미래교육 mini-cards ──
   const mr=DEPT_DATA.mirae;
-  const mrBook=gv(mr.교재매출,mi), mrRemote=gv(mr.원격매출,mi), mrProfit=gv(mr.영업이익,mi);
+  const mrBook=getAct(mr.교재매출), mrRemote=getAct(mr.원격매출), mrProfit=getAct(mr.영업이익);
   const mrS=(mrBook??0)+(mrRemote??0);
   const mrC=mrS-(mrProfit??0);
   const mrBook26p=mr.교재매출.yr26base[mi], mrRemote26p=mr.원격매출.yr26base[mi];
@@ -2389,7 +2403,7 @@ function renderMonthKpi(mi){
 
   // ── 방과후 mini-cards ──
   const bg=DEPT_DATA.bghu;
-  const bgSuup=gv(bg.수업료매출,mi), bgJae=gv(bg.재료비매출,mi), bgProfit=gv(bg.영업이익,mi);
+  const bgSuup=getAct(bg.수업료매출), bgJae=getAct(bg.재료비매출), bgProfit=getAct(bg.영업이익);
   const bgTotal=(bgSuup??0)+(bgJae??0);
   const bgC=bgTotal-(bgProfit??0);
   set('bghu-val-total',fmt억(bgTotal));
@@ -4235,7 +4249,7 @@ function applyRawToDashboard(){
   inited['overview'] = false;
   // overview는 즉시 재렌더
   initOverview();
-  renderMonthKpi(currentMonth);
+  autoSelectLatestMonth();
 }
 
 function renderUploadSummary(){
@@ -4286,7 +4300,7 @@ applyAuth();
   await loadDeptData();   // yr25·yr26base를 DB에서 로드 (하드코딩 덮어쓰기)
   await loadRawDB();
   if(RAW_DB.length) applyRawToDashboard();
-  renderMonthKpi(0);
+  autoSelectLatestMonth();
   applyAuth();
   loadComments();
   loadStu26();
