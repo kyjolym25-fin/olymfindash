@@ -2518,6 +2518,17 @@ function renderMonthKpi(mi){
   const frBadge=document.getElementById('fr_month_badge');
   if(frBadge) frBadge.textContent=`📅 당월 (${mn})`;
   renderFranchiseKpi();
+
+  // ── 재원생 탭 연동 (초기화된 경우) ──
+  if(inited['students']){
+    const lbl=document.getElementById('stu_month_label');
+    if(lbl) lbl.textContent=`2026년 ${mi+1}월 실적 기준`;
+    const mt=document.getElementById('stu_math_title');
+    if(mt) mt.textContent=`수학 과목별 재원생 (${mi+1}월)`;
+    const et=document.getElementById('stu_eng_title');
+    if(et) et.textContent=`영어 과목별 재원생 (${mi+1}월)`;
+    renderStuKpi(mi);renderStuCards(mi);renderStuBar(mi);renderStuMathEng(mi);renderStuTable(mi);
+  }
 }
 
 // ============================================================
@@ -3052,7 +3063,7 @@ function buildPLTable(items){
 // STUDENTS
 // ============================================================
 let stuBarChart=null, stuTrendChart=null, stuMathChart=null, stuEngChart=null;
-let stuMonthIdx=0;
+// stuMonthIdx 제거 — currentMonth로 통합
 
 const CAMPS_HAK=['광진','성동','동대문','중랑'];
 const CAMPS_U2M=['중계','송파방이','위례','미사'];
@@ -3084,20 +3095,11 @@ function buildStuMonthBar(){
   const bar=document.getElementById('stu-month-bar'); if(!bar) return;
   const MN=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
   bar.innerHTML='<span class="month-bar-lbl">월 선택</span>'+
-    MN.map((m,i)=>`<button class="mtn-btn${i===stuMonthIdx?' on':''}" onclick="setStuMonth(${i})">${m}</button>`).join('')+
+    MN.map((m,i)=>`<button class="mtn-btn${i===currentMonth?' on':''}" onclick="setCurrentMonth(${i})">${m}</button>`).join('')+
     '<span id="stu_month_label" style="font-size:11px;color:var(--muted);margin-left:6px"></span>';
 }
 
-function setStuMonth(mi){
-  stuMonthIdx=mi;
-  document.querySelectorAll('#stu-month-bar .mtn-btn').forEach((b,i)=>b.classList.toggle('on',i===mi));
-  const mn=mi+1;
-  const lbl=document.getElementById('stu_month_label');
-  if(lbl) lbl.textContent=`2026년 ${mn}월 실적 기준`;
-  document.getElementById('stu_math_title').textContent=`수학 과목별 재원생 (${mn}월)`;
-  document.getElementById('stu_eng_title').textContent=`영어 과목별 재원생 (${mn}월)`;
-  renderStuKpi(mi);renderStuCards(mi);renderStuBar(mi);renderStuMathEng(mi);renderStuTable(mi);
-}
+function setStuMonth(mi){ setCurrentMonth(mi); }
 
 function renderStuCards(month){
   const hakEl=document.getElementById('stu_hak_cards');
@@ -3405,12 +3407,9 @@ function updateStudentTrend(){
 }
 
 function initStudents(){
-  // 데이터가 있는 최신 월 자동 선택
-  let lmi=0;
-  for(let i=11;i>=0;i--){if(CAMPS_ALL.some(c=>STU[c]?.yr26a?.합계?.[i]>0)){lmi=i;break;}}
-  stuMonthIdx=lmi;
   buildStuMonthBar();
-  renderStuKpi(lmi);renderStuCards(lmi);renderStuBar(lmi);renderStuMathEng(lmi);renderStuTable(lmi);updateStudentTrend();
+  renderStuKpi(currentMonth);renderStuCards(currentMonth);renderStuBar(currentMonth);
+  renderStuMathEng(currentMonth);renderStuTable(currentMonth);updateStudentTrend();
 }
 
 // ============================================================
@@ -3778,7 +3777,7 @@ function saveAdminStuData(){
   const stuInited = inited['students'];
   if(stuInited){
     inited['students'] = false; // 리셋해서 다음 방문시 재초기화
-    renderStuTable(stuMonthIdx ?? 0);
+    renderStuTable(currentMonth);
   }
 
   msg.style.color = 'var(--c26a)';
@@ -3860,7 +3859,7 @@ function handleStuXlsxUpload(event){
 
       // 재원생 탭 리렌더
       renderAdminStuInput();
-      if(inited['students']){ inited['students']=false; renderStuTable(stuMonthIdx??0); }
+      if(inited['students']){ inited['students']=false; renderStuTable(currentMonth); }
 
       msg.style.color='var(--c26a)';
       msg.textContent=`✓ ${processedMonths.sort((a,b)=>a-b).map(m=>m+'월').join(', ')} 재원생 데이터 적용 완료`;
