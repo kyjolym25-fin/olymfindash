@@ -919,15 +919,8 @@ thead th{font-size:13px}
 <!-- ═══════════════════════════ 재원생 현황 ═══════════════════════════ -->
 <div class="page" id="pg-students">
 
-  <!-- 월 선택 + KPI 요약 (동적) -->
-  <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap">
-    <span style="font-size:13px;font-weight:600">기준 월</span>
-    <div style="display:flex;gap:4px" id="month_btns">
-      <button class="pbtn on" onclick="setStuMonth(0,this)">1월</button>
-      <button class="pbtn" onclick="setStuMonth(1,this)">2월</button>
-    </div>
-    <span style="font-size:11px;color:var(--muted)" id="stu_month_label">2026년 1월 실적 기준</span>
-  </div>
+  <!-- 월 선택 -->
+  <div class="month-bar" id="stu-month-bar"></div>
 
   <!-- KPI 카드 (동적) -->
   <div id="stu_kpi_cards" class="mini-cards" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px"></div>
@@ -2993,15 +2986,23 @@ function getStu(campus,month){
   };
 }
 
-function setStuMonth(idx,btn){
-  stuMonthIdx=idx;
-  const mn=idx===0?'1':'2';
-  document.querySelectorAll('#month_btns .pbtn').forEach(b=>b.classList.remove('on'));
-  btn.classList.add('on');
-  document.getElementById('stu_month_label').textContent=`2026년 ${mn}월 실적 기준`;
+function buildStuMonthBar(){
+  const bar=document.getElementById('stu-month-bar'); if(!bar) return;
+  const MN=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  bar.innerHTML='<span class="month-bar-lbl">월 선택</span>'+
+    MN.map((m,i)=>`<button class="mtn-btn${i===stuMonthIdx?' on':''}" onclick="setStuMonth(${i})">${m}</button>`).join('')+
+    '<span id="stu_month_label" style="font-size:11px;color:var(--muted);margin-left:6px"></span>';
+}
+
+function setStuMonth(mi){
+  stuMonthIdx=mi;
+  document.querySelectorAll('#stu-month-bar .mtn-btn').forEach((b,i)=>b.classList.toggle('on',i===mi));
+  const mn=mi+1;
+  const lbl=document.getElementById('stu_month_label');
+  if(lbl) lbl.textContent=`2026년 ${mn}월 실적 기준`;
   document.getElementById('stu_math_title').textContent=`수학 과목별 재원생 (${mn}월)`;
   document.getElementById('stu_eng_title').textContent=`영어 과목별 재원생 (${mn}월)`;
-  renderStuKpi(idx);renderStuCards(idx);renderStuBar(idx);renderStuMathEng(idx);renderStuTable(idx);
+  renderStuKpi(mi);renderStuCards(mi);renderStuBar(mi);renderStuMathEng(mi);renderStuTable(mi);
 }
 
 function renderStuCards(month){
@@ -3060,7 +3061,7 @@ function renderStuCards(month){
 }
 
 function renderStuKpi(month){
-  const mn = month===0?'1':'2';
+  const mn = month+1;
   const tot26 = CAMPS_ALL.reduce((s,c)=>s+getStu(c,month).a26, 0);
   const tot25 = CAMPS_ALL.reduce((s,c)=>s+getStu(c,month).a25, 0);
   const diff = tot26-tot25;
@@ -3096,8 +3097,7 @@ function renderStuBar(month){
     dsBar('25년 실적',CAMPS_ALL.map(c=>getStu(c,month).a25),C25),
     dsBar('26년 실적',CAMPS_ALL.map(c=>getStu(c,month).a26),C26A),
   ]);
-  const mn=month===0?'1':'2';
-  document.getElementById('stu_bar_label').textContent=`${mn}월 기준 · 25년 vs 26년 실적 (명)`;
+  document.getElementById('stu_bar_label').textContent=`${month+1}월 기준 · 25년 vs 26년 실적 (명)`;
 }
 
 function renderStuMathEng(month){
@@ -3121,7 +3121,7 @@ function renderStuMathEng(month){
 }
 
 function renderStuTable(month){
-  const mn=month===0?'1월':'2월';
+  const mn=`${month+1}월`;
   document.getElementById('stu_table_title').textContent=`캠퍼스별 재원생 상세표 (${mn})`;
   let html=''; let tot26=0,tot25=0;
   CAMPS_ALL.forEach(c=>{
@@ -3311,7 +3311,12 @@ function updateStudentTrend(){
 }
 
 function initStudents(){
-  renderStuKpi(0);renderStuCards(0);renderStuBar(0);renderStuMathEng(0);renderStuTable(0);updateStudentTrend();
+  // 데이터가 있는 최신 월 자동 선택
+  let lmi=0;
+  for(let i=11;i>=0;i--){if(CAMPS_ALL.some(c=>STU[c]?.yr26a?.합계?.[i]>0)){lmi=i;break;}}
+  stuMonthIdx=lmi;
+  buildStuMonthBar();
+  renderStuKpi(lmi);renderStuCards(lmi);renderStuBar(lmi);renderStuMathEng(lmi);renderStuTable(lmi);updateStudentTrend();
 }
 
 // ============================================================
