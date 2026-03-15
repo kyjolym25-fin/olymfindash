@@ -4567,16 +4567,15 @@ function applyRawToDashboard(){
     });
   });
 
-  // ── 5c. 총괄 overview: 학원본부 공통비가 RAW_DB에 없을 경우 계획값으로 보정 ──
-  // 사업부 KPI는 학원본부 포함(getVal fallback)이지만 overview는 raw합계만 사용 → 불일치 해소
+  // ── 5c. 총괄 overview: 캠퍼스 안분 공통비 실적 반영 ──
+  // RAW_DB에 포함되지 않는 배분 항목 → 월별 실적 확정값을 직접 기입 (단위: M원)
+  const CAMPUS_COMMON_ACTUAL = [64, null, null, null, null, null, null, null, null, null, null, null];
   months.forEach((mn,mi)=>{
     if(DEPT_DATA.overview.판관비.yr26actual[mi] == null) return;
-    const hqActual = DEPT_DATA.camps['학원본부'].영업이익.yr26actual[mi];
-    if(hqActual == null){
-      // 학원본부가 RAW_DB에 없는 경우 → 계획값(비용)을 overview 판관비에 가산
-      const hqCost = -(DEPT_DATA.camps['학원본부'].영업이익.yr26base[mi] ?? 0);
-      DEPT_DATA.overview.판관비.yr26actual[mi] = parseFloat(((DEPT_DATA.overview.판관비.yr26actual[mi]) + hqCost).toFixed(2));
-    }
+    const hqCost = CAMPUS_COMMON_ACTUAL[mi];
+    if(hqCost == null) return;
+    DEPT_DATA.overview.판관비.yr26actual[mi] = parseFloat(((DEPT_DATA.overview.판관비.yr26actual[mi]) + hqCost).toFixed(2));
+    DEPT_DATA.camps['학원본부'].영업이익.yr26actual[mi] = -hqCost;
   });
 
   // CC별 월별 실적 집계 (수학/영어 분리, 영업이익은 매출비율로 배분)
