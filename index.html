@@ -2202,14 +2202,13 @@ function buildCC3YMonth(mi){
       const rp25=ref25p!==0?ref.yr25.p2/ref25p:1/ccs.length;
       const rs26p=ref26ps>0?ref.yr26p.s/ref26ps:1/ccs.length;
       const rp26p=ref26pp!==0?ref.yr26p.p2/ref26pp:1/ccs.length;
-      const eff=latestActMi>=0?Math.min(mi,latestActMi):-1;
-      let yr26a_month=null;
-      if(eff>=0){
-        yr26a_month=CC_MONTH_ACTUAL[cc]?.[eff]||null;
-        if(!yr26a_month){
-          const campS=cd.매출.yr26actual?.[eff],campP=cd.영업이익.yr26actual?.[eff];
-          if(campS!=null) yr26a_month={s:Math.round(campS*M*rs26p),p2:Math.round((campP??0)*M*rp26p)};
-        }
+      const effMi=latestActMi>=0?Math.min(mi,latestActMi):mi;
+      // CC 실제 데이터 우선, 없으면 camp-level actual × CC 비율
+      let yr26a_month = CC_MONTH_ACTUAL[cc]?.[effMi]||
+                        (latestActMi>=0?CC_MONTH_ACTUAL[cc]?.[latestActMi]:null)||null;
+      if(!yr26a_month && latestActMi>=0){
+        const campS=cd.매출.yr26actual?.[effMi],campP=cd.영업이익.yr26actual?.[effMi];
+        if(campS!=null) yr26a_month={s:Math.round(campS*M*rs26p),p2:Math.round((campP??0)*M*rp26p)};
       }
       result[cc]={
         yr25: {s:Math.round(cs25*rs25), p2:Math.round(cp25*rp25)},
