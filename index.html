@@ -4323,6 +4323,25 @@ function applyRawToDashboard(){
     });
   });
 
+  // ── 5b. 캠퍼스 실적 fallback: r.cp 없을 때 사업본부 합계를 yr25 비율로 배분 ──
+  const HAK_CAMPS=['광진','성동','동대문','중랑'];
+  const U2M_CAMPS=['중계','송파방이','미사','위례'];
+  months.forEach((mn,mi)=>{
+    [['학원사업본부',HAK_CAMPS],['U2M사업부',U2M_CAMPS]].forEach(([dept,camps])=>{
+      if(camps.every(c=>DEPT_DATA.camps[c].매출.yr26actual[mi]!=null)) return; // 이미 채워진 경우 스킵
+      const dS=sum(r=>r.d===dept&&r.m===mn&&r.t==='매출');
+      const dC=sum(r=>r.d===dept&&r.m===mn&&r.t==='판매관리비');
+      if(!dS) return;
+      const tot25=camps.reduce((s,c)=>s+(DEPT_DATA.camps[c].매출.yr25[mi]??0),0);
+      camps.forEach(c=>{
+        if(DEPT_DATA.camps[c].매출.yr26actual[mi]!=null) return;
+        const ratio=tot25>0?(DEPT_DATA.camps[c].매출.yr25[mi]??0)/tot25:1/camps.length;
+        DEPT_DATA.camps[c].매출.yr26actual[mi]=Math.round(dS*ratio/1e6);
+        DEPT_DATA.camps[c].영업이익.yr26actual[mi]=Math.round((dS-dC)*ratio/1e6);
+      });
+    });
+  });
+
   // CC별 월별 실적 집계 (수학/영어 분리, 영업이익은 매출비율로 배분)
   CC_MONTH_ACTUAL = {};
   const CC_SPLIT = {
