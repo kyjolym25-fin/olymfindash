@@ -2312,16 +2312,26 @@ function fmt억(v){
   return v.toFixed(1)+'백만';
 }
 
-function buildMonthBar(barId, onclickFn, monthVal){
+function _getActualMonths(){
+  const ov=DEPT_DATA.overview?.매출?.yr26actual;
+  if(!ov) return [0];
+  const months=[];
+  for(let i=0;i<12;i++) if(ov[i]!=null) months.push(i);
+  return months.length ? months : [0];
+}
+
+function buildMonthBar(barId, onclickFn, monthVal, extraHtml=''){
   const bar = document.getElementById(barId); if(!bar) return;
   const MN=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
-  bar.innerHTML='<span class="month-bar-lbl">월 선택</span>'+
-    MN.map((m,i)=>`<button class="mtn-btn${i===monthVal?' on':''}" onclick="${onclickFn}(${i})">${m}</button>`).join('');
+  const actMths = _getActualMonths();
+  bar.innerHTML='<span class="month-bar-lbl">기준 월</span>'+
+    actMths.map(i=>`<button class="mtn-btn${i===monthVal?' on':''}" data-mi="${i}" onclick="${onclickFn}(${i})">${MN[i]}</button>`).join('')+
+    extraHtml;
 }
 
 function _updateBarBtn(barId, mi){
   const bar=document.getElementById(barId); if(!bar) return;
-  bar.querySelectorAll('.mtn-btn').forEach((b,i)=>b.classList.toggle('on',i===mi));
+  bar.querySelectorAll('.mtn-btn').forEach(b=>b.classList.toggle('on', parseInt(b.dataset.mi)===mi));
 }
 
 function setOvMonth(mi){
@@ -2358,9 +2368,13 @@ function _calcLatestActMi(){
 function autoSelectLatestMonth(){
   latestActMi = _calcLatestActMi();
   const lmi = latestActMi >= 0 ? latestActMi : 0;
-  setOvMonth(lmi);
-  setDeptMonth(lmi);
-  if(inited['students']) setStuMonth(lmi);
+  // 실적 데이터 기준으로 바 재빌드 (표시 월 갱신)
+  buildMonthBar('ov-month-bar', 'setOvMonth', lmi);
+  buildMonthBar('dept-month-bar', 'setDeptMonth', lmi);
+  ovMonth = lmi; deptMonth = lmi;
+  renderOvKpi(lmi);
+  renderDeptKpi(lmi);
+  if(inited['students']){ buildStuMonthBar(); setStuMonth(lmi); }
   else stuMonth = lmi;
 }
 
@@ -3089,11 +3103,8 @@ function getStu(campus,month){
 }
 
 function buildStuMonthBar(){
-  const bar=document.getElementById('stu-month-bar'); if(!bar) return;
-  const MN=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
-  bar.innerHTML='<span class="month-bar-lbl">월 선택</span>'+
-    MN.map((m,i)=>`<button class="mtn-btn${i===stuMonth?' on':''}" onclick="setStuMonth(${i})">${m}</button>`).join('')+
-    '<span id="stu_month_label" style="font-size:11px;color:var(--muted);margin-left:6px"></span>';
+  buildMonthBar('stu-month-bar', 'setStuMonth', stuMonth,
+    '<span id="stu_month_label" style="font-size:11px;color:var(--muted);margin-left:6px"></span>');
 }
 
 
