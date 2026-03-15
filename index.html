@@ -4417,6 +4417,10 @@ function runDiag(){
     lines.push(`cp 값: ${cps}`);
     const ccs=[...new Set(RAW_DB.map(r=>r.cc))].slice(0,8).join(', ');
     lines.push(`cc 값(최대8): ${ccs}`);
+    // 공통비 진단
+    const commonRows = RAW_DB.filter(r=>r.a&&r.a.includes('공통'));
+    lines.push(`공통비 관련 행(${commonRows.length}건): ${commonRows.slice(0,3).map(r=>`t=${r.t}|a=${r.a}|d=${r.d}|v=${r.v}`).join(' / ')||'(없음)'}`);
+    lines.push(`overview 판관비 yr26actual[0]: ${DEPT_DATA.overview.판관비.yr26actual[0]}`);
     // effCamp 결과
     const campMap={};
     RAW_DB.forEach(r=>{const c=effC(r);if(c){campMap[c]=(campMap[c]||0)+1;}});
