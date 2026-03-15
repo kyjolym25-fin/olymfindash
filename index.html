@@ -336,7 +336,6 @@ thead th{font-size:13px}
     <div class="logo">🏢</div>
     <div style="display:flex;flex-direction:column;gap:5px">
       <div class="hdr-title">올림피아드교육 손익실적 대시보드</div>
-      <div class="hdr-sub">2026년 1월 · 손익계산서 기반 자동 집계</div>
     </div>
   </div>
   <div style="display:flex;align-items:center;gap:10px">
@@ -2203,10 +2202,19 @@ function buildCC3YMonth(mi){
       const rp25=ref25p!==0?ref.yr25.p2/ref25p:1/ccs.length;
       const rs26p=ref26ps>0?ref.yr26p.s/ref26ps:1/ccs.length;
       const rp26p=ref26pp!==0?ref.yr26p.p2/ref26pp:1/ccs.length;
+      const eff=latestActMi>=0?Math.min(mi,latestActMi):-1;
+      let yr26a_month=null;
+      if(eff>=0){
+        yr26a_month=CC_MONTH_ACTUAL[cc]?.[eff]||null;
+        if(!yr26a_month){
+          const campS=cd.매출.yr26actual?.[eff],campP=cd.영업이익.yr26actual?.[eff];
+          if(campS!=null) yr26a_month={s:Math.round(campS*M*rs26p),p2:Math.round((campP??0)*M*rp26p)};
+        }
+      }
       result[cc]={
         yr25: {s:Math.round(cs25*rs25), p2:Math.round(cp25*rp25)},
         yr26p:{s:Math.round(cs26p*rs26p), p2:Math.round(cp26p*rp26p)},
-        yr26a: CC_MONTH_ACTUAL[cc]?.[mi]||(latestActMi>=0?CC_MONTH_ACTUAL[cc]?.[latestActMi]:null)||null,
+        yr26a: yr26a_month,
       };
     });
   }
@@ -2244,6 +2252,10 @@ function buildCC3YYtd(mi){
         for(let i=0;i<=actCap;i++){
           const a=CC_MONTH_ACTUAL[cc]?.[i];
           if(a){ytdS+=a.s;ytdP+=a.p2;hasAny=true;}
+          else{
+            const campS=cd.매출.yr26actual?.[i],campP=cd.영업이익.yr26actual?.[i];
+            if(campS!=null){ytdS+=Math.round(campS*M*rs26p);ytdP+=Math.round((campP??0)*M*rp26p);hasAny=true;}
+          }
         }
       }
       result[cc]={
