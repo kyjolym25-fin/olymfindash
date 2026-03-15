@@ -2177,90 +2177,103 @@ function renderCC3YTree(containerId, groupDef, dataObj){
   document.getElementById(containerId).innerHTML = html;
 }
 
-// ── CC별 월별 데이터 빌더 (DEPT_DATA 월별값 × 1월 비율) ──
+// ── CC별 공통 맵 ──
+const CAMP_CC_MAP={
+  '광진':  {ccs:['광진수학','광진영어'],  src:()=>CC3Y},
+  '성동':  {ccs:['성동수학','성동영어'],  src:()=>CC3Y},
+  '동대문':{ccs:['동대문수학','동대문영어'],src:()=>CC3Y},
+  '중랑':  {ccs:['중랑수학','중랑영어'],  src:()=>CC3Y},
+  '중계':  {ccs:['중계수학'],            src:()=>CC3Y_U2M},
+  '송파방이':{ccs:['송파방이수학'],       src:()=>CC3Y_U2M},
+  '미사':  {ccs:['미사수학'],            src:()=>CC3Y_U2M},
+  '위례':  {ccs:['위례수학'],            src:()=>CC3Y_U2M},
+};
+
+// CC별 비율 계산 헬퍼: CC3Y 레퍼런스 기반 camp 내 CC 비율
+function _ccRatios(ccs, src){
+  const ref25s=ccs.reduce((s,cc)=>s+(src[cc]?.yr25.s||0),0);
+  const ref25p=ccs.reduce((s,cc)=>s+(src[cc]?.yr25.p2||0),0);
+  const ref26ps=ccs.reduce((s,cc)=>s+(src[cc]?.yr26p.s||0),0);
+  const ref26pp=ccs.reduce((s,cc)=>s+(src[cc]?.yr26p.p2||0),0);
+  return ccs.map(cc=>({
+    cc,
+    rs25: ref25s>0?(src[cc]?.yr25.s||0)/ref25s:1/ccs.length,
+    rp25: ref25p!==0?(src[cc]?.yr25.p2||0)/ref25p:1/ccs.length,
+    rs26p:ref26ps>0?(src[cc]?.yr26p.s||0)/ref26ps:1/ccs.length,
+    rp26p:ref26pp!==0?(src[cc]?.yr26p.p2||0)/ref26pp:1/ccs.length,
+  }));
+}
+
+// CC yr26a 단일 월 조회: CC_MONTH_ACTUAL → camp yr26actual × CC비율 순으로 fallback
+function _getCC26a(cc, mi, cd, rs26p, rp26p){
+  const M=1e6;
+  // 1. CC 직접 데이터 (step 6에서 구축)
+  if(CC_MONTH_ACTUAL[cc]?.[mi]) return CC_MONTH_ACTUAL[cc][mi];
+  // 2. latestActMi 이후 월이면 최신 실적 월로 대체
+  if(latestActMi>=0 && mi>latestActMi && CC_MONTH_ACTUAL[cc]?.[latestActMi])
+    return CC_MONTH_ACTUAL[cc][latestActMi];
+  // 3. camp yr26actual × CC비율
+  const effMi = (cd.매출.yr26actual[mi]!=null) ? mi
+               : (latestActMi>=0 && cd.매출.yr26actual[latestActMi]!=null) ? latestActMi : -1;
+  if(effMi<0) return null;
+  const cS=cd.매출.yr26actual[effMi], cP=cd.영업이익.yr26actual[effMi]??0;
+  return {s:Math.round(cS*M*rs26p), p2:Math.round(cP*M*rp26p)};
+}
+
+// ── CC별 월별 데이터 빌더 ──
 function buildCC3YMonth(mi){
   const M=1e6;
-  const CAMP_CC={
-    '광진':{ccs:['광진수학','광진영어'],src:CC3Y},'성동':{ccs:['성동수학','성동영어'],src:CC3Y},
-    '동대문':{ccs:['동대문수학','동대문영어'],src:CC3Y},'중랑':{ccs:['중랑수학','중랑영어'],src:CC3Y},
-    '중계':{ccs:['중계수학'],src:CC3Y_U2M},'송파방이':{ccs:['송파방이수학'],src:CC3Y_U2M},
-    '미사':{ccs:['미사수학'],src:CC3Y_U2M},'위례':{ccs:['위례수학'],src:CC3Y_U2M},
-  };
   const result={};
-  for(const [camp,{ccs,src}] of Object.entries(CAMP_CC)){
+  for(const [camp,{ccs,src:srcFn}] of Object.entries(CAMP_CC_MAP)){
     const cd=DEPT_DATA.camps[camp]; if(!cd) continue;
-    const ref25s=ccs.reduce((s,cc)=>s+(src[cc]?.yr25.s||0),0);
-    const ref25p=ccs.reduce((s,cc)=>s+(src[cc]?.yr25.p2||0),0);
-    const ref26ps=ccs.reduce((s,cc)=>s+(src[cc]?.yr26p.s||0),0);
-    const ref26pp=ccs.reduce((s,cc)=>s+(src[cc]?.yr26p.p2||0),0);
+    const src=srcFn();
     const cs25=(cd.매출.yr25[mi]??0)*M, cp25=(cd.영업이익.yr25[mi]??0)*M;
     const cs26p=(cd.매출.yr26base[mi]??cd.매출.yr26base[0]??0)*M;
     const cp26p=(cd.영업이익.yr26base[mi]??cd.영업이익.yr26base[0]??0)*M;
-    ccs.forEach(cc=>{
-      const ref=src[cc]; if(!ref) return;
-      const rs25=ref25s>0?ref.yr25.s/ref25s:1/ccs.length;
-      const rp25=ref25p!==0?ref.yr25.p2/ref25p:1/ccs.length;
-      const rs26p=ref26ps>0?ref.yr26p.s/ref26ps:1/ccs.length;
-      const rp26p=ref26pp!==0?ref.yr26p.p2/ref26pp:1/ccs.length;
+    for(const {cc,rs25,rp25,rs26p,rp26p} of _ccRatios(ccs,src)){
       result[cc]={
         yr25: {s:Math.round(cs25*rs25), p2:Math.round(cp25*rp25)},
-        yr26p:{s:Math.round(cs26p*rs26p), p2:Math.round(cp26p*rp26p)},
-        yr26a: (()=>{
-          const eMi=latestActMi>=0?Math.min(mi,latestActMi):mi;
-          const cc_a=CC_MONTH_ACTUAL[cc]?.[eMi]||(latestActMi>=0?CC_MONTH_ACTUAL[cc]?.[latestActMi]:null)||null;
-          if(cc_a) return cc_a;
-          const cS=cd.매출.yr26actual?.[eMi],cP=cd.영업이익.yr26actual?.[eMi];
-          return cS!=null?{s:Math.round(cS*M*rs26p),p2:Math.round((cP??0)*M*rp26p)}:null;
-        })(),
+        yr26p:{s:Math.round(cs26p*rs26p),p2:Math.round(cp26p*rp26p)},
+        yr26a: _getCC26a(cc,mi,cd,rs26p,rp26p),
       };
-    });
+    }
   }
   return result;
 }
 
-// ── CC별 YTD 누적 빌더 (0~mi 누적, 실적은 0~min(mi,latestActMi)) ──
+// ── CC별 YTD 누적 빌더 (0~min(mi,latestActMi)) ──
 function buildCC3YYtd(mi){
   const M=1e6;
   const actCap=latestActMi>=0?Math.min(mi,latestActMi):-1;
-  const CAMP_CC={
-    '광진':{ccs:['광진수학','광진영어'],src:CC3Y},'성동':{ccs:['성동수학','성동영어'],src:CC3Y},
-    '동대문':{ccs:['동대문수학','동대문영어'],src:CC3Y},'중랑':{ccs:['중랑수학','중랑영어'],src:CC3Y},
-    '중계':{ccs:['중계수학'],src:CC3Y_U2M},'송파방이':{ccs:['송파방이수학'],src:CC3Y_U2M},
-    '미사':{ccs:['미사수학'],src:CC3Y_U2M},'위례':{ccs:['위례수학'],src:CC3Y_U2M},
-  };
   const sumArr=(arr,to)=>arr.slice(0,to+1).reduce((s,v)=>s+(v??0),0);
   const result={};
-  for(const [camp,{ccs,src}] of Object.entries(CAMP_CC)){
+  for(const [camp,{ccs,src:srcFn}] of Object.entries(CAMP_CC_MAP)){
     const cd=DEPT_DATA.camps[camp]; if(!cd) continue;
-    const ref25s=ccs.reduce((s,cc)=>s+(src[cc]?.yr25.s||0),0);
-    const ref25p=ccs.reduce((s,cc)=>s+(src[cc]?.yr25.p2||0),0);
-    const ref26ps=ccs.reduce((s,cc)=>s+(src[cc]?.yr26p.s||0),0);
-    const ref26pp=ccs.reduce((s,cc)=>s+(src[cc]?.yr26p.p2||0),0);
+    const src=srcFn();
     const cs25=sumArr(cd.매출.yr25,mi)*M, cp25=sumArr(cd.영업이익.yr25,mi)*M;
     const cs26p=sumArr(cd.매출.yr26base,mi)*M, cp26p=sumArr(cd.영업이익.yr26base,mi)*M;
-    ccs.forEach(cc=>{
-      const ref=src[cc]; if(!ref) return;
-      const rs25=ref25s>0?ref.yr25.s/ref25s:1/ccs.length;
-      const rp25=ref25p!==0?ref.yr25.p2/ref25p:1/ccs.length;
-      const rs26p=ref26ps>0?ref.yr26p.s/ref26ps:1/ccs.length;
-      const rp26p=ref26pp!==0?ref.yr26p.p2/ref26pp:1/ccs.length;
+    for(const {cc,rs25,rp25,rs26p,rp26p} of _ccRatios(ccs,src)){
       let ytdS=0,ytdP=0,hasAny=false;
       if(actCap>=0){
         for(let i=0;i<=actCap;i++){
           const a=CC_MONTH_ACTUAL[cc]?.[i];
           if(a){ytdS+=a.s;ytdP+=a.p2;hasAny=true;}
           else{
-            const cS=cd.매출.yr26actual?.[i],cP=cd.영업이익.yr26actual?.[i];
-            if(cS!=null){ytdS+=Math.round(cS*M*rs26p);ytdP+=Math.round((cP??0)*M*rp26p);hasAny=true;}
+            const cS=cd.매출.yr26actual?.[i];
+            if(cS!=null){
+              ytdS+=Math.round(cS*M*rs26p);
+              ytdP+=Math.round((cd.영업이익.yr26actual[i]??0)*M*rp26p);
+              hasAny=true;
+            }
           }
         }
       }
       result[cc]={
         yr25: {s:Math.round(cs25*rs25), p2:Math.round(cp25*rp25)},
-        yr26p:{s:Math.round(cs26p*rs26p), p2:Math.round(cp26p*rp26p)},
+        yr26p:{s:Math.round(cs26p*rs26p),p2:Math.round(cp26p*rp26p)},
         yr26a: hasAny?{s:ytdS,p2:ytdP}:null,
       };
-    });
+    }
   }
   return result;
 }
@@ -2368,6 +2381,12 @@ function setStuMonth(mi){
 }
 
 function _calcLatestActMi(){
+  // 1순위: CC_MONTH_ACTUAL 또는 camp yr26actual (업로드된 실제 데이터)
+  for(let i=11;i>=0;i--){
+    if(Object.values(CC_MONTH_ACTUAL).some(arr=>arr[i]!=null)) return i;
+    if(Object.values(DEPT_DATA.camps).some(c=>c.매출.yr26actual[i]!=null)) return i;
+  }
+  // 2순위: overview yr26actual (하드코딩 포함 — KPI 표시용)
   const ov=DEPT_DATA.overview?.매출?.yr26actual;
   if(!ov) return -1;
   for(let i=11;i>=0;i--) if(ov[i]!=null) return i;
@@ -4416,12 +4435,15 @@ function applyRawToDashboard(){
   setCardVis('bghu_profit_mtn_card',  hasActual(DEPT_DATA.bghu.영업이익));
   setCardVis('bghu_sales_mtn_card',   hasActual(DEPT_DATA.bghu.수업료매출));
 
-  // ── 6. 초기화된 탭 리셋 → 다음 방문시 재렌더 ──
+  // ── 6. 탭 리셋 후 가시 탭 즉시 재렌더 ──
+  const _wasHak = inited['dept'];
+  const _wasU2m = inited['dept_u2m'];
   Object.keys(inited).forEach(k=>{ inited[k]=false; });
-  inited['overview'] = false;
-  // overview는 즉시 재렌더
   initOverview();
   autoSelectLatestMonth();
+  // 이미 열린 CC 트리는 데이터 갱신 즉시 반영
+  if(_wasHak){ inited['dept']=true; renderHakwonTree(deptMonth); }
+  if(_wasU2m){ inited['dept_u2m']=true; renderU2mTree(deptMonth); }
 }
 
 function renderUploadSummary(){
