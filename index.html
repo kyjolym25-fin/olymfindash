@@ -4232,6 +4232,15 @@ function applyRawToDashboard(){
 
   const sum = (filter) => RAW_DB.filter(filter).reduce((s,r)=>s+r.v, 0);
   const CAMPS_LIST = ['광진','성동','동대문','중랑','중계','송파방이','미사','위례'];
+  // r.cp가 없을 때 r.cc 접두사로 캠퍼스 유추
+  const _campPfx = ['광진','성동','동대문','중랑','중계','송파방이','미사','위례'];
+  const effCamp = r => {
+    if(r.cp && r.cp.trim() && r.cp !== '-') return r.cp;
+    for(const c of _campPfx){ if(r.cc && r.cc.startsWith(c)) return c; }
+    return null;
+  };
+  // "U2M사업부" → "U2M사업본부" 정규화
+  const effDept = r => (r.d === 'U2M사업부' ? 'U2M사업본부' : r.d);
 
   // ── 1. 월별 총괄 매출·판관비 갱신 ──
   const months = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
@@ -4261,18 +4270,18 @@ function applyRawToDashboard(){
 
   // ── 3. 캠퍼스별 판관비 상세 갱신 ──
   CAMPS_LIST.forEach(camp=>{
-    const hasCamp = RAW_DB.some(r=>r.cp===camp);
+    const hasCamp = RAW_DB.some(r=>effCamp(r)===camp);
     if(!hasCamp) return;
     const a = CAMP_COST_26A[camp];
     if(!a) return;
-    a.sales   = sum(r=>r.cp===camp && r.t==='매출');
-    a.staff   = sum(r=>r.cp===camp && r.t==='판매관리비' && costCat(r.a)==='staff');
-    a.instr   = sum(r=>r.cp===camp && r.t==='판매관리비' && costCat(r.a)==='instr');
-    a.vehicle = sum(r=>r.cp===camp && r.t==='판매관리비' && costCat(r.a)==='vehicle');
-    a.rent    = sum(r=>r.cp===camp && r.t==='판매관리비' && costCat(r.a)==='rent');
-    a.bldg    = sum(r=>r.cp===camp && r.t==='판매관리비' && costCat(r.a)==='bldg');
-    a.adv     = sum(r=>r.cp===camp && r.t==='판매관리비' && costCat(r.a)==='adv');
-    a.other   = sum(r=>r.cp===camp && r.t==='판매관리비' && costCat(r.a)==='other');
+    a.sales   = sum(r=>effCamp(r)===camp && r.t==='매출');
+    a.staff   = sum(r=>effCamp(r)===camp && r.t==='판매관리비' && costCat(r.a)==='staff');
+    a.instr   = sum(r=>effCamp(r)===camp && r.t==='판매관리비' && costCat(r.a)==='instr');
+    a.vehicle = sum(r=>effCamp(r)===camp && r.t==='판매관리비' && costCat(r.a)==='vehicle');
+    a.rent    = sum(r=>effCamp(r)===camp && r.t==='판매관리비' && costCat(r.a)==='rent');
+    a.bldg    = sum(r=>effCamp(r)===camp && r.t==='판매관리비' && costCat(r.a)==='bldg');
+    a.adv     = sum(r=>effCamp(r)===camp && r.t==='판매관리비' && costCat(r.a)==='adv');
+    a.other   = sum(r=>effCamp(r)===camp && r.t==='판매관리비' && costCat(r.a)==='other');
     a.total   = a.staff+a.instr+a.vehicle+a.rent+a.bldg+a.adv+a.other;
   });
 
@@ -4291,9 +4300,9 @@ function applyRawToDashboard(){
 
   // ── 가맹사업 월별 재무 데이터 갱신 (RAW_DB → DEPT_DATA.franchise) ──
   months.forEach((mn,mi)=>{
-    if(!RAW_DB.some(r=>r.m===mn && r.cp==='교육넷')) return;
+    if(!RAW_DB.some(r=>r.m===mn && effCamp(r)==='교육넷')) return;
     const s = sum(r=>r.m===mn && r.t==='매출' && r.a==='가맹비수입');
-    const c = sum(r=>r.m===mn && r.cp==='교육넷' && r.t==='판매관리비');
+    const c = sum(r=>r.m===mn && effCamp(r)==='교육넷' && r.t==='판매관리비');
     if(s || c){
       DEPT_DATA.franchise.매출.yr26actual[mi]     = parseFloat((s/1e6).toFixed(1));
       DEPT_DATA.franchise.판관비.yr26actual[mi]   = parseFloat((c/1e6).toFixed(1));
@@ -4310,24 +4319,24 @@ function applyRawToDashboard(){
   // ── 5. 캠퍼스/카테고리별 월별 매출·영업이익 → DEPT_DATA.yr26actual 갱신 ──
   const allCamps = ['광진','성동','동대문','중랑','중계','송파방이','미사','위례'];
 
-  // 학원·U2M: cp 기준 매출 + 영업이익
+  // 학원·U2M: effCamp 기준 매출 + 영업이익
   allCamps.forEach(camp=>{
     months.forEach((mn,mi)=>{
-      const s = sum(r=>r.cp===camp && r.m===mn && r.t==='매출');
-      const c = sum(r=>r.cp===camp && r.m===mn && r.t==='판매관리비');
+      const s = sum(r=>effCamp(r)===camp && r.m===mn && r.t==='매출');
+      const c = sum(r=>effCamp(r)===camp && r.m===mn && r.t==='판매관리비');
       if(s) DEPT_DATA.camps[camp].매출.yr26actual[mi] = Math.round(s/1e6);
       if(s||c) DEPT_DATA.camps[camp].영업이익.yr26actual[mi] = Math.round((s-c)/1e6);
     });
   });
 
-  // ── 5b. camp yr26actual fallback: r.cp 없을 때 사업본부 합계를 yr25 비율로 배분 ──
+  // ── 5b. camp yr26actual fallback: 캠퍼스 미식별 시 사업본부 합계를 yr25 비율로 배분 ──
   const HAK_C=['광진','성동','동대문','중랑'];
   const U2M_C=['중계','송파방이','미사','위례'];
   [['학원사업본부',HAK_C],['U2M사업본부',U2M_C]].forEach(([dept,camps])=>{
     months.forEach((mn,mi)=>{
       if(camps.every(c=>DEPT_DATA.camps[c].매출.yr26actual[mi]!=null)) return;
-      const dS=sum(r=>r.d===dept&&r.m===mn&&r.t==='매출');
-      const dC=sum(r=>r.d===dept&&r.m===mn&&r.t==='판매관리비');
+      const dS=sum(r=>effDept(r)===dept&&r.m===mn&&r.t==='매출');
+      const dC=sum(r=>effDept(r)===dept&&r.m===mn&&r.t==='판매관리비');
       if(!dS) return;
       const tot25=camps.reduce((s,c)=>s+(DEPT_DATA.camps[c].매출.yr25[mi]??0),0);
       camps.forEach(c=>{
@@ -4348,17 +4357,17 @@ function applyRawToDashboard(){
   };
   allCamps.forEach(camp=>{
     months.forEach((mn,mi)=>{
-      if(!RAW_DB.some(r=>r.cp===camp&&r.m===mn)) return;
+      if(!RAW_DB.some(r=>effCamp(r)===camp&&r.m===mn)) return;
       const ccs=CC_SPLIT[camp]||[];
       const cpWon=(DEPT_DATA.camps[camp].영업이익.yr26actual[mi]??null);
       const profitWon=cpWon!=null?cpWon*1e6:null;
       if(ccs.length===1){
-        const s=sum(r=>r.cp===camp&&r.m===mn&&r.t==='매출');
+        const s=sum(r=>effCamp(r)===camp&&r.m===mn&&r.t==='매출');
         if(s){ if(!CC_MONTH_ACTUAL[ccs[0]])CC_MONTH_ACTUAL[ccs[0]]=Array(12).fill(null);
           CC_MONTH_ACTUAL[ccs[0]][mi]={s,p2:profitWon??0}; }
       } else {
-        const s수=sum(r=>r.cp===camp&&r.m===mn&&r.t==='매출'&&r.s!=='영어');
-        const s영=sum(r=>r.cp===camp&&r.m===mn&&r.t==='매출'&&r.s==='영어');
+        const s수=sum(r=>effCamp(r)===camp&&r.m===mn&&r.t==='매출'&&r.s!=='영어');
+        const s영=sum(r=>effCamp(r)===camp&&r.m===mn&&r.t==='매출'&&r.s==='영어');
         const tot=s수+s영;
         if(s수){ if(!CC_MONTH_ACTUAL[ccs[0]])CC_MONTH_ACTUAL[ccs[0]]=Array(12).fill(null);
           CC_MONTH_ACTUAL[ccs[0]][mi]={s:s수,p2:profitWon!=null&&tot>0?Math.round(profitWon*s수/tot):0}; }
@@ -4369,22 +4378,24 @@ function applyRawToDashboard(){
   });
 
   // 미래교육
+  const 미래명 = ['미래교육사업부','미래교육사업본부'];
   months.forEach((mn,mi)=>{
-    const 교재 = sum(r=>r.d==='미래교육사업부' && r.m===mn && r.t==='매출' && r.a&&r.a.includes('교재'));
-    const 원격 = sum(r=>r.d==='미래교육사업부' && r.m===mn && r.t==='매출' && r.a&&(r.a.includes('원격')||r.a.includes('온라인')));
-    const ms   = sum(r=>r.d==='미래교육사업부' && r.m===mn && r.t==='매출');
-    const mc   = sum(r=>r.d==='미래교육사업부' && r.m===mn && r.t==='판매관리비');
+    const 교재 = sum(r=>미래명.includes(effDept(r)) && r.m===mn && r.t==='매출' && r.a&&r.a.includes('교재'));
+    const 원격 = sum(r=>미래명.includes(effDept(r)) && r.m===mn && r.t==='매출' && r.a&&(r.a.includes('원격')||r.a.includes('온라인')));
+    const ms   = sum(r=>미래명.includes(effDept(r)) && r.m===mn && r.t==='매출');
+    const mc   = sum(r=>미래명.includes(effDept(r)) && r.m===mn && r.t==='판매관리비');
     if(교재)  DEPT_DATA.mirae.교재매출.yr26actual[mi] = Math.round(교재/1e6);
     if(원격)  DEPT_DATA.mirae.원격매출.yr26actual[mi] = Math.round(원격/1e6);
     if(ms||mc) DEPT_DATA.mirae.영업이익.yr26actual[mi] = Math.round((ms-mc)/1e6);
   });
 
   // 방과후
+  const 방과후명 = ['방과후사업본부','방과후사업부'];
   months.forEach((mn,mi)=>{
-    const 수업료 = sum(r=>r.d==='방과후사업본부' && r.m===mn && r.t==='매출' && r.a==='방과후학교');
-    const 재료비 = sum(r=>r.d==='방과후사업본부' && r.m===mn && r.t==='매출' && r.a==='재료비수입');
-    const bs    = sum(r=>r.d==='방과후사업본부' && r.m===mn && r.t==='매출');
-    const bc    = sum(r=>r.d==='방과후사업본부' && r.m===mn && r.t==='판매관리비');
+    const 수업료 = sum(r=>방과후명.includes(effDept(r)) && r.m===mn && r.t==='매출' && r.a==='방과후학교');
+    const 재료비 = sum(r=>방과후명.includes(effDept(r)) && r.m===mn && r.t==='매출' && r.a==='재료비수입');
+    const bs    = sum(r=>방과후명.includes(effDept(r)) && r.m===mn && r.t==='매출');
+    const bc    = sum(r=>방과후명.includes(effDept(r)) && r.m===mn && r.t==='판매관리비');
     if(수업료)  DEPT_DATA.bghu.수업료매출.yr26actual[mi] = Math.round(수업료/1e6);
     if(재료비)  DEPT_DATA.bghu.재료비매출.yr26actual[mi] = Math.round(재료비/1e6);
     if(bs||bc)  DEPT_DATA.bghu.영업이익.yr26actual[mi] = Math.round((bs-bc)/1e6);
@@ -4416,8 +4427,10 @@ function renderUploadSummary(){
   document.getElementById('uploadPreview').style.display='block';
 
   const months = [...new Set(RAW_DB.map(r=>r.m))].sort((a,b)=>MONTH_IDX[a]-MONTH_IDX[b]);
-  const depts = ['학원사업본부','U2M사업부','미래교육사업부','방과후사업본부','경영기획실'];
+  const depts = ['학원사업본부','U2M사업본부','미래교육사업부','방과후사업본부','경영기획실'];
   const sum = (filter) => RAW_DB.filter(filter).reduce((s,r)=>s+r.v, 0);
+  // 사업부명 정규화 (업로드 데이터의 U2M사업부 → U2M사업본부 등)
+  const normDept = r => r.d==='U2M사업부'?'U2M사업본부':r.d==='미래교육사업본부'?'미래교육사업부':r.d==='방과후사업부'?'방과후사업본부':r.d;
   const M = 1e6;
 
   let html = `<table class="utbl"><thead><tr>
@@ -4428,8 +4441,8 @@ function renderUploadSummary(){
   depts.forEach(d=>{
     html += `<tr><td style="font-weight:600">${d}</td>`;
     months.forEach(mn=>{
-      const s = sum(r=>r.d===d&&r.m===mn&&r.t==='매출');
-      const c = sum(r=>r.d===d&&r.m===mn&&r.t==='판매관리비');
+      const s = sum(r=>normDept(r)===d&&r.m===mn&&r.t==='매출');
+      const c = sum(r=>normDept(r)===d&&r.m===mn&&r.t==='판매관리비');
       html += `<td class="r" style="color:var(--c26a)">${s?(s/M).toFixed(1):'−'}</td>`;
       html += `<td class="r" style="color:var(--muted)">${c?(c/M).toFixed(1):'−'}</td>`;
     });
