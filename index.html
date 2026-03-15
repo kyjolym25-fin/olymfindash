@@ -4567,15 +4567,15 @@ function applyRawToDashboard(){
     });
   });
 
-  // ── 5c. 총괄 overview: 캠퍼스 안분 공통비 실적 반영 ──
-  // RAW_DB에 포함되지 않는 배분 항목 → 월별 실적 확정값을 직접 기입 (단위: M원)
-  const CAMPUS_COMMON_ACTUAL = [64, null, null, null, null, null, null, null, null, null, null, null];
+  // ── 5c. 총괄 overview: 캠퍼스 안분 공통비 반영 ──
+  // 계정과목='공통비' 행은 경영기획실 배분 항목으로 판관비 구분과 별도 집계되므로 overview에 직접 가산
   months.forEach((mn,mi)=>{
     if(DEPT_DATA.overview.판관비.yr26actual[mi] == null) return;
-    const hqCost = CAMPUS_COMMON_ACTUAL[mi];
-    if(hqCost == null) return;
-    DEPT_DATA.overview.판관비.yr26actual[mi] = parseFloat(((DEPT_DATA.overview.판관비.yr26actual[mi]) + hqCost).toFixed(2));
-    DEPT_DATA.camps['학원본부'].영업이익.yr26actual[mi] = -hqCost;
+    const commonCost = sum(r=>r.m===mn && r.a==='공통비');
+    if(!commonCost) return;
+    const commonM = parseFloat((commonCost/1e6).toFixed(2));
+    DEPT_DATA.overview.판관비.yr26actual[mi] = parseFloat(((DEPT_DATA.overview.판관비.yr26actual[mi]) + commonM).toFixed(2));
+    DEPT_DATA.camps['학원본부'].영업이익.yr26actual[mi] = -commonM;
   });
 
   // CC별 월별 실적 집계 (수학/영어 분리, 영업이익은 매출비율로 배분)
