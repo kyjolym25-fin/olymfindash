@@ -169,8 +169,8 @@ tbody td.indent{padding-left:26px;color:var(--muted2)}
 /* ── 당월/YTD 섹션 구분 ── */
 .period-section-hd{display:flex;align-items:center;gap:10px;margin:24px 0 10px}
 .period-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 16px;border-radius:20px;font-size:12px;font-weight:700;letter-spacing:.3px;white-space:nowrap}
-.period-badge.monthly{background:linear-gradient(135deg,#1e3a5f,#2d74e8);color:#fff}
-.period-badge.ytd{background:linear-gradient(135deg,#0f4c3a,#22bf85);color:#fff}
+.period-badge.monthly{background:#EEF2FF;color:#4361EE;border:1px solid #C7D2FE}
+.period-badge.ytd{background:#D1FAE5;color:#059669;border:1px solid #A7F3D0}
 .period-line{flex:1;height:1px;background:var(--border2)}
 
 /* ── 코멘트 박스 ── */
@@ -238,16 +238,7 @@ tbody td.indent{padding-left:26px;color:var(--muted2)}
 .admin-only{display:none}
 
 /* ═══════════════════════════════════
-   ① 색상 밝기 +30% (muted 계열)
-═══════════════════════════════════ */
-:root{
-  --muted:#8b98c7;    /* 기존 #6b7599 → +30% */
-  --muted2:#b1beeb;   /* 기존 #8892b5 → +30% */
-  --text:#f0f4ff;     /* 기존 #e2e8f8 → 약간 밝게 */
-}
-
-/* ═══════════════════════════════════
-   ② 폰트 ×1.2 + 미니카드 수치 강조
+   폰트 크기 조정 + 미니카드 수치 강조
 ═══════════════════════════════════ */
 .hdr-title{font-size:18px}
 .tab{font-size:16px}
@@ -1525,10 +1516,10 @@ const RAW=[
 // CHART UTILITIES
 // ============================================================
 const CO={responsive:true,maintainAspectRatio:false,
-  plugins:{legend:{labels:{color:'#6b7599',font:{size:12},boxWidth:10,padding:10}}},
-  scales:{x:{grid:{color:'#1d2340'},ticks:{color:'#8b98c7',font:{size:14}}},
-          y:{grid:{color:'#1d2340'},ticks:{color:'#8b98c7',font:{size:14}}}}};
-const CO_SM={...CO,scales:{x:{grid:{color:'#1d2340'},ticks:{color:'#8b98c7',font:{size:12}}},y:{grid:{color:'#1d2340'},ticks:{color:'#8b98c7',font:{size:12}}}}};
+  plugins:{legend:{labels:{color:'#7B87A8',font:{size:12},boxWidth:10,padding:10}}},
+  scales:{x:{grid:{color:'#E4E8F4'},ticks:{color:'#9DA8C3',font:{size:14}}},
+          y:{grid:{color:'#E4E8F4'},ticks:{color:'#9DA8C3',font:{size:14}}}}};
+const CO_SM={...CO,scales:{x:{grid:{color:'#E4E8F4'},ticks:{color:'#9DA8C3',font:{size:12}}},y:{grid:{color:'#E4E8F4'},ticks:{color:'#9DA8C3',font:{size:12}}}}};
 
 function _destroyChart(canvasEl){ const ex=Chart.getChart(canvasEl); if(ex) ex.destroy(); }
 function mkLine(id,labels,datasets){
@@ -1551,7 +1542,7 @@ function mkDoughnut(id,labels,data,colors){
   return new Chart(ctx.getContext('2d'),{type:'doughnut',
     data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:0,hoverOffset:6}]},
     options:{responsive:true,maintainAspectRatio:false,cutout:'62%',
-      plugins:{legend:{position:'bottom',labels:{color:'#6b7599',font:{size:11},boxWidth:8,padding:8}}}}});
+      plugins:{legend:{position:'bottom',labels:{color:'#9DA8C3',font:{size:11},boxWidth:8,padding:8}}}}});
 }
 // 26년 실적을 항상 첫 번째(앞)로: datasets 순서 = [26a, 25년, 26계획]
 function dsLine(label,data,color,dashed=false){
@@ -1578,8 +1569,8 @@ function initOverview(){
     ...CO,
     elements:{line:{tension:.35},point:{radius:3,hoverRadius:6}},
     scales:{
-      x:{grid:{color:'#1d2340'},ticks:{color:'#8b98c7',font:{size:11}},offset:true},
-      y:{grid:{color:'#1d2340'},ticks:{color:'#8b98c7',font:{size:10}}}
+      x:{grid:{color:'#E4E8F4'},ticks:{color:'#9DA8C3',font:{size:11}},offset:true},
+      y:{grid:{color:'#E4E8F4'},ticks:{color:'#9DA8C3',font:{size:10}}}
     }
   };
   const ovLblPlugin = (dataArr, color, id) => ({
@@ -1946,13 +1937,13 @@ function renderCampMountain(camp, canvasId, section) {
       plugins:{
         legend:{
           display:true, position:'top',
-          labels:{color:'#d0d8f0', font:{size:12}, boxWidth:14, padding:12}
+          labels:{color:'#7B87A8', font:{size:12}, boxWidth:14, padding:12}
         },
         tooltip:{mode:'index',intersect:false}
       },
       scales:{
-        x:{grid:{color:'#1d2340'}, ticks:{color:'#8b98c7',font:{size:13}}},
-        y:{grid:{color:'#1d2340'}, ticks:{color:'#8b98c7',font:{size:13}}}
+        x:{grid:{color:'#E4E8F4'}, ticks:{color:'#9DA8C3',font:{size:13}}},
+        y:{grid:{color:'#E4E8F4'}, ticks:{color:'#9DA8C3',font:{size:13}}}
       }
     },
     plugins:[lblPlugin]
@@ -2034,12 +2025,12 @@ function renderCampSalesMtn(camp, canvasId, section){
       responsive:true, maintainAspectRatio:false,
       plugins:{
         legend:{display:true, position:'top',
-          labels:{color:'#d0d8f0', font:{size:12}, boxWidth:14, padding:12}},
+          labels:{color:'#7B87A8', font:{size:12}, boxWidth:14, padding:12}},
         tooltip:{mode:'index',intersect:false}
       },
       scales:{
-        x:{grid:{color:'#1d2340'}, ticks:{color:'#8b98c7',font:{size:13}}},
-        y:{grid:{color:'#1d2340'}, ticks:{color:'#8b98c7',font:{size:13}}}
+        x:{grid:{color:'#E4E8F4'}, ticks:{color:'#9DA8C3',font:{size:13}}},
+        y:{grid:{color:'#E4E8F4'}, ticks:{color:'#9DA8C3',font:{size:13}}}
       }
     },
     plugins:[lblPlugin]
@@ -2639,8 +2630,8 @@ function renderFranchiseCountChart(){
     },
     options:{
       responsive:true, maintainAspectRatio:false,
-      plugins:{ legend:{display:true,position:'top',labels:{color:'#d0d8f0',font:{size:11},boxWidth:12,padding:10}}, tooltip:{mode:'index',intersect:false} },
-      scales:{ x:{grid:{color:'#1d2340'},ticks:{color:'#8b98c7',font:{size:12}}}, y:{grid:{color:'#1d2340'},ticks:{color:'#8b98c7',font:{size:12}},beginAtZero:true} }
+      plugins:{ legend:{display:true,position:'top',labels:{color:'#7B87A8',font:{size:11},boxWidth:12,padding:10}}, tooltip:{mode:'index',intersect:false} },
+      scales:{ x:{grid:{color:'#E4E8F4'},ticks:{color:'#9DA8C3',font:{size:12}}}, y:{grid:{color:'#E4E8F4'},ticks:{color:'#9DA8C3',font:{size:12}},beginAtZero:true} }
     }
   });
 }
@@ -2675,8 +2666,8 @@ function renderFranchiseProfitChart(){
     },
     options:{
       responsive:true, maintainAspectRatio:false,
-      plugins:{ legend:{display:true,position:'top',labels:{color:'#d0d8f0',font:{size:11},boxWidth:12,padding:10}}, tooltip:{mode:'index',intersect:false} },
-      scales:{ x:{grid:{color:'#1d2340'},ticks:{color:'#8b98c7',font:{size:12}}}, y:{grid:{color:'#1d2340'},ticks:{color:'#8b98c7',font:{size:12}}} }
+      plugins:{ legend:{display:true,position:'top',labels:{color:'#7B87A8',font:{size:11},boxWidth:12,padding:10}}, tooltip:{mode:'index',intersect:false} },
+      scales:{ x:{grid:{color:'#E4E8F4'},ticks:{color:'#9DA8C3',font:{size:12}}}, y:{grid:{color:'#E4E8F4'},ticks:{color:'#9DA8C3',font:{size:12}}} }
     }
   });
 }
@@ -2757,10 +2748,10 @@ function initMirae(){
       },
       options:{
         responsive:true, maintainAspectRatio:false,
-        plugins:{legend:{labels:{color:'#6b7599',font:{size:12},boxWidth:10,padding:10}}},
+        plugins:{legend:{labels:{color:'#9DA8C3',font:{size:12},boxWidth:10,padding:10}}},
         scales:{
-          x:{grid:{color:'#1d2340'}, ticks:{color:'#6b7599',font:{size:11}}},
-          y:{grid:{color:'#1d2340'}, ticks:{color:'#6b7599',font:{size:11}}},
+          x:{grid:{color:'#E4E8F4'}, ticks:{color:'#9DA8C3',font:{size:11}}},
+          y:{grid:{color:'#E4E8F4'}, ticks:{color:'#9DA8C3',font:{size:11}}},
         }
       }
     });
@@ -3264,14 +3255,14 @@ function renderStuMathEng(month){
     {label:'25년 초중',data:CAMPS_HAK.map(c=>getStu(c,month).mc25),backgroundColor:'#4d96f044',borderRadius:3,borderSkipped:false,stack:'25'},
     {label:'25년 영재',data:CAMPS_HAK.map(c=>getStu(c,month).mg25),backgroundColor:'#9474f044',borderRadius:3,borderSkipped:false,stack:'25'},
     {label:'25년 고등',data:CAMPS_HAK.map(c=>getStu(c,month).md25),backgroundColor:'#e6aa1044',borderRadius:3,borderSkipped:false,stack:'25'},
-  ],{plugins:{legend:{labels:{color:'#6b7599',font:{size:10},boxWidth:8,padding:8}}}});
+  ],{plugins:{legend:{labels:{color:'#9DA8C3',font:{size:10},boxWidth:8,padding:8}}}});
 
   stuEngChart=mkBar('c_stu_eng',CAMPS_HAK,[
     {label:'26년 초중',data:CAMPS_HAK.map(c=>getStu(c,month).ec26),backgroundColor:'#22bf85cc',borderRadius:3,borderSkipped:false,stack:'26'},
     {label:'26년 고등',data:CAMPS_HAK.map(c=>getStu(c,month).ed26),backgroundColor:'#e6aa10cc',borderRadius:3,borderSkipped:false,stack:'26'},
     {label:'25년 초중',data:CAMPS_HAK.map(c=>getStu(c,month).ec25),backgroundColor:'#4d96f044',borderRadius:3,borderSkipped:false,stack:'25'},
     {label:'25년 고등',data:CAMPS_HAK.map(c=>getStu(c,month).ed25),backgroundColor:'#9474f044',borderRadius:3,borderSkipped:false,stack:'25'},
-  ],{plugins:{legend:{labels:{color:'#6b7599',font:{size:10},boxWidth:8,padding:8}}}});
+  ],{plugins:{legend:{labels:{color:'#9DA8C3',font:{size:10},boxWidth:8,padding:8}}}});
 }
 
 function renderStuTable(month){
@@ -3409,7 +3400,7 @@ function updateStudentTrend(){
       plugins: {
         legend: {
           position: 'top',
-          labels: { color: '#6b7599', font: { size: 11 }, boxWidth: 12, padding: 12 }
+          labels: { color: '#9DA8C3', font: { size: 11 }, boxWidth: 12, padding: 12 }
         },
         tooltip: {
           callbacks: {
@@ -3433,11 +3424,11 @@ function updateStudentTrend(){
         annotation: undefined
       },
       scales: {
-        x: { grid: { color: '#1d2340' }, ticks: { color: '#6b7599', font: { size: 10 } } },
+        x: { grid: { color: '#E4E8F4' }, ticks: { color: '#9DA8C3', font: { size: 10 } } },
         y: {
-          grid: { color: '#1d2340' },
-          ticks: { color: '#6b7599', font: { size: 11 } },
-          title: { display: true, text: '재원생 (명)', color: '#6b7599', font: { size: 10 } }
+          grid: { color: '#E4E8F4' },
+          ticks: { color: '#9DA8C3', font: { size: 11 } },
+          title: { display: true, text: '재원생 (명)', color: '#9DA8C3', font: { size: 10 } }
         }
       }
     }
