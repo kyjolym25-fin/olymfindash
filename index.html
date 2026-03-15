@@ -4268,22 +4268,24 @@ function applyRawToDashboard(){
     PL[k].profit = PL[k].sales - PL[k].cost;
   });
 
-  // ── 3. 캠퍼스별 판관비 상세 갱신 ──
-  CAMPS_LIST.forEach(camp=>{
-    const hasCamp = RAW_DB.some(r=>effCamp(r)===camp);
-    if(!hasCamp) return;
-    const a = CAMP_COST_26A[camp];
-    if(!a) return;
-    a.sales   = sum(r=>effCamp(r)===camp && r.t==='매출');
-    a.staff   = sum(r=>effCamp(r)===camp && r.t==='판매관리비' && costCat(r.a)==='staff');
-    a.instr   = sum(r=>effCamp(r)===camp && r.t==='판매관리비' && costCat(r.a)==='instr');
-    a.vehicle = sum(r=>effCamp(r)===camp && r.t==='판매관리비' && costCat(r.a)==='vehicle');
-    a.rent    = sum(r=>effCamp(r)===camp && r.t==='판매관리비' && costCat(r.a)==='rent');
-    a.bldg    = sum(r=>effCamp(r)===camp && r.t==='판매관리비' && costCat(r.a)==='bldg');
-    a.adv     = sum(r=>effCamp(r)===camp && r.t==='판매관리비' && costCat(r.a)==='adv');
-    a.other   = sum(r=>effCamp(r)===camp && r.t==='판매관리비' && costCat(r.a)==='other');
-    a.total   = a.staff+a.instr+a.vehicle+a.rent+a.bldg+a.adv+a.other;
-  });
+  // ── 3. 캠퍼스별 판관비 상세 갱신 (CAMP_COST_26A는 initHakwon 스코프 — 접근 가능할 때만 실행) ──
+  try {
+    CAMPS_LIST.forEach(camp=>{
+      const hasCamp = RAW_DB.some(r=>effCamp(r)===camp);
+      if(!hasCamp) return;
+      const a = CAMP_COST_26A[camp];
+      if(!a) return;
+      a.sales   = sum(r=>effCamp(r)===camp && r.t==='매출');
+      a.staff   = sum(r=>effCamp(r)===camp && r.t==='판매관리비' && costCat(r.a)==='staff');
+      a.instr   = sum(r=>effCamp(r)===camp && r.t==='판매관리비' && costCat(r.a)==='instr');
+      a.vehicle = sum(r=>effCamp(r)===camp && r.t==='판매관리비' && costCat(r.a)==='vehicle');
+      a.rent    = sum(r=>effCamp(r)===camp && r.t==='판매관리비' && costCat(r.a)==='rent');
+      a.bldg    = sum(r=>effCamp(r)===camp && r.t==='판매관리비' && costCat(r.a)==='bldg');
+      a.adv     = sum(r=>effCamp(r)===camp && r.t==='판매관리비' && costCat(r.a)==='adv');
+      a.other   = sum(r=>effCamp(r)===camp && r.t==='판매관리비' && costCat(r.a)==='other');
+      a.total   = a.staff+a.instr+a.vehicle+a.rent+a.bldg+a.adv+a.other;
+    });
+  } catch(e) { /* CAMP_COST_26A not in scope yet (initHakwon not called) — skip */ }
 
   // ── 4. 방과후 수업료/재료비 분리 표시 ──
   if(RAW_DB.some(r=>r.d==='방과후사업본부')){
