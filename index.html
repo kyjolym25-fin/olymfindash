@@ -2477,11 +2477,13 @@ function renderOvKpi(mi){
 }
 
 function renderDeptKpi(mi){
-  const {MN,mn,getAct,pctStr,set,setH} = _mkKpiHelpers(mi);
+  const {MN,mn,pctStr,set,setH} = _mkKpiHelpers(mi);
+  // 실적 우선, 없으면 계획 폴백 (getVal 전역함수 사용)
+  const gv = (m) => getVal(m, mi) ?? 0;
   // ── 학원 mini-cards ──
   const hakCamps=['광진','성동','동대문','중랑'];
-  const hS=hakCamps.reduce((s,c)=>s+(getAct(DEPT_DATA.camps[c].매출)??0),0);
-  const hP=hakCamps.reduce((s,c)=>s+(getAct(DEPT_DATA.camps[c].영업이익)??0),0);
+  const hS=hakCamps.reduce((s,c)=>s+gv(DEPT_DATA.camps[c].매출),0);
+  const hP=hakCamps.reduce((s,c)=>s+gv(DEPT_DATA.camps[c].영업이익),0);
   const hC=hS-hP;
   const hS25=hakCamps.reduce((s,c)=>s+(DEPT_DATA.camps[c].매출.yr25[mi]??0),0);
   const hS26p=hakCamps.reduce((s,c)=>s+(DEPT_DATA.camps[c].매출.yr26base[mi]??0),0);
@@ -2493,8 +2495,8 @@ function renderDeptKpi(mi){
   setH('hak-meta-p',hS>0?`이익률 ${(hP/hS*100).toFixed(1)}%`:'');
   // ── U2M mini-cards ──
   const u2mCamps=['중계','송파방이','미사','위례'];
-  const uS=u2mCamps.reduce((s,c)=>s+(getAct(DEPT_DATA.camps[c].매출)??0),0);
-  const uP=u2mCamps.reduce((s,c)=>s+(getAct(DEPT_DATA.camps[c].영업이익)??0),0);
+  const uS=u2mCamps.reduce((s,c)=>s+gv(DEPT_DATA.camps[c].매출),0);
+  const uP=u2mCamps.reduce((s,c)=>s+gv(DEPT_DATA.camps[c].영업이익),0);
   const uC=uS-uP;
   const uS25=u2mCamps.reduce((s,c)=>s+(DEPT_DATA.camps[c].매출.yr25[mi]??0),0);
   const uS26p=u2mCamps.reduce((s,c)=>s+(DEPT_DATA.camps[c].매출.yr26base[mi]??0),0);
@@ -2506,19 +2508,19 @@ function renderDeptKpi(mi){
   setH('u2m-meta-p',uS>0?`이익률 ${(uP/uS*100).toFixed(1)}%`:'');
   // ── 미래교육 mini-cards ──
   const mr=DEPT_DATA.mirae;
-  const mrBook=getAct(mr.교재매출), mrRemote=getAct(mr.원격매출), mrProfit=getAct(mr.영업이익);
-  const mrS=(mrBook??0)+(mrRemote??0), mrC=mrS-(mrProfit??0);
+  const mrBook=gv(mr.교재매출), mrRemote=gv(mr.원격매출), mrProfit=gv(mr.영업이익);
+  const mrS=mrBook+mrRemote, mrC=mrS-mrProfit;
   const mrBook26p=mr.교재매출.yr26base[mi], mrRemote26p=mr.원격매출.yr26base[mi];
   set('mirae-val-s',fmt억(mrS)); set('mirae-val-book',fmt억(mrBook)); set('mirae-val-remote',fmt억(mrRemote));
-  set('mirae-val-c',fmt억(mrC)); set('mirae-val-p',fmt억(mrProfit)); set('mirae-meta-s',`26년 ${mn} 실적`);
+  set('mirae-val-c',fmt억(mrC)); set('mirae-val-p',fmt억(mrProfit)); set('mirae-meta-s',`26년 ${mn}`);
   set('mirae-meta-book',mrBook26p>0?`계획比 ${mrBook>=mrBook26p?'+':''}${((mrBook-mrBook26p)/mrBook26p*100).toFixed(1)}%`:'');
   set('mirae-meta-remote',mrRemote26p>0?`계획比 ${mrRemote>=mrRemote26p?'+':''}${((mrRemote-mrRemote26p)/mrRemote26p*100).toFixed(1)}%`:'');
   set('mirae-meta-c',mrS>0?`매출比 ${(mrC/mrS*100).toFixed(1)}%`:'');
   set('mirae-meta-p',mrS>0?`이익률 ${(mrProfit/mrS*100).toFixed(1)}%`:'');
   // ── 방과후 mini-cards ──
   const bg=DEPT_DATA.bghu;
-  const bgSuup=getAct(bg.수업료매출), bgJae=getAct(bg.재료비매출), bgProfit=getAct(bg.영업이익);
-  const bgTotal=(bgSuup??0)+(bgJae??0), bgC=bgTotal-(bgProfit??0);
+  const bgSuup=gv(bg.수업료매출), bgJae=gv(bg.재료비매출), bgProfit=gv(bg.영업이익);
+  const bgTotal=bgSuup+bgJae, bgC=bgTotal-bgProfit;
   set('bghu-val-total',fmt억(bgTotal)); set('bghu-val-suup',fmt억(bgSuup)); set('bghu-val-jae',fmt억(bgJae));
   set('bghu-val-c',fmt억(bgC)); set('bghu-val-p',fmt억(bgProfit));
   setH('bghu-meta-suup',bg.수업료매출.yr25[mi]>0?`<span style="color:${bgSuup>=(bg.수업료매출.yr25[mi]??0)?'var(--c26a)':'var(--loss)'}">25년比 ${((bgSuup-(bg.수업료매출.yr25[mi]??0))/(bg.수업료매출.yr25[mi]??1)*100).toFixed(1)}%</span>`:'계정: 방과후학교');
