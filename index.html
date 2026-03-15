@@ -197,7 +197,7 @@ tbody td.indent{padding-left:28px;color:var(--muted2)}
 .comment-editor{display:none;background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin:14px 0 0}
 .comment-editor .ce-hd{display:flex;align-items:center;gap:8px;margin-bottom:12px}
 .comment-editor .ce-hd-title{font-size:12px;font-weight:600;color:var(--fg)}
-.comment-editor .ce-hd-badge{font-size:10px;font-weight:600;color:var(--c26a);background:#22bf8518;border:1px solid #22bf8540;border-radius:10px;padding:2px 8px}
+.comment-editor .ce-hd-badge{font-size:10px;font-weight:600;color:var(--c26a);background:#10B98118;border:1px solid #10B98140;border-radius:10px;padding:2px 8px}
 .comment-editor textarea{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--fg);resize:vertical;min-height:72px;font-family:inherit;box-sizing:border-box;outline:none;transition:border-color .15s;line-height:1.6}
 .comment-editor textarea:focus{border-color:var(--c26a)}
 .comment-editor .cb-btns{display:flex;gap:8px;margin-top:10px;justify-content:flex-end;align-items:center}
@@ -208,16 +208,16 @@ tbody td.indent{padding-left:28px;color:var(--muted2)}
 
 /* ── 인증 오버레이 ── */
 .auth-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9000;display:flex;align-items:center;justify-content:center}
-.auth-panel{background:var(--bg);border:1px solid var(--border2);border-radius:16px;padding:36px 40px;width:400px;max-width:94vw;position:relative;box-shadow:0 24px 60px rgba(0,0,0,.5)}
-.auth-panel h2{font-size:18px;font-weight:700;margin:0 0 4px}
+.auth-panel{background:#fff;border-radius:20px;padding:36px 40px;width:400px;max-width:94vw;position:relative;box-shadow:0 20px 60px rgba(99,119,185,.2)}
+.auth-panel h2{font-size:18px;font-weight:700;margin:0 0 4px;color:var(--text)}
 .auth-sub{font-size:12px;color:var(--muted);margin-bottom:22px}
 .auth-field{margin-bottom:13px}
 .auth-field label{display:block;font-size:11px;font-weight:600;color:var(--muted);margin-bottom:4px}
-.auth-field input,.auth-field select{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--fg);box-sizing:border-box;outline:none;font-family:inherit}
-.auth-field input:focus{border-color:var(--c26a)}
-.auth-btn-primary{width:100%;padding:11px;background:var(--c26a);color:#0d1117;font-weight:700;font-size:14px;border:none;border-radius:8px;cursor:pointer;margin-top:4px}
-.auth-btn-primary:hover{filter:brightness(1.08)}
-.auth-btn-sec{width:100%;padding:10px;background:var(--s2);color:var(--fg);font-weight:600;font-size:13px;border:1px solid var(--border);border-radius:8px;cursor:pointer;margin-top:8px}
+.auth-field input,.auth-field select{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:13px;color:var(--text);box-sizing:border-box;outline:none;font-family:inherit}
+.auth-field input:focus{border-color:#4361EE}
+.auth-btn-primary{width:100%;padding:12px;background:linear-gradient(135deg,#4361EE,#7C5CFC);color:#fff;font-weight:700;font-size:14px;border:none;border-radius:10px;cursor:pointer;margin-top:4px}
+.auth-btn-primary:hover{filter:brightness(1.06)}
+.auth-btn-sec{width:100%;padding:10px;background:var(--s2);color:var(--text);font-weight:600;font-size:13px;border:1px solid var(--border);border-radius:10px;cursor:pointer;margin-top:8px}
 .auth-err{font-size:11px;color:var(--loss);margin-top:6px;min-height:16px}
 .auth-ok{font-size:11px;color:var(--c26a);margin-top:6px;min-height:16px}
 .auth-links{font-size:11px;color:var(--muted);text-align:center;margin-top:14px}
@@ -226,11 +226,11 @@ tbody td.indent{padding-left:28px;color:var(--muted2)}
 
 /* ── 관리 페이지 ── */
 #pg-admin{padding:0}
-.admin-sec{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:14px}
+.admin-sec{background:#fff;border-radius:16px;padding:20px;margin-bottom:14px;box-shadow:var(--shadow)}
 .admin-sec h3{font-size:14px;font-weight:700;margin:0 0 14px;display:flex;align-items:center;gap:8px}
 .atab-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
-.atab{padding:5px 14px;font-size:11px;font-weight:600;border-radius:6px;cursor:pointer;color:var(--muted);border:1px solid var(--border);background:var(--s2)}
-.atab.on{background:var(--c26a);color:#0d1117;border-color:var(--c26a)}
+.atab{padding:5px 14px;font-size:11px;font-weight:600;border-radius:20px;cursor:pointer;color:var(--muted);border:1px solid var(--border);background:#fff}
+.atab.on{background:#4361EE;color:#fff;border-color:#4361EE}
 .utbl{width:100%;border-collapse:collapse;font-size:12px}
 .utbl th{background:var(--s3);padding:7px 12px;text-align:left;color:var(--muted);font-weight:600;border-bottom:2px solid var(--border2)}
 .utbl td{padding:7px 12px;border-bottom:1px solid var(--border)}
@@ -238,7 +238,7 @@ tbody td.indent{padding-left:28px;color:var(--muted2)}
 .rbadge.admin{background:#7c3aed22;color:#7c3aed}
 .rbadge.viewer{background:#0891b222;color:#0891b2}
 .sbadge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700}
-.sbadge.active{background:#22bf8522;color:#22bf85}
+.sbadge.active{background:#10B98122;color:#10B981}
 .month-bar{display:flex;align-items:center;gap:5px;flex-wrap:wrap;padding:8px 0 14px;border-bottom:1px solid var(--border);margin-bottom:16px}
 .month-bar-lbl{font-size:11px;color:var(--muted);margin-right:2px;white-space:nowrap}
 .dde-sel{background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:7px 12px;font-size:12px;cursor:pointer}
@@ -1314,7 +1314,7 @@ thead th{font-size:13px}
 // DATA
 // ============================================================
 const M=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
-const C25='#4d96f0', C26P='#9474f0', C26A='#22bf85';
+const C25='#4361EE', C26P='#7C5CFC', C26A='#10B981';
 
 
 // 손익계산서 실적 (1월, 단위: 원)
@@ -1649,7 +1649,7 @@ function initOverview(){
   mkDoughnut('c_dept_pie',
     ['학원사업본부','U2M사업본부','방과후사업본부','미래교육사업부'],
     [1549.5,382.5,659.6,391.4],
-    ['#2d74e8','#6a28d9','#e08c00','#0ea872']);
+    ['#4361EE','#6a28d9','#F59E0B','#0ea872']);
   // 목표달성률
   const depts=[
     {name:'학원사업본부',plan:1525.0,actual:1549.5},
@@ -1725,7 +1725,7 @@ function initHakwon(){
     };
   }
 
-  const DOTS=['#e05555','#e08c00','#e6c910','#22bf85','#4d96f0','#9474f0','#bf7be0','#6b7280'];
+  const DOTS=['#EF4444','#F59E0B','#e6c910','#10B981','#4361EE','#7C5CFC','#bf7be0','#6b7280'];
   const dot=(i,sz=7)=>`<span style="display:inline-block;width:${sz}px;height:${sz}px;border-radius:50%;background:${DOTS[i%DOTS.length]};margin-right:6px;flex-shrink:0;vertical-align:middle"></span>`;
 
   function renderCostTable(containerId, camps) {
@@ -1776,7 +1776,7 @@ function initHakwon(){
         yr26p: ['staff','instr','vehicle'].reduce((s,k)=>s+d[k].yr26p, 0),
         yr26a: ['staff','instr','vehicle'].reduce((s,k)=>s+d[k].yr26a, 0),
       };
-      rows+=`<tr style="background:rgba(77,150,240,0.07);border-bottom:1px solid var(--border)">
+      rows+=`<tr style="background:rgba(67,97,238,0.07);border-bottom:1px solid var(--border)">
         <td style="padding:4px 10px;font-size:14px;font-weight:600;display:flex;align-items:center">${dot(di++)}인건비 소계</td>
         <td style="padding:4px 10px;font-size:12px;color:var(--muted)">직원인건비+강사비+차량운행비</td>
         ${cells3(laborTotal.yr25,laborTotal.yr26p,laborTotal.yr26a,d.sales.yr25,d.sales.yr26p,d.sales.yr26a,true)}
@@ -1941,13 +1941,13 @@ function renderCampMountain(camp, canvasId, section) {
       labels:M,
       datasets:[
         { label:'25년 실적', data:d.p25,
-          borderColor:'rgba(77,150,240,0.75)', backgroundColor:'rgba(77,150,240,0.18)',
+          borderColor:'rgba(67,97,238,0.75)', backgroundColor:'rgba(67,97,238,0.18)',
           fill:true, borderWidth:1.5, tension:.35, order:1,
-          pointRadius:3, pointBackgroundColor:'rgba(77,150,240,0.75)' },
+          pointRadius:3, pointBackgroundColor:'rgba(67,97,238,0.75)' },
         { label:'26년 실적', data:d.p26a,
-          borderColor:'#22bf85', backgroundColor:'rgba(34,191,133,0.38)',
+          borderColor:'#10B981', backgroundColor:'rgba(16,185,129,0.38)',
           fill:true, borderWidth:2.5, tension:.35, order:0, spanGaps:false,
-          pointRadius:5, pointBackgroundColor:'#22bf85',
+          pointRadius:5, pointBackgroundColor:'#10B981',
           pointBorderColor:'#fff', pointBorderWidth:2 },
       ]
     },
@@ -2021,19 +2021,19 @@ function renderCampSalesMtn(camp, canvasId, section){
     datasets.push({
       label:'25년 실적',
       data: raw25,
-      borderColor:'rgba(77,150,240,0.75)',
-      backgroundColor:'rgba(77,150,240,0.18)',
+      borderColor:'rgba(67,97,238,0.75)',
+      backgroundColor:'rgba(67,97,238,0.18)',
       fill:true, borderWidth:1.5, tension:.35, order:1,
-      pointRadius:3, pointBackgroundColor:'rgba(77,150,240,0.75)'
+      pointRadius:3, pointBackgroundColor:'rgba(67,97,238,0.75)'
     });
   }
   datasets.push({
     label:'26년 실적',
     data: data26,
-    borderColor:'#22bf85',
-    backgroundColor:'rgba(34,191,133,0.28)',
+    borderColor:'#10B981',
+    backgroundColor:'rgba(16,185,129,0.28)',
     fill:true, borderWidth:2.5, tension:.35, spanGaps:false, order:0,
-    pointRadius:5, pointBackgroundColor:'#22bf85',
+    pointRadius:5, pointBackgroundColor:'#10B981',
     pointBorderColor:'#fff', pointBorderWidth:2
   });
 
@@ -2078,8 +2078,8 @@ function renderCC3YTree(containerId, groupDef, dataObj){
   const ac  = v => v==null?'var(--muted)': v>=100?'var(--c26a)': v>=80?'var(--yellow)':'var(--loss)';
   const ach = (a,b) => b!==0 ? a/b*100 : null;
   const ccLbl = cc => cc
-    .replace(/수학$/, '<span style="font-size:10px;font-weight:400;color:#4d96f0;margin-left:2px">수학</span>')
-    .replace(/영어$/, '<span style="font-size:10px;font-weight:400;color:#9474f0;margin-left:2px">영어</span>');
+    .replace(/수학$/, '<span style="font-size:10px;font-weight:400;color:#4361EE;margin-left:2px">수학</span>')
+    .replace(/영어$/, '<span style="font-size:10px;font-weight:400;color:#7C5CFC;margin-left:2px">영어</span>');
 
   // 열 헤더 (매출·영업이익 각 5열씩)
   const subHd = (color, showMgRatio=false) => `
@@ -2124,12 +2124,12 @@ function renderCC3YTree(containerId, groupDef, dataObj){
         <thead>
           <tr style="background:var(--s3)">
             <th rowspan="2" style="padding:7px 10px;text-align:left;color:var(--muted);font-weight:600;border-bottom:2px solid var(--border2);min-width:110px">구분</th>
-            <th colspan="5" style="padding:6px 0;text-align:center;color:#4d96f0;font-weight:600;border-bottom:1px solid var(--border)">💰 매출</th>
-            <th colspan="5" style="padding:6px 0;text-align:center;color:#22bf85;font-weight:600;border-bottom:1px solid var(--border)">📈 영업이익</th>
+            <th colspan="5" style="padding:6px 0;text-align:center;color:#4361EE;font-weight:600;border-bottom:1px solid var(--border)">💰 매출</th>
+            <th colspan="5" style="padding:6px 0;text-align:center;color:#10B981;font-weight:600;border-bottom:1px solid var(--border)">📈 영업이익</th>
           </tr>
           <tr style="background:var(--s3);font-size:10.5px">
-            ${subHd('#4d96f0')}
-            ${subHd('#22bf85', true)}
+            ${subHd('#4361EE')}
+            ${subHd('#10B981', true)}
           </tr>
           <!-- 구분선 -->
           <tr><td colspan="11" style="padding:0;border-bottom:2px solid var(--border2)"></td></tr>
@@ -2306,13 +2306,13 @@ function buildCC3YYtd(mi){
 // ── 학원사업본부 렌더 ──
 function renderHakwonTree(mi=0){
   const MN=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
-  const hakDef=[{name:'학원사업본부', color:'#2d74e8', emoji:'🏫',
+  const hakDef=[{name:'학원사업본부', color:'#4361EE', emoji:'🏫',
     ccs:['광진수학','광진영어','성동수학','성동영어','동대문수학','동대문영어','중랑수학','중랑영어'],
     groups:[
-      {label:'📍 광진', color:'#2d74e8', ccs:['광진수학','광진영어']},
-      {label:'📍 성동', color:'#e08c00', ccs:['성동수학','성동영어']},
+      {label:'📍 광진', color:'#4361EE', ccs:['광진수학','광진영어']},
+      {label:'📍 성동', color:'#F59E0B', ccs:['성동수학','성동영어']},
       {label:'📍 동대문', color:'#0ea872', ccs:['동대문수학','동대문영어']},
-      {label:'📍 중랑', color:'#9474f0', ccs:['중랑수학','중랑영어']},
+      {label:'📍 중랑', color:'#7C5CFC', ccs:['중랑수학','중랑영어']},
     ]}];
   renderCC3YTree('hakwon_tree', hakDef, buildCC3YMonth(mi));
   const ytdCap=latestActMi>=0?Math.min(mi,latestActMi):mi;
@@ -2656,13 +2656,13 @@ function renderFranchiseCountChart(){
       labels:MO,
       datasets:[
         { label:'25년 신규가맹', data:fr.신규가맹수.yr25,
-          borderColor:'rgba(77,150,240,0.75)', backgroundColor:'rgba(77,150,240,0.12)',
+          borderColor:'rgba(67,97,238,0.75)', backgroundColor:'rgba(67,97,238,0.12)',
           fill:false, borderWidth:1.5, tension:.35, borderDash:[4,3],
-          pointRadius:3, pointBackgroundColor:'rgba(77,150,240,0.75)' },
+          pointRadius:3, pointBackgroundColor:'rgba(67,97,238,0.75)' },
         { label:'26년 신규가맹', data:Array.from({length:12},(_,i)=>getVal(fr.신규가맹수,i)),
-          borderColor:'#22bf85', backgroundColor:'rgba(34,191,133,0.25)',
+          borderColor:'#10B981', backgroundColor:'rgba(16,185,129,0.25)',
           fill:false, borderWidth:2, tension:.35, spanGaps:false,
-          pointRadius:4, pointBackgroundColor:'#22bf85', pointBorderColor:'#fff', pointBorderWidth:2 },
+          pointRadius:4, pointBackgroundColor:'#10B981', pointBorderColor:'#fff', pointBorderWidth:2 },
         { label:'25년 재가맹', data:fr.재가맹수.yr25,
           borderColor:'rgba(240,180,77,0.75)', backgroundColor:'rgba(240,180,77,0.12)',
           fill:false, borderWidth:1.5, tension:.35, borderDash:[4,3],
@@ -2692,17 +2692,17 @@ function renderFranchiseProfitChart(){
       labels:MO,
       datasets:[
         { label:'25년 매출', data:fr.매출.yr25,
-          borderColor:'rgba(77,150,240,0.75)', backgroundColor:'rgba(77,150,240,0.12)',
+          borderColor:'rgba(67,97,238,0.75)', backgroundColor:'rgba(67,97,238,0.12)',
           fill:false, borderWidth:1.5, tension:.35, borderDash:[4,3],
-          pointRadius:3, pointBackgroundColor:'rgba(77,150,240,0.75)' },
+          pointRadius:3, pointBackgroundColor:'rgba(67,97,238,0.75)' },
         { label:'25년 영업이익', data:fr.영업이익.yr25,
           borderColor:'rgba(240,96,96,0.6)', backgroundColor:'rgba(240,96,96,0.08)',
           fill:false, borderWidth:1.5, tension:.35, borderDash:[4,3],
           pointRadius:3, pointBackgroundColor:'rgba(240,96,96,0.6)' },
         { label:'26년 매출', data:Array.from({length:12},(_,i)=>getVal(fr.매출,i)),
-          borderColor:'#22bf85', backgroundColor:'rgba(34,191,133,0.25)',
+          borderColor:'#10B981', backgroundColor:'rgba(16,185,129,0.25)',
           fill:false, borderWidth:2, tension:.35, spanGaps:false,
-          pointRadius:4, pointBackgroundColor:'#22bf85', pointBorderColor:'#fff', pointBorderWidth:2 },
+          pointRadius:4, pointBackgroundColor:'#10B981', pointBorderColor:'#fff', pointBorderWidth:2 },
         { label:'26년 영업이익', data:Array.from({length:12},(_,i)=>getVal(fr.영업이익,i)),
           borderColor:'#f06060', backgroundColor:'rgba(240,96,96,0.15)',
           fill:false, borderWidth:2, tension:.35, spanGaps:false,
@@ -2748,7 +2748,7 @@ function initMirae(){
     },
   };
   const CCS = ['직영수학','직영영어','FC수학'];
-  const COLORS = {'직영수학':'#2d74e8','직영영어':'#9474f0','FC수학':'#0ea872'};
+  const COLORS = {'직영수학':'#4361EE','직영영어':'#7C5CFC','FC수학':'#0ea872'};
 
   const fk = v => Math.round(v/1000).toLocaleString();
   const fm = v => (v/1e6).toFixed(1);
@@ -2868,12 +2868,12 @@ function initMirae(){
   const SALES3 = {yr25:395956280, yr26p:365832491, yr26a:391361840};
   // 판관비 합계: 25실적=316,746,208 / 26계획=352,592,308 / 26실적=346,470,397
   const COST3 = [
-    {label:'인건비',         yr25:87016914,  yr26p:96864599,  yr26a:95182780,  color:'#e05555'},
-    {label:'프로그램사용료', yr25:98086345,  yr26p:109186755, yr26a:107290992, color:'#e08c00'},
+    {label:'인건비',         yr25:87016914,  yr26p:96864599,  yr26a:95182780,  color:'#EF4444'},
+    {label:'프로그램사용료', yr25:98086345,  yr26p:109186755, yr26a:107290992, color:'#F59E0B'},
     {label:'판매장려금',     yr25:52060083,  yr26p:57951711,  yr26a:56945520,  color:'#e6c910'},
-    {label:'광고선전비',     yr25:156124,    yr26p:173792,    yr26a:170775,    color:'#22bf85'},
-    {label:'외주용역비',     yr25:42733309,  yr26p:47569428,  yr26a:46743500,  color:'#4d96f0'},
-    {label:'기타',           yr25:36693434,  yr26p:40846022,  yr26a:40136830,  color:'#9474f0'},
+    {label:'광고선전비',     yr25:156124,    yr26p:173792,    yr26a:170775,    color:'#10B981'},
+    {label:'외주용역비',     yr25:42733309,  yr26p:47569428,  yr26a:46743500,  color:'#4361EE'},
+    {label:'기타',           yr25:36693434,  yr26p:40846022,  yr26a:40136830,  color:'#7C5CFC'},
     {label:'합계',           yr25:316746208, yr26p:352592308, yr26a:346470397, color:null, bold:true},
   ];
 
@@ -3026,7 +3026,7 @@ function initBgh(){
   mkDoughnut('c_bgh_cost',
     ['인건비','임대료','소모품비','기타'],
     [428.0,120.0,40.0,(PL['방과후사업본부'].cost/1e6-428.0-120.0-40.0)].map(v=>Math.max(v,0)),
-    ['#2d74e8','#6a28d9','#e08c00','#6b7280']);
+    ['#4361EE','#6a28d9','#F59E0B','#6b7280']);
   renderDeptCostTable('bgh_cost_table', [
     {label:'인건비 (직원)', desc:'직원급여·상여·퇴직금·복리후생비', yr25:40076,  yr26p:45433,  yr26a:41884},
     {label:'인건비 (강사)', desc:'강사비(일반)·보조교사',           yr25:404874, yr26p:502014, yr26a:523217},
@@ -3048,7 +3048,7 @@ function initMgmt(){
   mkDoughnut('c_mgmt_cost',
     ['인건비','운영비','기타'],
     [25.8,10.4,(PL['경영기획실'].cost/1e6-25.8-10.4)].map(v=>Math.max(v,0)),
-    ['#2d74e8','#0ea872','#6b7280']);
+    ['#4361EE','#0ea872','#6b7280']);
   mkLine('c_mgmt_trend',M,[
     dsLine('26년 실적',[PL['경영기획실'].cost/1e6,...Array(11).fill(null)],C26A),
     dsLine('25년 실적',[19.17,23.72,38.21,28.49,24.42,30.61,45.79,33.12,37.71,43.14,65.71,99.65],C25),
@@ -3066,7 +3066,7 @@ function renderDeptCostTable(containerId, items, salesK){
   const tot25  = items.reduce((s,i)=>s+(i.yr25||0), 0);
   const tot26p = items.reduce((s,i)=>s+(i.yr26p||0), 0);
   const tot26a = items.reduce((s,i)=>s+(i.yr26a||0), 0);
-  const DOTS=['#e05555','#e08c00','#e6c910','#22bf85','#4d96f0','#9474f0'];
+  const DOTS=['#EF4444','#F59E0B','#e6c910','#10B981','#4361EE','#7C5CFC'];
   const dot = i => `<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${DOTS[i%DOTS.length]};margin-right:6px;flex-shrink:0;vertical-align:middle"></span>`;
   const thS='padding:6px 12px;text-align:right;font-size:11px;font-weight:600;color:var(--muted);white-space:nowrap';
   const thL='padding:6px 12px;text-align:left;font-size:11px;font-weight:600;color:var(--muted)';
@@ -3124,7 +3124,7 @@ function buildPLTable(items){
     rows+=`<tr>
       <td style="font-weight:600">${name}</td>
       <td class="r" style="color:var(--c26a)">${d.sales.toLocaleString()}</td>
-      <td class="r" style="color:#e05555">${d.cost.toLocaleString()}</td>
+      <td class="r" style="color:#EF4444">${d.cost.toLocaleString()}</td>
       <td class="r" style="color:${d.profit>=0?'var(--c26a)':'var(--loss)'}; font-weight:700">${d.profit.toLocaleString()}</td>
       <td class="r" style="color:${m>=0?'var(--c26a)':'var(--loss)'}">${m.toFixed(1)}%</td>
       <td><span class="tg ${d.profit>=0?'tg-ok':'tg-ng'}">${d.profit>=0?'흑자':'적자'}</span></td>
@@ -3139,7 +3139,7 @@ function buildPLTable(items){
   rows+=`<tr class="total-row">
     <td>합계</td>
     <td class="r" style="color:var(--c26a)">${tot.s.toLocaleString()}</td>
-    <td class="r" style="color:#e05555">${tot.c.toLocaleString()}</td>
+    <td class="r" style="color:#EF4444">${tot.c.toLocaleString()}</td>
     <td class="r" style="color:${tm>=0?'var(--c26a)':'var(--loss)'}">${tot.p.toLocaleString()}</td>
     <td class="r" style="color:${tm>=0?'var(--c26a)':'var(--loss)'}">${tm.toFixed(1)}%</td>
     <td><span class="tg ${tm>=0?'tg-ok':'tg-ng'}">${tm>=0?'흑자':'적자'}</span></td>
@@ -3294,19 +3294,19 @@ function renderStuBar(month){
 
 function renderStuMathEng(month){
   stuMathChart=mkBar('c_stu_math',CAMPS_HAK,[
-    {label:'26년 초중',data:CAMPS_HAK.map(c=>getStu(c,month).mc26),backgroundColor:'#22bf85cc',borderRadius:3,borderSkipped:false,stack:'26'},
-    {label:'26년 영재',data:CAMPS_HAK.map(c=>getStu(c,month).mg26),backgroundColor:'#9474f0cc',borderRadius:3,borderSkipped:false,stack:'26'},
-    {label:'26년 고등',data:CAMPS_HAK.map(c=>getStu(c,month).md26),backgroundColor:'#e6aa10cc',borderRadius:3,borderSkipped:false,stack:'26'},
-    {label:'25년 초중',data:CAMPS_HAK.map(c=>getStu(c,month).mc25),backgroundColor:'#4d96f044',borderRadius:3,borderSkipped:false,stack:'25'},
-    {label:'25년 영재',data:CAMPS_HAK.map(c=>getStu(c,month).mg25),backgroundColor:'#9474f044',borderRadius:3,borderSkipped:false,stack:'25'},
-    {label:'25년 고등',data:CAMPS_HAK.map(c=>getStu(c,month).md25),backgroundColor:'#e6aa1044',borderRadius:3,borderSkipped:false,stack:'25'},
+    {label:'26년 초중',data:CAMPS_HAK.map(c=>getStu(c,month).mc26),backgroundColor:'#10B981cc',borderRadius:3,borderSkipped:false,stack:'26'},
+    {label:'26년 영재',data:CAMPS_HAK.map(c=>getStu(c,month).mg26),backgroundColor:'#7C5CFCcc',borderRadius:3,borderSkipped:false,stack:'26'},
+    {label:'26년 고등',data:CAMPS_HAK.map(c=>getStu(c,month).md26),backgroundColor:'#F59E0Bcc',borderRadius:3,borderSkipped:false,stack:'26'},
+    {label:'25년 초중',data:CAMPS_HAK.map(c=>getStu(c,month).mc25),backgroundColor:'#4361EE44',borderRadius:3,borderSkipped:false,stack:'25'},
+    {label:'25년 영재',data:CAMPS_HAK.map(c=>getStu(c,month).mg25),backgroundColor:'#7C5CFC44',borderRadius:3,borderSkipped:false,stack:'25'},
+    {label:'25년 고등',data:CAMPS_HAK.map(c=>getStu(c,month).md25),backgroundColor:'#F59E0B44',borderRadius:3,borderSkipped:false,stack:'25'},
   ],{plugins:{legend:{labels:{color:'#9DA8C3',font:{size:10},boxWidth:8,padding:8}}}});
 
   stuEngChart=mkBar('c_stu_eng',CAMPS_HAK,[
-    {label:'26년 초중',data:CAMPS_HAK.map(c=>getStu(c,month).ec26),backgroundColor:'#22bf85cc',borderRadius:3,borderSkipped:false,stack:'26'},
-    {label:'26년 고등',data:CAMPS_HAK.map(c=>getStu(c,month).ed26),backgroundColor:'#e6aa10cc',borderRadius:3,borderSkipped:false,stack:'26'},
-    {label:'25년 초중',data:CAMPS_HAK.map(c=>getStu(c,month).ec25),backgroundColor:'#4d96f044',borderRadius:3,borderSkipped:false,stack:'25'},
-    {label:'25년 고등',data:CAMPS_HAK.map(c=>getStu(c,month).ed25),backgroundColor:'#9474f044',borderRadius:3,borderSkipped:false,stack:'25'},
+    {label:'26년 초중',data:CAMPS_HAK.map(c=>getStu(c,month).ec26),backgroundColor:'#10B981cc',borderRadius:3,borderSkipped:false,stack:'26'},
+    {label:'26년 고등',data:CAMPS_HAK.map(c=>getStu(c,month).ed26),backgroundColor:'#F59E0Bcc',borderRadius:3,borderSkipped:false,stack:'26'},
+    {label:'25년 초중',data:CAMPS_HAK.map(c=>getStu(c,month).ec25),backgroundColor:'#4361EE44',borderRadius:3,borderSkipped:false,stack:'25'},
+    {label:'25년 고등',data:CAMPS_HAK.map(c=>getStu(c,month).ed25),backgroundColor:'#7C5CFC44',borderRadius:3,borderSkipped:false,stack:'25'},
   ],{plugins:{legend:{labels:{color:'#9DA8C3',font:{size:10},boxWidth:8,padding:8}}}});
 }
 
@@ -3411,12 +3411,12 @@ function updateStudentTrend(){
     {
       label: '25년 실적',
       data: data25,
-      borderColor: '#4d96f099',
+      borderColor: '#4361EE99',
       backgroundColor: 'transparent',
       borderWidth: 2,
       borderDash: [],
       pointRadius: 3,
-      pointBackgroundColor: '#4d96f088',
+      pointBackgroundColor: '#4361EE88',
       tension: 0.35,
       fill: false,
     },
@@ -3424,11 +3424,11 @@ function updateStudentTrend(){
     {
       label: '26년 실적',
       data: data26,
-      borderColor: '#22bf85',
-      backgroundColor: '#22bf8520',
+      borderColor: '#10B981',
+      backgroundColor: '#10B98120',
       borderWidth: 3,
       pointRadius: 5,
-      pointBackgroundColor: '#22bf85',
+      pointBackgroundColor: '#10B981',
       pointBorderColor: '#fff',
       pointBorderWidth: 2,
       tension: 0.35,
@@ -3490,7 +3490,7 @@ function updateStudentTrend(){
       const pt = meta.data[lastActual];
       const ctx2 = chart.ctx;
       ctx2.save();
-      ctx2.fillStyle = '#22bf85';
+      ctx2.fillStyle = '#10B981';
       ctx2.font = 'bold 10px sans-serif';
       ctx2.textAlign = 'center';
       ctx2.fillText(`▲ ${data26[lastActual]}명`, pt.x, pt.y - 10);
@@ -4009,7 +4009,7 @@ async function renderPendingTable(){
     <td><span class="rbadge ${u.role}">${u.role==='admin'?'관리자':'뷰어'}</span></td>
     <td>${u.join_date||'-'}</td>
     <td>
-      <button onclick="approveUser('${u.email}')" style="font-size:10px;padding:3px 8px;background:#22bf8522;border:1px solid var(--c26a);border-radius:4px;cursor:pointer;color:var(--c26a)">승인</button>
+      <button onclick="approveUser('${u.email}')" style="font-size:10px;padding:3px 8px;background:#10B98122;border:1px solid var(--c26a);border-radius:4px;cursor:pointer;color:var(--c26a)">승인</button>
       <button onclick="rejectUser('${u.email}')" style="font-size:10px;padding:3px 8px;background:var(--s3);border:1px solid var(--border2);border-radius:4px;cursor:pointer;color:var(--loss);margin-left:4px">거절</button>
     </td>
   </tr>`).join('')
