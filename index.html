@@ -151,12 +151,17 @@ tbody td.indent{padding-left:28px;color:var(--muted2)}
 .tg-n{background:#EEF2FF;color:#4361EE}
 
 /* ── ACHIEVEMENT BAR ── */
-.ach-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)}
+.ach-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border)}
 .ach-row:last-child{border:none}
+.ach-row.sub{padding:4px 0 4px 14px;border-bottom:none}
+.ach-row.sub:last-child{padding-bottom:7px}
 .ach-name{font-size:11px;width:90px;flex-shrink:0}
+.ach-row.sub .ach-name{font-size:10px;color:var(--muted);width:86px}
 .ach-bar-bg{flex:1;height:7px;background:var(--border);border-radius:4px;overflow:hidden}
+.ach-row.sub .ach-bar-bg{height:5px}
 .ach-bar{height:100%;border-radius:4px;transition:width 1s ease}
 .ach-pct{font-size:11px;font-weight:700;width:48px;text-align:right}
+.ach-row.sub .ach-pct{font-size:10px;font-weight:600}
 
 /* ── FILTERS / PAGINATION ── */
 .fbar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
@@ -1650,24 +1655,6 @@ function initOverview(){
     ['학원사업본부','U2M사업본부','방과후사업본부','미래교육사업부'],
     [1549.5,382.5,659.6,391.4],
     ['#4361EE','#6a28d9','#F59E0B','#0ea872']);
-  // 목표달성률
-  const depts=[
-    {name:'학원사업본부',plan:1525.0,actual:1549.5},
-    {name:'U2M사업본부',plan:329.8,actual:382.5},
-    {name:'미래교육사업부',plan:365.8,actual:391.4},
-    {name:'방과후사업본부',plan:703.3,actual:659.6},
-  ];
-  const el=document.getElementById('ach_list');
-  el.innerHTML='';
-  depts.forEach(({name,plan,actual})=>{
-    const pct=plan>0?(actual/plan*100):0;
-    const color=pct>=100?C26A:pct>=90?C25:'#f87171';
-    el.innerHTML+=`<div class="ach-row">
-      <div class="ach-name">${name}</div>
-      <div class="ach-bar-bg"><div class="ach-bar" style="width:${Math.min(pct,100).toFixed(0)}%;background:${color}"></div></div>
-      <div class="ach-pct" style="color:${color}">${pct.toFixed(1)}%</div>
-    </div>`;
-  });
   renderOvKpi(ovMonth);
 }
 
@@ -2554,6 +2541,46 @@ function renderOvKpi(mi){
     kpiHtml('영업이익 YTD',fmt억(yp25),fmt억(yp26p),fmt억(yp26a),pctStr(yp26a,yp26p),yp26a<0?'var(--loss)':'var(--c26a)')+
     kpiHtml('이익률 YTD',yr25.toFixed(1)+'%',yr26pp.toFixed(1)+'%',yr26a2!=null?yr26a2.toFixed(1)+'%':'-',
       yr26a2!=null?`계획比 ${(yr26a2-yr26pp)>=0?'+':''}${(yr26a2-yr26pp).toFixed(1)}%p`:'');
+
+  // ── 목표달성률 (동적) ──
+  const achEl = document.getElementById('ach_list');
+  if(!achEl) return;
+  const MN2=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  const curMon = MN2[mi];
+  const gvCamp = (camp, metric) => DEPT_DATA.camps[camp][metric].yr26actual[mi] ?? DEPT_DATA.camps[camp][metric].yr26base[mi] ?? 0;
+  const sumRAW = (fn) => RAW_DB.filter(r => r.m===curMon && fn(r)).reduce((s,r)=>s+(r.v||0),0) / 1e6;
+  const achRow = (name, plan, actual, isSub=false) => {
+    const pct = plan>0 ? actual/plan*100 : 0;
+    const color = pct>=100 ? C26A : pct>=90 ? C25 : '#f87171';
+    return `<div class="ach-row${isSub?' sub':''}">
+      <div class="ach-name">${name}</div>
+      <div class="ach-bar-bg"><div class="ach-bar" style="width:${Math.min(pct,100).toFixed(0)}%;background:${color}"></div></div>
+      <div class="ach-pct" style="color:${color}">${pct>0?pct.toFixed(1)+'%':'-'}</div>
+    </div>`;
+  };
+
+  const hakCamps2=['광진','성동','동대문','중랑'];
+  const u2mCamps2=['중계','송파방이','미사','위례'];
+  const hakPlan   = hakCamps2.reduce((s,c)=>s+(DEPT_DATA.camps[c].매출.yr26base[mi]??0),0);
+  const hakActual = hakCamps2.reduce((s,c)=>s+gvCamp(c,'매출'),0);
+  const hakTuit   = sumRAW(r=>r.a==='교습비수입');
+  const u2mPlan   = u2mCamps2.reduce((s,c)=>s+(DEPT_DATA.camps[c].매출.yr26base[mi]??0),0);
+  const u2mActual = u2mCamps2.reduce((s,c)=>s+gvCamp(c,'매출'),0);
+  const u2mTuit   = sumRAW(r=>r.a==='U2M수업료');
+  const gvM = (metric) => DEPT_DATA.mirae[metric].yr26actual[mi] ?? DEPT_DATA.mirae[metric].yr26base[mi] ?? 0;
+  const gvB = (metric) => DEPT_DATA.bghu[metric].yr26actual[mi] ?? DEPT_DATA.bghu[metric].yr26base[mi] ?? 0;
+
+  achEl.innerHTML =
+    achRow('학원사업본부', hakPlan, hakActual) +
+    achRow('└ 교습비 매출', hakPlan, hakTuit||hakActual, true) +
+    achRow('U2M사업본부', u2mPlan, u2mActual) +
+    achRow('└ 교습비 매출', u2mPlan, u2mTuit||u2mActual, true) +
+    achRow('미래교육사업부', DEPT_DATA.mirae.교재매출.yr26base[mi]+DEPT_DATA.mirae.원격매출.yr26base[mi], gvM('교재매출')+gvM('원격매출')) +
+    achRow('├ 교재매출', DEPT_DATA.mirae.교재매출.yr26base[mi]??0, gvM('교재매출'), true) +
+    achRow('└ 원격매출', DEPT_DATA.mirae.원격매출.yr26base[mi]??0, gvM('원격매출'), true) +
+    achRow('방과후사업본부', (DEPT_DATA.bghu.수업료매출.yr26base[mi]??0)+(DEPT_DATA.bghu.재료비매출.yr26base[mi]??0), gvB('수업료매출')+gvB('재료비매출')) +
+    achRow('├ 수업료매출', DEPT_DATA.bghu.수업료매출.yr26base[mi]??0, gvB('수업료매출'), true) +
+    achRow('└ 재료비매출', DEPT_DATA.bghu.재료비매출.yr26base[mi]??0, gvB('재료비매출'), true);
 }
 
 function renderDeptKpi(mi){
