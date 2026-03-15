@@ -2564,12 +2564,21 @@ function renderOvKpi(mi){
 
   const hakCamps2=['광진','성동','동대문','중랑'];
   const u2mCamps2=['중계','송파방이','미사','위례'];
+  // r.cp 우선, 없으면 r.cc 접두사로 캠퍼스 판별 (applyRawToDashboard의 effCamp와 동일 로직)
+  const _effCamp = r => {
+    if(r.cp && r.cp.trim() && r.cp !== '-') return r.cp;
+    if(r.cc === '학원본부') return '학원본부';
+    for(const c of ['광진','성동','동대문','중랑','중계','송파방이','미사','위례']){
+      if(r.cc && r.cc.startsWith(c)) return c;
+    }
+    return null;
+  };
   const hakPlan   = hakCamps2.reduce((s,c)=>s+(DEPT_DATA.camps[c].매출.yr26base[mi]??0),0);
   const hakActual = hakCamps2.reduce((s,c)=>s+gvCamp(c,'매출'),0);
-  const hakTuit   = sumRAW(r=>r.a==='교습비수입');
+  const hakTuit   = sumRAW(r=>r.a==='교습비수입' && hakCamps2.includes(_effCamp(r)));
   const u2mPlan   = u2mCamps2.reduce((s,c)=>s+(DEPT_DATA.camps[c].매출.yr26base[mi]??0),0);
   const u2mActual = u2mCamps2.reduce((s,c)=>s+gvCamp(c,'매출'),0);
-  const u2mTuit   = sumRAW(r=>r.a==='U2M수업료');
+  const u2mTuit   = sumRAW(r=>r.a==='U2M수업료' && u2mCamps2.includes(_effCamp(r)));
   const gvM = (metric) => DEPT_DATA.mirae[metric].yr26actual[mi] ?? DEPT_DATA.mirae[metric].yr26base[mi] ?? 0;
   const gvB = (metric) => DEPT_DATA.bghu[metric].yr26actual[mi] ?? DEPT_DATA.bghu[metric].yr26base[mi] ?? 0;
 
