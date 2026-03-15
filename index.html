@@ -1395,6 +1395,8 @@ const DEPT_DATA = {
                 영업이익: { yr25:[13,-3,3,0,0,-2,11,-15,-5,-1,-19,-9],           yr26base:[2,null,null,null,null,null,null,null,null,null,null,null],   yr26actual:N12() } },
     '위례':    { 매출: { yr25:[52,40,38,37,38,35,50,34,34,33,33,34],             yr26base:[60,null,null,null,null,null,null,null,null,null,null,null],  yr26actual:N12() },
                 영업이익: { yr25:[4,-14,-8,-12,-11,-7,6,-20,-9,-9,-10,-6],       yr26base:[25,null,null,null,null,null,null,null,null,null,null,null],  yr26actual:N12() } },
+    '학원본부':{ 매출: { yr25:N12(), yr26base:[0,null,null,null,null,null,null,null,null,null,null,null], yr26actual:N12() },
+                영업이익: { yr25:N12(), yr26base:[-18,null,null,null,null,null,null,null,null,null,null,null], yr26actual:N12() } },
   },
 
   // ── 미래교육사업본부 ──
@@ -2588,7 +2590,7 @@ function renderDeptKpi(mi){
   // 실적 우선, 없으면 계획 폴백 (getVal 전역함수 사용)
   const gv = (m) => getVal(m, mi) ?? 0;
   // ── 학원 mini-cards ──
-  const hakCamps=['광진','성동','동대문','중랑'];
+  const hakCamps=['광진','성동','동대문','중랑','학원본부'];
   const hS=hakCamps.reduce((s,c)=>s+gv(DEPT_DATA.camps[c].매출),0);
   const hP=hakCamps.reduce((s,c)=>s+gv(DEPT_DATA.camps[c].영업이익),0);
   const hC=hS-hP;
@@ -4371,11 +4373,12 @@ function applyRawToDashboard(){
   if(!RAW_DB.length) return;
 
   const sum = (filter) => RAW_DB.filter(filter).reduce((s,r)=>s+r.v, 0);
-  const CAMPS_LIST = ['광진','성동','동대문','중랑','중계','송파방이','미사','위례'];
+  const CAMPS_LIST = ['광진','성동','동대문','중랑','중계','송파방이','미사','위례','학원본부'];
   // r.cp가 없을 때 r.cc 접두사로 캠퍼스 유추
   const _campPfx = ['광진','성동','동대문','중랑','중계','송파방이','미사','위례'];
   const effCamp = r => {
     if(r.cp && r.cp.trim() && r.cp !== '-') return r.cp;
+    if(r.cc === '학원본부') return '학원본부';
     for(const c of _campPfx){ if(r.cc && r.cc.startsWith(c)) return c; }
     return null;
   };
@@ -4459,7 +4462,7 @@ function applyRawToDashboard(){
   }
 
   // ── 5. 캠퍼스/카테고리별 월별 매출·영업이익 → DEPT_DATA.yr26actual 갱신 ──
-  const allCamps = ['광진','성동','동대문','중랑','중계','송파방이','미사','위례'];
+  const allCamps = ['광진','성동','동대문','중랑','중계','송파방이','미사','위례','학원본부'];
 
   // 학원·U2M: effCamp 기준 매출 + 영업이익
   allCamps.forEach(camp=>{
