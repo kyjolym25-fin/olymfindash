@@ -65,6 +65,20 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
 .g5{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px}
 .full{margin-bottom:14px}
 
+/* ── KPI 그라디언트 카드 ── */
+.kpi-grad-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:14px}
+.kpi-grad{border-radius:16px;padding:20px 22px;color:#fff;position:relative;overflow:hidden;box-shadow:var(--shadow-md)}
+.kpi-grad::after{content:'';position:absolute;right:-20px;top:-20px;width:90px;height:90px;border-radius:50%;background:rgba(255,255,255,.1)}
+.kpi-grad.blue{background:linear-gradient(135deg,#4361EE,#738EFF)}
+.kpi-grad.green{background:linear-gradient(135deg,#10B981,#34D399)}
+.kpi-grad.purple{background:linear-gradient(135deg,#7C5CFC,#A78BFA)}
+.kpi-grad.amber{background:linear-gradient(135deg,#F59E0B,#FCD34D)}
+.kpi-grad-lbl{font-size:11px;font-weight:600;opacity:.85;letter-spacing:.4px;margin-bottom:10px}
+.kpi-grad-val{font-size:24px;font-weight:900;letter-spacing:-1px;line-height:1}
+.kpi-grad-unit{font-size:12px;font-weight:400;opacity:.8;margin-left:2px}
+.kpi-grad-sub{font-size:11px;opacity:.8;margin-top:8px;display:flex;align-items:center;gap:6px}
+.kpi-grad-delta{font-size:11px;font-weight:700;background:rgba(255,255,255,.2);border-radius:20px;padding:2px 8px}
+
 /* ── CARD ── */
 .card{background:var(--s1);border-radius:16px;padding:18px 20px;box-shadow:var(--shadow)}
 .ch{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px}
@@ -378,6 +392,9 @@ thead th{font-size:13px}
 
   <!-- 월 선택 바 -->
   <div class="month-bar" id="ov-month-bar"></div>
+
+  <!-- KPI 그라디언트 요약 카드 -->
+  <div class="kpi-grad-grid" id="ov-kpi-grad"></div>
 
   <!-- KPI 통합 2열 -->
   <div class="g2" style="margin-bottom:14px">
@@ -2490,6 +2507,32 @@ function renderOvKpi(mi){
   const r25=s25>0?p25/s25*100:0, r26p=s26p>0?p26p/s26p*100:0;
   const r26a=s26a>0&&p26a!=null?p26a/s26a*100:null;
   const cRatio=s26a>0&&c26a!=null?`매출比 ${(c26a/s26a*100).toFixed(1)}%`:'';
+  const gradEl=document.getElementById('ov-kpi-grad');
+  if(gradEl){
+    const deltaStr=(a,b)=>{ if(a==null||!b) return ''; const p=(a-b)/Math.abs(b)*100,sg=p>=0?'▲':'▼'; return `${sg} ${Math.abs(p).toFixed(1)}% vs 계획`; };
+    const rDelta=(a,b)=>{ if(a==null||b==null) return ''; const d=a-b,sg=d>=0?'+':''; return `계획比 ${sg}${d.toFixed(1)}%p`; };
+    gradEl.innerHTML=`
+      <div class="kpi-grad blue">
+        <div class="kpi-grad-lbl">매출액</div>
+        <div class="kpi-grad-val">${fmt억(s26a)??'-'}<span class="kpi-grad-unit">백만원</span></div>
+        <div class="kpi-grad-sub"><span class="kpi-grad-delta">${deltaStr(s26a,s26p)||'데이터 없음'}</span></div>
+      </div>
+      <div class="kpi-grad green">
+        <div class="kpi-grad-lbl">영업이익</div>
+        <div class="kpi-grad-val">${fmt억(p26a)??'-'}<span class="kpi-grad-unit">백만원</span></div>
+        <div class="kpi-grad-sub"><span class="kpi-grad-delta">${deltaStr(p26a,p26p)||'데이터 없음'}</span></div>
+      </div>
+      <div class="kpi-grad purple">
+        <div class="kpi-grad-lbl">영업이익률</div>
+        <div class="kpi-grad-val">${r26a!=null?r26a.toFixed(1):'-'}<span class="kpi-grad-unit">%</span></div>
+        <div class="kpi-grad-sub"><span class="kpi-grad-delta">${rDelta(r26a,r26p)||'데이터 없음'}</span></div>
+      </div>
+      <div class="kpi-grad amber">
+        <div class="kpi-grad-lbl">판관비</div>
+        <div class="kpi-grad-val">${fmt억(c26a)??'-'}<span class="kpi-grad-unit">백만원</span></div>
+        <div class="kpi-grad-sub"><span class="kpi-grad-delta">${deltaStr(c26a,c26p)||'데이터 없음'}</span></div>
+      </div>`;
+  }
   const g=document.getElementById('ov-kpi-monthly');
   if(g) g.innerHTML=
     kpiHtml('매출액',fmt억(s25),fmt억(s26p),fmt억(s26a),pctStr(s26a,s26p))+
