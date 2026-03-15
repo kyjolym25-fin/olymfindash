@@ -2544,7 +2544,7 @@ function renderOvKpi(mi){
     : pct>=90
     ? '#F59E0B,#FCD34D'
     : '#F43F5E,#FB7185';
-  const fmtM = v => v>=1000 ? (v/1000).toFixed(1)+'B' : Math.round(v)+'M';
+  const fmtM = v => Math.round(v)+'M';
   const achRow = (name, plan, actual, isSub=false, forceGreen=false) => {
     const pct = plan>0 ? actual/plan*100 : 0;
     const barW = Math.min(pct, 100).toFixed(1);
@@ -2554,9 +2554,9 @@ function renderOvKpi(mi){
       return `<div class="ach-row sub">
         <div class="ach-row-top">
           <div class="ach-name">${name}</div>
-          <div class="ach-pct" style="color:${pctColor}">${pct>0?pct.toFixed(1)+'%':'-'}</div>
+          <div class="ach-pct" style="color:#9DA8C3">${pct>0?pct.toFixed(1)+'%':'-'}</div>
         </div>
-        <div class="ach-track"><div class="ach-bar" style="width:${barW}%;background:linear-gradient(to right,${gr});opacity:.7"></div></div>
+        <div class="ach-track"><div class="ach-bar" style="width:${barW}%;background:linear-gradient(to right,#9DA8C3,#CDD3E8)"></div></div>
       </div>`;
     }
     const planTxt = plan>0 ? fmtM(plan) : '-';
