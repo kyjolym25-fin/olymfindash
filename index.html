@@ -1828,7 +1828,6 @@ function initHakwon(){
   renderCampMountain('광진', 'c_hak_mountain', 'hak');
 
   // 캠퍼스별 월별 매출 마운틴 (RAW_DB 기반) - 항상 렌더
-  if(campSalesMtnChts['hak_s']){ campSalesMtnChts['hak_s'].destroy(); campSalesMtnChts['hak_s']=null; }
   renderCampSalesMtn('광진','c_hak_sales_mtn','hak_s');
 }
 
@@ -1897,7 +1896,7 @@ function renderCampMountain(camp, canvasId, section) {
   const d = { p25: metric.yr25, p26a: Array.from({length:12},(_,i)=>getVal(metric,i)) };
   const ctx = document.getElementById(canvasId);
   if(!ctx) return null;
-  if(campMtnCharts[section]) { campMtnCharts[section].destroy(); campMtnCharts[section] = null; }
+  _destroyChart(ctx);
 
   const M = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
 
@@ -1979,7 +1978,7 @@ function renderCampSalesMtn(camp, canvasId, section){
   const metric = METRIC_MAP[camp] || (DEPT_DATA.camps[camp] && DEPT_DATA.camps[camp].매출);
   const ctx = document.getElementById(canvasId);
   if(!ctx) return;
-  if(campSalesMtnChts[section]){ campSalesMtnChts[section].destroy(); campSalesMtnChts[section]=null; }
+  _destroyChart(ctx);
   const raw25 = metric ? metric.yr25 : null;
   const data26 = metric ? Array.from({length:12}, (_,i) => getVal(metric, i)) : Array(12).fill(null);
 
@@ -2609,7 +2608,7 @@ function renderFranchiseKpi(){
 
 function renderFranchiseCountChart(){
   const ctx = document.getElementById('c_fr_count'); if(!ctx) return;
-  if(frCharts.count){ frCharts.count.destroy(); frCharts.count=null; }
+  _destroyChart(ctx);
   const fr = DEPT_DATA.franchise;
   const MO = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
   frCharts.count = new Chart(ctx.getContext('2d'), {
@@ -2645,7 +2644,7 @@ function renderFranchiseCountChart(){
 
 function renderFranchiseProfitChart(){
   const ctx = document.getElementById('c_fr_profit'); if(!ctx) return;
-  if(frCharts.profit){ frCharts.profit.destroy(); frCharts.profit=null; }
+  _destroyChart(ctx);
   const fr = DEPT_DATA.franchise;
   const MO = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
   frCharts.profit = new Chart(ctx.getContext('2d'), {
@@ -2684,7 +2683,6 @@ function initU2m(){
   renderCampMountain('중계', 'c_u2m_mountain', 'u2m');
 
   // 캠퍼스별 월별 매출 마운틴 (RAW_DB 기반) - 항상 렌더
-  if(campSalesMtnChts['u2m_s']){ campSalesMtnChts['u2m_s'].destroy(); campSalesMtnChts['u2m_s']=null; }
   renderCampSalesMtn('중계','c_u2m_sales_mtn','u2m_s');
 }
 
@@ -2888,7 +2886,6 @@ function initMirae(){
   renderCampMountain('미래_교재', 'c_mirae_mountain', 'mirae');
 
   // RAW_DB 기반 영업이익 추이 - 항상 렌더
-  if(campSalesMtnChts['mirae_p']){ campSalesMtnChts['mirae_p'].destroy(); campSalesMtnChts['mirae_p']=null; }
   renderCampSalesMtn('미래_영업이익','c_mirae_profit_mtn','mirae_p');
 }
 
@@ -3002,7 +2999,6 @@ function initBgh(){
   renderCampMountain('방과후_수업료', 'c_bghu_mountain', 'bghu');
 
   // RAW_DB 기반 영업이익 추이 - 항상 렌더
-  if(campSalesMtnChts['bghu_p']){ campSalesMtnChts['bghu_p'].destroy(); campSalesMtnChts['bghu_p']=null; }
   renderCampSalesMtn('방과후_영업이익','c_bghu_profit_mtn','bghu_p');
 }
 
@@ -3250,7 +3246,6 @@ function renderStuKpi(month){
 }
 
 function renderStuBar(month){
-  if(stuBarChart){stuBarChart.destroy();stuBarChart=null;}
   stuBarChart=mkBar('c_stu_bar',CAMPS_ALL,[
     dsBar('25년 실적',CAMPS_ALL.map(c=>getStu(c,month).a25),C25),
     dsBar('26년 실적',CAMPS_ALL.map(c=>getStu(c,month).a26),C26A),
@@ -3259,7 +3254,6 @@ function renderStuBar(month){
 }
 
 function renderStuMathEng(month){
-  if(stuMathChart){stuMathChart.destroy();stuMathChart=null;}
   stuMathChart=mkBar('c_stu_math',CAMPS_HAK,[
     {label:'26년 초중',data:CAMPS_HAK.map(c=>getStu(c,month).mc26),backgroundColor:'#22bf85cc',borderRadius:3,borderSkipped:false,stack:'26'},
     {label:'26년 영재',data:CAMPS_HAK.map(c=>getStu(c,month).mg26),backgroundColor:'#9474f0cc',borderRadius:3,borderSkipped:false,stack:'26'},
@@ -3269,7 +3263,6 @@ function renderStuMathEng(month){
     {label:'25년 고등',data:CAMPS_HAK.map(c=>getStu(c,month).md25),backgroundColor:'#e6aa1044',borderRadius:3,borderSkipped:false,stack:'25'},
   ],{plugins:{legend:{labels:{color:'#6b7599',font:{size:10},boxWidth:8,padding:8}}}});
 
-  if(stuEngChart){stuEngChart.destroy();stuEngChart=null;}
   stuEngChart=mkBar('c_stu_eng',CAMPS_HAK,[
     {label:'26년 초중',data:CAMPS_HAK.map(c=>getStu(c,month).ec26),backgroundColor:'#22bf85cc',borderRadius:3,borderSkipped:false,stack:'26'},
     {label:'26년 고등',data:CAMPS_HAK.map(c=>getStu(c,month).ed26),backgroundColor:'#e6aa10cc',borderRadius:3,borderSkipped:false,stack:'26'},
@@ -3363,9 +3356,9 @@ function updateStudentTrend(){
   const c=document.getElementById('stu_campus_sel').value;
   const s=STU[c];
   const months=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
-  if(stuTrendChart){stuTrendChart.destroy();stuTrendChart=null;}
   const ctx=document.getElementById('c_stu_trend');
   if(!ctx)return;
+  _destroyChart(ctx);
 
   // 25년 합계 (12개월 전체, 0은 null로 처리하지 않음)
   const data25 = months.map((_,i) => s.yr25['합계'][i] ?? 0);
