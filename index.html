@@ -1154,6 +1154,13 @@ thead th{font-size:13px}
       <span>총 row 수: <strong id="rowCountEl" style="color:var(--fg)">-</strong></span>
     </div>
 
+    <!-- 데이터 진단 패널 -->
+    <div id="diagPanel" style="display:none;margin-top:10px;background:var(--s3);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:11px;font-family:monospace">
+      <div style="font-weight:700;margin-bottom:8px;font-size:12px">🔍 데이터 진단</div>
+      <div id="diagContent" style="white-space:pre-wrap;line-height:1.7;color:var(--fg)"></div>
+    </div>
+    <button onclick="runDiag()" style="margin-top:8px;padding:4px 12px;font-size:11px;background:var(--s3);border:1px solid var(--border);border-radius:6px;cursor:pointer;color:var(--muted)">🔍 데이터 진단</button>
+
     <!-- 업로드된 데이터 요약 미리보기 -->
     <div id="uploadPreview" style="display:none;margin-top:14px">
       <div style="font-size:12px;font-weight:600;margin-bottom:8px">📊 집계 요약 (전체 누적)</div>
@@ -4244,6 +4251,52 @@ function handleXlsxUpload(event){
   reader.readAsArrayBuffer(file);
   // input 초기화 (같은 파일 재업로드 가능)
   event.target.value='';
+}
+
+function runDiag(){
+  const lines=[];
+  const campPfx=['광진','성동','동대문','중랑','중계','송파방이','미사','위례'];
+  const effC=r=>{
+    if(r.cp&&r.cp.trim()&&r.cp!=='-') return r.cp;
+    for(const c of campPfx){if(r.cc&&r.cc.startsWith(c))return c;}
+    return null;
+  };
+  lines.push(`RAW_DB: ${RAW_DB.length}건`);
+  if(RAW_DB.length){
+    const s=RAW_DB[0];
+    lines.push(`첫 row: t=${s.t} | cc=${s.cc} | m=${s.m} | d=${s.d} | cp=${s.cp||'(없음)'} | effCamp=${effC(s)||'(null)'}`);
+    const months=[...new Set(RAW_DB.map(r=>r.m))].join(', ');
+    lines.push(`업로드 월: ${months}`);
+    const depts=[...new Set(RAW_DB.map(r=>r.d))].join(', ');
+    lines.push(`본부 값: ${depts}`);
+    const cps=[...new Set(RAW_DB.map(r=>r.cp||''))].filter(Boolean).join(', ')||'(모두 비어있음)';
+    lines.push(`cp 값: ${cps}`);
+    const ccs=[...new Set(RAW_DB.map(r=>r.cc))].slice(0,8).join(', ');
+    lines.push(`cc 값(최대8): ${ccs}`);
+    // effCamp 결과
+    const campMap={};
+    RAW_DB.forEach(r=>{const c=effC(r);if(c){campMap[c]=(campMap[c]||0)+1;}});
+    lines.push(`effCamp 결과: ${JSON.stringify(campMap)}`);
+  }
+  lines.push('');
+  lines.push(`latestActMi: ${latestActMi}`);
+  lines.push('camp yr26actual(매출) [0]:');
+  for(const c of campPfx){
+    const v=DEPT_DATA.camps[c]?.매출?.yr26actual?.[0];
+    lines.push(`  ${c}: ${v!=null?v:'null'}`);
+  }
+  lines.push('');
+  const ccKeys=Object.keys(CC_MONTH_ACTUAL);
+  lines.push(`CC_MONTH_ACTUAL keys(${ccKeys.length}): ${ccKeys.join(', ')||'(없음)'}`);
+  if(ccKeys.length){
+    const k=ccKeys[0];
+    const v=CC_MONTH_ACTUAL[k];
+    lines.push(`  ${k}[0]: ${JSON.stringify(v[0])}`);
+  }
+  const el=document.getElementById('diagContent');
+  const panel=document.getElementById('diagPanel');
+  if(el) el.textContent=lines.join('\n');
+  if(panel) panel.style.display='block';
 }
 
 function applyRawToDashboard(){
