@@ -2340,6 +2340,7 @@ let ovMonth = 0;
 let deptMonth = 0;
 let stuMonth = 0;
 let latestActMi = -1;
+let RAW_DB = [];  // [{t,a,cc,m,d,cp,s,gr,v}, ...] — initOverview보다 앞에 선언 필수
 
 function fmt억(v){
   if(v==null||isNaN(v)) return '-';
@@ -4091,9 +4092,6 @@ function costCat(acct){
 }
 
 const MONTH_IDX={'1월':0,'2월':1,'3월':2,'4월':3,'5월':4,'6월':5,'7월':6,'8월':7,'9월':8,'10월':9,'11월':10,'12월':11};
-
-// 업로드된 로우 데이터 저장소 (월별 누적)
-let RAW_DB = [];  // [{t,a,cc,m,d,cp,s,gr,v}, ...]
 
 // ============================================================
 // DEPT_DATA DB 연동 (dept_data 테이블)
