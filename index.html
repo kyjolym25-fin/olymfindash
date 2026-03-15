@@ -4567,6 +4567,18 @@ function applyRawToDashboard(){
     });
   });
 
+  // ── 5c. 총괄 overview: 학원본부 공통비가 RAW_DB에 없을 경우 계획값으로 보정 ──
+  // 사업부 KPI는 학원본부 포함(getVal fallback)이지만 overview는 raw합계만 사용 → 불일치 해소
+  months.forEach((mn,mi)=>{
+    if(DEPT_DATA.overview.판관비.yr26actual[mi] == null) return;
+    const hqActual = DEPT_DATA.camps['학원본부'].영업이익.yr26actual[mi];
+    if(hqActual == null){
+      // 학원본부가 RAW_DB에 없는 경우 → 계획값(비용)을 overview 판관비에 가산
+      const hqCost = -(DEPT_DATA.camps['학원본부'].영업이익.yr26base[mi] ?? 0);
+      DEPT_DATA.overview.판관비.yr26actual[mi] = parseFloat(((DEPT_DATA.overview.판관비.yr26actual[mi]) + hqCost).toFixed(2));
+    }
+  });
+
   // CC별 월별 실적 집계 (수학/영어 분리, 영업이익은 매출비율로 배분)
   CC_MONTH_ACTUAL = {};
   const CC_SPLIT = {
