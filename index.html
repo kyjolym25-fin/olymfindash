@@ -426,20 +426,32 @@ thead th{font-size:13px}
     </div>
   </div>
 
-  <div class="g3">
+  <!-- 목표달성률 2열 -->
+  <div class="g2">
+    <div class="card">
+      <div class="ch"><div><div class="ct" id="ach-title-monthly">목표달성률 (당월)</div><div class="cs">사업부별 실적/계획</div></div></div>
+      <div id="ach_list" style="margin-top:6px"></div>
+    </div>
+    <div class="card">
+      <div class="ch"><div><div class="ct" id="ach-title-ytd">목표달성률 (YTD)</div><div class="cs" id="ach-cs-ytd">사업부별 누적 실적/계획</div></div></div>
+      <div id="ach_list_ytd" style="margin-top:6px"></div>
+    </div>
+  </div>
+
+  <!-- 누적 차트 2열 -->
+  <div class="g2">
     <div class="card">
       <div class="ch">
         <div><div class="ct">누적 매출 비교</div><div class="cs">월별 누적합계 (백만원)</div></div>
         <div class="cbg">누적</div>
       </div>
-      <div class="cw" style="height:250px"><canvas id="c_overall_sales"></canvas></div>
+      <div class="cw" style="height:220px"><canvas id="c_overall_sales"></canvas></div>
     </div>
     <div class="card">
-      <div class="ch"><div><div class="ct">26년 1월 목표달성률</div><div class="cs">사업부별 실적/계획</div></div></div>
-      <div id="ach_list" style="display:flex;flex-direction:column;gap:2px;margin-top:6px"></div>
+      <div class="ch"><div><div class="ct">누적 영업이익 비교</div><div class="cs">월별 누적합계 (백만원)</div></div></div>
+      <div class="cw" style="height:220px"><canvas id="c_overall_profit"></canvas></div>
     </div>
   </div>
-
 
   <div id="cb-ov-s1" class="comment-box" style="display:none">
     <div class="cb-label"><span>✦</span> COMMENT</div>
@@ -452,31 +464,6 @@ thead th{font-size:13px}
     <div class="cb-btns">
       <button class="cb-del" onclick="deleteComment('ov-s1')">삭제</button>
       <button class="cb-save" onclick="saveComment('ov-s1')">저장</button>
-    </div>
-  </div>
-
-  <div class="g2">
-    <div class="card">
-      <div class="ch"><div><div class="ct">누적 영업이익 비교</div><div class="cs">월별 누적합계 (백만원)</div></div></div>
-      <div class="cw" style="height:220px"><canvas id="c_overall_profit"></canvas></div>
-    </div>
-    <div class="card">
-      <div class="ch"><div><div class="ct">사업부별 매출 구성 (26년 1월 실적)</div></div></div>
-      <div class="cw" style="height:220px"><canvas id="c_dept_pie"></canvas></div>
-    </div>
-  </div>
-
-  <div id="cb-ov-s2" class="comment-box" style="display:none">
-    <div class="cb-label"><span>✦</span> COMMENT</div>
-    <div class="cb-text" id="cb-text-ov-s2"></div>
-    <div class="cb-date" id="cb-date-ov-s2"></div>
-  </div>
-  <div id="ce-ov-s2" class="comment-editor">
-    <div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div>
-    <textarea id="ce-text-ov-s2" placeholder="코멘트를 입력하세요..."></textarea>
-    <div class="cb-btns">
-      <button class="cb-del" onclick="deleteComment('ov-s2')">삭제</button>
-      <button class="cb-save" onclick="saveComment('ov-s2')">저장</button>
     </div>
   </div>
 
@@ -1657,11 +1644,6 @@ function initOverview(){
       ]},
       options:ovOpts, plugins:[ovLblPlugin(yr26aData,C26A,'profitLbl')]});
   })();
-  // 사업부 파이
-  mkDoughnut('c_dept_pie',
-    ['학원사업본부','U2M사업본부','방과후사업본부','미래교육사업부'],
-    [1549.5,382.5,659.6,391.4],
-    ['#4361EE','#6a28d9','#F59E0B','#0ea872']);
   renderOvKpi(ovMonth);
 }
 
@@ -2591,7 +2573,6 @@ function renderOvKpi(mi){
 
   const hakCamps2=['광진','성동','동대문','중랑'];
   const u2mCamps2=['중계','송파방이','미사','위례'];
-  // r.cp 우선, 없으면 r.cc 접두사로 캠퍼스 판별 (applyRawToDashboard의 effCamp와 동일 로직)
   const _effCamp = r => {
     if(r.cp && r.cp.trim() && r.cp !== '-') return r.cp;
     if(r.cc === '학원본부') return '학원본부';
@@ -2600,6 +2581,8 @@ function renderOvKpi(mi){
     }
     return null;
   };
+
+  // ── 당월 ──
   const hakPlan   = hakCamps2.reduce((s,c)=>s+(DEPT_DATA.camps[c].매출.yr26base[mi]??0),0);
   const hakActual = hakCamps2.reduce((s,c)=>s+gvCamp(c,'매출'),0);
   const hakTuit   = sumRAW(r=>r.a==='교습비수입' && hakCamps2.includes(_effCamp(r)));
@@ -2608,6 +2591,10 @@ function renderOvKpi(mi){
   const u2mTuit   = sumRAW(r=>r.a==='U2M수업료' && u2mCamps2.includes(_effCamp(r)));
   const gvM = (metric) => DEPT_DATA.mirae[metric].yr26actual[mi] ?? DEPT_DATA.mirae[metric].yr26base[mi] ?? 0;
   const gvB = (metric) => DEPT_DATA.bghu[metric].yr26actual[mi] ?? DEPT_DATA.bghu[metric].yr26base[mi] ?? 0;
+
+  // 타이틀 동적 업데이트
+  const mTitle = document.getElementById('ach-title-monthly');
+  if(mTitle) mTitle.textContent = `목표달성률 (${mn})`;
 
   achEl.innerHTML =
     achRow('학원사업본부', hakPlan, hakActual) +
@@ -2620,6 +2607,46 @@ function renderOvKpi(mi){
     achRow('방과후사업본부', (DEPT_DATA.bghu.수업료매출.yr26base[mi]??0)+(DEPT_DATA.bghu.재료비매출.yr26base[mi]??0), gvB('수업료매출')+gvB('재료비매출')) +
     achRow('├ 수업료매출', DEPT_DATA.bghu.수업료매출.yr26base[mi]??0, gvB('수업료매출'), true) +
     achRow('└ 재료비매출', DEPT_DATA.bghu.재료비매출.yr26base[mi]??0, gvB('재료비매출'), true);
+
+  // ── YTD ──
+  const achElYtd = document.getElementById('ach_list_ytd');
+  if(!achElYtd) return;
+  const ytdCap  = latestActMi >= 0 ? Math.min(mi, latestActMi) : -1;
+  const ytdMons = MN2.slice(0, ytdCap + 1); // 실적 집계 월 목록
+  const sumBase = (arr) => arr.slice(0, mi+1).reduce((s,v)=>s+(v??0), 0);
+  const sumAct  = (arr) => ytdCap >= 0 ? arr.slice(0, ytdCap+1).reduce((s,v)=>s+(v??0), 0) : 0;
+  const sumRAWYtd = (fn) => ytdCap >= 0
+    ? RAW_DB.filter(r => ytdMons.includes(r.m) && fn(r)).reduce((s,r)=>s+(r.v||0),0) / 1e6
+    : 0;
+
+  const hakPlanY   = hakCamps2.reduce((s,c)=>s+sumBase(DEPT_DATA.camps[c].매출.yr26base),0);
+  const hakActualY = hakCamps2.reduce((s,c)=>s+sumAct(DEPT_DATA.camps[c].매출.yr26actual),0);
+  const hakTuitY   = sumRAWYtd(r=>r.a==='교습비수입' && hakCamps2.includes(_effCamp(r)));
+  const u2mPlanY   = u2mCamps2.reduce((s,c)=>s+sumBase(DEPT_DATA.camps[c].매출.yr26base),0);
+  const u2mActualY = u2mCamps2.reduce((s,c)=>s+sumAct(DEPT_DATA.camps[c].매출.yr26actual),0);
+  const u2mTuitY   = sumRAWYtd(r=>r.a==='U2M수업료' && u2mCamps2.includes(_effCamp(r)));
+  const gvMY = (metric) => sumAct(DEPT_DATA.mirae[metric].yr26actual) || sumBase(DEPT_DATA.mirae[metric].yr26base);
+  const gvBY = (metric) => sumAct(DEPT_DATA.bghu[metric].yr26actual)  || sumBase(DEPT_DATA.bghu[metric].yr26base);
+
+  const ytdLbl = ytdCap >= 0 && ytdCap < mi
+    ? `YTD 1~${MN2[ytdCap]} (실적기준)`
+    : `YTD 1~${mn}`;
+  const ytdTitle = document.getElementById('ach-title-ytd');
+  const ytdCs    = document.getElementById('ach-cs-ytd');
+  if(ytdTitle) ytdTitle.textContent = `목표달성률 (${ytdLbl})`;
+  if(ytdCs) ytdCs.textContent = '사업부별 누적 실적/계획';
+
+  achElYtd.innerHTML =
+    achRow('학원사업본부', hakPlanY, hakActualY) +
+    achRow('└ 교습비 매출', hakPlanY, hakTuitY||hakActualY, true) +
+    achRow('U2M사업본부', u2mPlanY, u2mActualY) +
+    achRow('└ 교습비 매출', u2mPlanY, u2mTuitY||u2mActualY, true) +
+    achRow('미래교육사업부', sumBase(DEPT_DATA.mirae.교재매출.yr26base)+sumBase(DEPT_DATA.mirae.원격매출.yr26base), gvMY('교재매출')+gvMY('원격매출')) +
+    achRow('├ 교재매출', sumBase(DEPT_DATA.mirae.교재매출.yr26base), gvMY('교재매출'), true) +
+    achRow('└ 원격매출', sumBase(DEPT_DATA.mirae.원격매출.yr26base), gvMY('원격매출'), true) +
+    achRow('방과후사업본부', sumBase(DEPT_DATA.bghu.수업료매출.yr26base)+sumBase(DEPT_DATA.bghu.재료비매출.yr26base), gvBY('수업료매출')+gvBY('재료비매출')) +
+    achRow('├ 수업료매출', sumBase(DEPT_DATA.bghu.수업료매출.yr26base), gvBY('수업료매출'), true) +
+    achRow('└ 재료비매출', sumBase(DEPT_DATA.bghu.재료비매출.yr26base), gvBY('재료비매출'), true);
 }
 
 function renderDeptKpi(mi){
