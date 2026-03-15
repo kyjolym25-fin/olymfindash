@@ -3103,8 +3103,18 @@ function getStu(campus,month){
 }
 
 function buildStuMonthBar(){
-  buildMonthBar('stu-month-bar', 'setStuMonth', stuMonth,
-    '<span id="stu_month_label" style="font-size:11px;color:var(--muted);margin-left:6px"></span>');
+  const bar=document.getElementById('stu-month-bar'); if(!bar) return;
+  const MN=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  // 재원생 실적 있는 월: 전체 캠퍼스 합계가 0 초과인 월
+  const actMths=[];
+  for(let i=0;i<12;i++){
+    const tot=CAMPS_ALL.reduce((s,c)=>s+(STU[c]?.yr26a?.['합계']?.[i]??0),0);
+    if(tot>0) actMths.push(i);
+  }
+  if(!actMths.length) actMths.push(0);
+  bar.innerHTML='<span class="month-bar-lbl">기준 월</span>'+
+    actMths.map(i=>`<button class="mtn-btn${i===stuMonth?' on':''}" data-mi="${i}" onclick="setStuMonth(${i})">${MN[i]}</button>`).join('')+
+    '<span id="stu_month_label" style="font-size:11px;color:var(--muted);margin-left:6px"></span>';
 }
 
 
