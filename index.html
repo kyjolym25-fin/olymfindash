@@ -1658,6 +1658,7 @@ function initOverview(){
     {name:'방과후사업본부',plan:703.3,actual:659.6},
   ];
   const el=document.getElementById('ach_list');
+  el.innerHTML='';
   depts.forEach(({name,plan,actual})=>{
     const pct=plan>0?(actual/plan*100):0;
     const color=pct>=100?C26A:pct>=90?C25:'#f87171';
