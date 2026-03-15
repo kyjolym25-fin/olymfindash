@@ -1558,8 +1558,8 @@ const fp=v=>v==null?'-':v.toFixed(1)+'%';
 // OVERVIEW
 // ============================================================
 function initOverview(){
-  buildMonthBar('ov-month-bar');
-  buildMonthBar('dept-month-bar');
+  buildMonthBar('ov-month-bar', 'setOvMonth', ovMonth);
+  buildMonthBar('dept-month-bar', 'setDeptMonth', deptMonth);
   // 누적 매출: 26년 실적 맨 앞
   // 누적 차트 공통 옵션 (x offset으로 첫 포인트 y축 겹침 방지, y축 폰트 축소)
   const ovOpts = {
@@ -1812,7 +1812,7 @@ function initHakwon(){
   renderCostTable('u2m_cost_table', ['중계','송파방이','미사','위례']);
 
   // 계층 트리 렌더링
-  renderHakwonTree(currentMonth);
+  renderHakwonTree(deptMonth);
   renderCampMountain('광진', 'c_hak_mountain', 'hak');
 
   // 캠퍼스별 월별 매출 마운틴 (RAW_DB 기반) - 항상 렌더
@@ -2299,7 +2299,9 @@ function renderU2mTree(mi=0){
 // ============================================================
 // 전역 월 선택
 // ============================================================
-let currentMonth = 0;
+let ovMonth = 0;
+let deptMonth = 0;
+let stuMonth = 0;
 let latestActMi = -1;
 
 function fmt억(v){
@@ -2310,25 +2312,56 @@ function fmt억(v){
   return v.toFixed(1)+'백만';
 }
 
-function buildMonthBar(barId){
+function buildMonthBar(barId, onclickFn, monthVal){
   const bar = document.getElementById(barId); if(!bar) return;
   const MN=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
   bar.innerHTML='<span class="month-bar-lbl">월 선택</span>'+
-    MN.map((m,i)=>`<button class="mtn-btn${i===currentMonth?' on':''}" onclick="setCurrentMonth(${i})">${m}</button>`).join('');
+    MN.map((m,i)=>`<button class="mtn-btn${i===monthVal?' on':''}" onclick="${onclickFn}(${i})">${m}</button>`).join('');
 }
 
-function setCurrentMonth(mi){
-  currentMonth = mi;
-  document.querySelectorAll('.month-bar').forEach(bar=>
-    bar.querySelectorAll('.mtn-btn').forEach((b,i)=>b.classList.toggle('on',i===mi)));
-  renderMonthKpi(mi);
+function _updateBarBtn(barId, mi){
+  const bar=document.getElementById(barId); if(!bar) return;
+  bar.querySelectorAll('.mtn-btn').forEach((b,i)=>b.classList.toggle('on',i===mi));
+}
+
+function setOvMonth(mi){
+  ovMonth = mi;
+  _updateBarBtn('ov-month-bar', mi);
+  renderOvKpi(mi);
+}
+
+function setDeptMonth(mi){
+  deptMonth = mi;
+  _updateBarBtn('dept-month-bar', mi);
+  renderDeptKpi(mi);
+}
+
+function setStuMonth(mi){
+  stuMonth = mi;
+  _updateBarBtn('stu-month-bar', mi);
+  const lbl=document.getElementById('stu_month_label');
+  if(lbl) lbl.textContent=`2026년 ${mi+1}월 실적 기준`;
+  const mt=document.getElementById('stu_math_title');
+  if(mt) mt.textContent=`수학 과목별 재원생 (${mi+1}월)`;
+  const et=document.getElementById('stu_eng_title');
+  if(et) et.textContent=`영어 과목별 재원생 (${mi+1}월)`;
+  renderStuKpi(mi);renderStuCards(mi);renderStuBar(mi);renderStuMathEng(mi);renderStuTable(mi);
+}
+
+function _calcLatestActMi(){
+  const ov=DEPT_DATA.overview?.매출?.yr26actual;
+  if(!ov) return -1;
+  for(let i=11;i>=0;i--) if(ov[i]!=null) return i;
+  return -1;
 }
 
 function autoSelectLatestMonth(){
-  const ov=DEPT_DATA.overview?.매출?.yr26actual;
-  let lmi=0;
-  if(ov) for(let i=11;i>=0;i--){if(ov[i]!=null){lmi=i;break;}}
-  setCurrentMonth(lmi);
+  latestActMi = _calcLatestActMi();
+  const lmi = latestActMi >= 0 ? latestActMi : 0;
+  setOvMonth(lmi);
+  setDeptMonth(lmi);
+  if(inited['students']) setStuMonth(lmi);
+  else stuMonth = lmi;
 }
 
 // ── 미래교육 YTD 테이블 렌더 ──
@@ -2372,25 +2405,17 @@ function renderMiraeYtd(mi){
   </table>`;
 }
 
-function renderMonthKpi(mi){
+function _mkKpiHelpers(mi){
+  latestActMi = _calcLatestActMi();
   const MN=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
-  const mn=MN[mi];
-  // 최신 실적 월 계산
-  latestActMi=(()=>{const ov=DEPT_DATA.overview?.매출?.yr26actual;if(!ov)return -1;for(let i=11;i>=0;i--)if(ov[i]!=null)return i;return -1;})();
-  // 선택 월에 실적 없으면 최신 실적 월 값 사용
-  const getAct=m=>m.yr26actual[mi]??(latestActMi>=0?m.yr26actual[latestActMi]:null);
-  const actLbl=latestActMi>=0&&latestActMi<mi?`실적(${MN[latestActMi]})`:'실적';
-  const ytd25=(m,to)=>m.yr25.slice(0,to+1).reduce((s,v)=>s+(v??0),0);
-  const ytd26p=(m,to)=>m.yr26base.slice(0,to+1).reduce((s,v)=>s+(v??0),0);
-  // 실적 YTD: 최신 실적 월까지만 합산
-  const ytdAct=(m,to)=>{const cap=latestActMi>=0?Math.min(to,latestActMi):to;let s=0;for(let i=0;i<=cap;i++)s+=(m.yr26actual[i]??0);return s;};
-
-  const pctStr=(a,b,lbl='계획比')=>{
-    if(a==null||!b) return '';
-    const p=(a-b)/Math.abs(b)*100, sg=p>=0?'+':'';
-    return `${lbl} ${sg}${p.toFixed(1)}%`;
-  };
-  const kpiHtml=(lbl,v25,v26p,v26a,delta='',dc='var(--c26a)')=>`
+  const mn = MN[mi];
+  const getAct = m => m.yr26actual[mi] ?? (latestActMi>=0 ? m.yr26actual[latestActMi] : null);
+  const actLbl = latestActMi>=0 && latestActMi<mi ? `실적(${MN[latestActMi]})` : '실적';
+  const ytd25  = (m,to) => m.yr25.slice(0,to+1).reduce((s,v)=>s+(v??0),0);
+  const ytd26p = (m,to) => m.yr26base.slice(0,to+1).reduce((s,v)=>s+(v??0),0);
+  const ytdAct = (m,to) => { const cap=latestActMi>=0?Math.min(to,latestActMi):to; let s=0; for(let i=0;i<=cap;i++)s+=(m.yr26actual[i]??0); return s; };
+  const pctStr = (a,b,lbl='계획比') => { if(a==null||!b) return ''; const p=(a-b)/Math.abs(b)*100,sg=p>=0?'+':''; return `${lbl} ${sg}${p.toFixed(1)}%`; };
+  const kpiHtml = (lbl,v25,v26p,v26a,delta='',dc='var(--c26a)') => `
     <div class="kpi-item">
       <div class="kpi-item-lbl">${lbl}</div>
       <div class="kpi-row"><span class="kpi-row-lbl" style="color:var(--c25)">25년</span><span class="kpi-row-val" style="color:var(--c25)">${v25}</span></div>
@@ -2399,10 +2424,13 @@ function renderMonthKpi(mi){
       <div class="kpi-main-row"><span class="kpi-row-lbl" style="color:var(--c26a)">${actLbl}</span><span class="kpi-main-val" style="color:var(--c26a)">${v26a}</span></div>
       <div class="kpi-delta" style="color:${dc}">${delta}</div>
     </div>`;
-  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
-  const setH=(id,v)=>{const el=document.getElementById(id);if(el)el.innerHTML=v;};
+  const set  = (id,v) => { const el=document.getElementById(id); if(el) el.textContent=v; };
+  const setH = (id,v) => { const el=document.getElementById(id); if(el) el.innerHTML=v; };
+  return {MN,mn,getAct,actLbl,ytd25,ytd26p,ytdAct,pctStr,kpiHtml,set,setH};
+}
 
-  // ── Overview monthly ──
+function renderOvKpi(mi){
+  const {MN,mn,getAct,ytd25,ytd26p,ytdAct,pctStr,kpiHtml,set,setH} = _mkKpiHelpers(mi);
   set('ov-month-title',`📅 ${mn} 실적`);
   setH('ov-ytd-title',`📊 YTD 실적 <span style="font-size:11px;font-weight:400;color:var(--muted)">(1~${mn} 누적)</span>`);
   const ov=DEPT_DATA.overview;
@@ -2419,22 +2447,23 @@ function renderMonthKpi(mi){
     kpiHtml('영업이익',fmt억(p25),fmt억(p26p),fmt억(p26a),pctStr(p26a,p26p),p26a<0?'var(--loss)':'var(--c26a)')+
     kpiHtml('영업이익률',r25.toFixed(1)+'%',r26p.toFixed(1)+'%',r26a!=null?r26a.toFixed(1)+'%':'-',
       r26a!=null?`계획比 ${(r26a-r26p)>=0?'+':''}${(r26a-r26p).toFixed(1)}%p`:'');
-
-  // ── Overview YTD ──
   const ys25=ytd25(ov.매출,mi), ys26p=ytd26p(ov.매출,mi), ys26a=ytdAct(ov.매출,mi);
   const yc25=ytd25(ov.판관비,mi), yc26p=ytd26p(ov.판관비,mi), yc26a=ytdAct(ov.판관비,mi);
   const yp25=ys25-yc25, yp26p=ys26p-yc26p, yp26a=ys26a-yc26a;
   const yr25=ys25>0?yp25/ys25*100:0, yr26pp=ys26p>0?yp26p/ys26p*100:0;
-  const yr26a=ys26a>0?yp26a/ys26a*100:null;
+  const yr26a2=ys26a>0?yp26a/ys26a*100:null;
   const ycRatio=ys26a>0?`매출比 ${(yc26a/ys26a*100).toFixed(1)}%`:'';
   const yg=document.getElementById('ov-kpi-ytd');
   if(yg) yg.innerHTML=
     kpiHtml('매출액 YTD',fmt억(ys25),fmt억(ys26p),fmt억(ys26a),pctStr(ys26a,ys26p))+
     kpiHtml('판관비 YTD',fmt억(yc25),fmt억(yc26p),fmt억(yc26a),ycRatio,yc26a/ys26a>0.85?'var(--loss)':'var(--c26a)')+
     kpiHtml('영업이익 YTD',fmt억(yp25),fmt억(yp26p),fmt억(yp26a),pctStr(yp26a,yp26p),yp26a<0?'var(--loss)':'var(--c26a)')+
-    kpiHtml('이익률 YTD',yr25.toFixed(1)+'%',yr26pp.toFixed(1)+'%',yr26a!=null?yr26a.toFixed(1)+'%':'-',
-      yr26a!=null?`계획比 ${(yr26a-yr26pp)>=0?'+':''}${(yr26a-yr26pp).toFixed(1)}%p`:'');
+    kpiHtml('이익률 YTD',yr25.toFixed(1)+'%',yr26pp.toFixed(1)+'%',yr26a2!=null?yr26a2.toFixed(1)+'%':'-',
+      yr26a2!=null?`계획比 ${(yr26a2-yr26pp)>=0?'+':''}${(yr26a2-yr26pp).toFixed(1)}%p`:'');
+}
 
+function renderDeptKpi(mi){
+  const {MN,mn,getAct,pctStr,set,setH} = _mkKpiHelpers(mi);
   // ── 학원 mini-cards ──
   const hakCamps=['광진','성동','동대문','중랑'];
   const hS=hakCamps.reduce((s,c)=>s+(getAct(DEPT_DATA.camps[c].매출)??0),0);
@@ -2442,15 +2471,12 @@ function renderMonthKpi(mi){
   const hC=hS-hP;
   const hS25=hakCamps.reduce((s,c)=>s+(DEPT_DATA.camps[c].매출.yr25[mi]??0),0);
   const hS26p=hakCamps.reduce((s,c)=>s+(DEPT_DATA.camps[c].매출.yr26base[mi]??0),0);
-  set('hak-val-s',fmt억(hS));
-  set('hak-val-c',fmt억(hC));
-  set('hak-val-p',fmt억(hP));
+  set('hak-val-s',fmt억(hS)); set('hak-val-c',fmt억(hC)); set('hak-val-p',fmt억(hP));
   const hYoY=hS25>0?`<span style="color:${hS>=hS25?'var(--c26a)':'var(--loss)'}">25년比 ${hS>=hS25?'+':''}${fmt억(hS-hS25)} (${((hS-hS25)/hS25*100).toFixed(1)}%)</span>`:'-';
   const hPlan=hS26p>0?`<span style="color:var(--c26p)">계획比 ${hS>=hS26p?'+':''}${((hS-hS26p)/hS26p*100).toFixed(1)}%</span>`:'';
   setH('hak-meta-s',`${hYoY}&nbsp;|&nbsp;${hPlan}`);
   setH('hak-meta-c',hS>0?`매출比 ${(hC/hS*100).toFixed(1)}%`:'');
   setH('hak-meta-p',hS>0?`이익률 ${(hP/hS*100).toFixed(1)}%`:'');
-
   // ── U2M mini-cards ──
   const u2mCamps=['중계','송파방이','미사','위례'];
   const uS=u2mCamps.reduce((s,c)=>s+(getAct(DEPT_DATA.camps[c].매출)??0),0);
@@ -2458,52 +2484,34 @@ function renderMonthKpi(mi){
   const uC=uS-uP;
   const uS25=u2mCamps.reduce((s,c)=>s+(DEPT_DATA.camps[c].매출.yr25[mi]??0),0);
   const uS26p=u2mCamps.reduce((s,c)=>s+(DEPT_DATA.camps[c].매출.yr26base[mi]??0),0);
-  set('u2m-val-s',fmt억(uS));
-  set('u2m-val-c',fmt억(uC));
-  set('u2m-val-p',fmt억(uP));
+  set('u2m-val-s',fmt억(uS)); set('u2m-val-c',fmt억(uC)); set('u2m-val-p',fmt억(uP));
   const uYoY=uS25>0?`<span style="color:${uS>=uS25?'var(--c26a)':'var(--loss)'}">25년比 ${uS>=uS25?'+':''}${fmt억(uS-uS25)} (${((uS-uS25)/uS25*100).toFixed(1)}%)</span>`:'-';
   const uPlan=uS26p>0?`<span style="color:var(--c26p)">계획比 ${uS>=uS26p?'+':''}${((uS-uS26p)/uS26p*100).toFixed(1)}%</span>`:'';
   setH('u2m-meta-s',`${uYoY}&nbsp;|&nbsp;${uPlan}`);
   setH('u2m-meta-c',uS>0?`매출比 ${(uC/uS*100).toFixed(1)}%`:'');
   setH('u2m-meta-p',uS>0?`이익률 ${(uP/uS*100).toFixed(1)}%`:'');
-
   // ── 미래교육 mini-cards ──
   const mr=DEPT_DATA.mirae;
   const mrBook=getAct(mr.교재매출), mrRemote=getAct(mr.원격매출), mrProfit=getAct(mr.영업이익);
-  const mrS=(mrBook??0)+(mrRemote??0);
-  const mrC=mrS-(mrProfit??0);
+  const mrS=(mrBook??0)+(mrRemote??0), mrC=mrS-(mrProfit??0);
   const mrBook26p=mr.교재매출.yr26base[mi], mrRemote26p=mr.원격매출.yr26base[mi];
-  set('mirae-val-s',fmt억(mrS));
-  set('mirae-val-book',fmt억(mrBook));
-  set('mirae-val-remote',fmt억(mrRemote));
-  set('mirae-val-c',fmt억(mrC));
-  set('mirae-val-p',fmt억(mrProfit));
-  set('mirae-meta-s',`26년 ${mn} 실적`);
-  const bookDelta=mrBook26p>0?`계획比 ${mrBook>=mrBook26p?'+':''}${((mrBook-mrBook26p)/mrBook26p*100).toFixed(1)}%`:'';
-  const remoteDelta=mrRemote26p>0?`계획比 ${mrRemote>=mrRemote26p?'+':''}${((mrRemote-mrRemote26p)/mrRemote26p*100).toFixed(1)}%`:'';
-  set('mirae-meta-book',bookDelta);
-  set('mirae-meta-remote',remoteDelta);
+  set('mirae-val-s',fmt억(mrS)); set('mirae-val-book',fmt억(mrBook)); set('mirae-val-remote',fmt억(mrRemote));
+  set('mirae-val-c',fmt억(mrC)); set('mirae-val-p',fmt억(mrProfit)); set('mirae-meta-s',`26년 ${mn} 실적`);
+  set('mirae-meta-book',mrBook26p>0?`계획比 ${mrBook>=mrBook26p?'+':''}${((mrBook-mrBook26p)/mrBook26p*100).toFixed(1)}%`:'');
+  set('mirae-meta-remote',mrRemote26p>0?`계획比 ${mrRemote>=mrRemote26p?'+':''}${((mrRemote-mrRemote26p)/mrRemote26p*100).toFixed(1)}%`:'');
   set('mirae-meta-c',mrS>0?`매출比 ${(mrC/mrS*100).toFixed(1)}%`:'');
   set('mirae-meta-p',mrS>0?`이익률 ${(mrProfit/mrS*100).toFixed(1)}%`:'');
-
   // ── 방과후 mini-cards ──
   const bg=DEPT_DATA.bghu;
   const bgSuup=getAct(bg.수업료매출), bgJae=getAct(bg.재료비매출), bgProfit=getAct(bg.영업이익);
-  const bgTotal=(bgSuup??0)+(bgJae??0);
-  const bgC=bgTotal-(bgProfit??0);
-  set('bghu-val-total',fmt억(bgTotal));
-  set('bghu-val-suup',fmt억(bgSuup));
-  set('bghu-val-jae',fmt억(bgJae));
-  set('bghu-val-c',fmt억(bgC));
-  set('bghu-val-p',fmt억(bgProfit));
-  setH('bghu-meta-suup',bg.수업료매출.yr25[mi]>0?
-    `<span style="color:${bgSuup>=(bg.수업료매출.yr25[mi]??0)?'var(--c26a)':'var(--loss)'}">25년比 ${((bgSuup-(bg.수업료매출.yr25[mi]??0))/(bg.수업료매출.yr25[mi]??1)*100).toFixed(1)}%</span>`:'계정: 방과후학교');
-  setH('bghu-meta-jae',bg.재료비매출.yr25[mi]>0?
-    `<span style="color:${bgJae>=(bg.재료비매출.yr25[mi]??0)?'var(--c26a)':'var(--loss)'}">25년比 ${((bgJae-(bg.재료비매출.yr25[mi]??0))/(bg.재료비매출.yr25[mi]??1)*100).toFixed(1)}%</span>`:'계정: 재료비수입');
+  const bgTotal=(bgSuup??0)+(bgJae??0), bgC=bgTotal-(bgProfit??0);
+  set('bghu-val-total',fmt억(bgTotal)); set('bghu-val-suup',fmt억(bgSuup)); set('bghu-val-jae',fmt억(bgJae));
+  set('bghu-val-c',fmt억(bgC)); set('bghu-val-p',fmt억(bgProfit));
+  setH('bghu-meta-suup',bg.수업료매출.yr25[mi]>0?`<span style="color:${bgSuup>=(bg.수업료매출.yr25[mi]??0)?'var(--c26a)':'var(--loss)'}">25년比 ${((bgSuup-(bg.수업료매출.yr25[mi]??0))/(bg.수업료매출.yr25[mi]??1)*100).toFixed(1)}%</span>`:'계정: 방과후학교');
+  setH('bghu-meta-jae',bg.재료비매출.yr25[mi]>0?`<span style="color:${bgJae>=(bg.재료비매출.yr25[mi]??0)?'var(--c26a)':'var(--loss)'}">25년比 ${((bgJae-(bg.재료비매출.yr25[mi]??0))/(bg.재료비매출.yr25[mi]??1)*100).toFixed(1)}%</span>`:'계정: 재료비수입');
   set('bghu-meta-c',bgTotal>0?`매출比 ${(bgC/bgTotal*100).toFixed(1)}%`:'');
   set('bghu-meta-p',bgTotal>0?`이익률 ${(bgProfit/bgTotal*100).toFixed(1)}%`:'');
-
-  // ── 학원/U2M 당월 배지 + 트리 업데이트 ──
+  // ── 배지 + 트리 ──
   const ytdMn=latestActMi>=0&&latestActMi<mi?MN[latestActMi]:mn;
   set('hak-badge-m',  `📅 당월 (${mn})`);
   set('hak-badge-ytd',`📊 YTD 누적 (1~${ytdMn})`);
@@ -2513,23 +2521,11 @@ function renderMonthKpi(mi){
   if(inited['dept'])     renderHakwonTree(mi);
   if(inited['dept_u2m']) renderU2mTree(mi);
   renderMiraeYtd(mi);
-
   // ── 가맹사업 ──
   frMonth=mi;
   const frBadge=document.getElementById('fr_month_badge');
   if(frBadge) frBadge.textContent=`📅 당월 (${mn})`;
   renderFranchiseKpi();
-
-  // ── 재원생 탭 연동 (초기화된 경우) ──
-  if(inited['students']){
-    const lbl=document.getElementById('stu_month_label');
-    if(lbl) lbl.textContent=`2026년 ${mi+1}월 실적 기준`;
-    const mt=document.getElementById('stu_math_title');
-    if(mt) mt.textContent=`수학 과목별 재원생 (${mi+1}월)`;
-    const et=document.getElementById('stu_eng_title');
-    if(et) et.textContent=`영어 과목별 재원생 (${mi+1}월)`;
-    renderStuKpi(mi);renderStuCards(mi);renderStuBar(mi);renderStuMathEng(mi);renderStuTable(mi);
-  }
 }
 
 // ============================================================
@@ -2627,7 +2623,7 @@ function renderFranchiseProfitChart(){
 }
 
 function initU2m(){
-  renderU2mTree(currentMonth);
+  renderU2mTree(deptMonth);
   renderCampMountain('중계', 'c_u2m_mountain', 'u2m');
 
   // 캠퍼스별 월별 매출 마운틴 (RAW_DB 기반) - 항상 렌더
@@ -3096,11 +3092,10 @@ function buildStuMonthBar(){
   const bar=document.getElementById('stu-month-bar'); if(!bar) return;
   const MN=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
   bar.innerHTML='<span class="month-bar-lbl">월 선택</span>'+
-    MN.map((m,i)=>`<button class="mtn-btn${i===currentMonth?' on':''}" onclick="setCurrentMonth(${i})">${m}</button>`).join('')+
+    MN.map((m,i)=>`<button class="mtn-btn${i===stuMonth?' on':''}" onclick="setStuMonth(${i})">${m}</button>`).join('')+
     '<span id="stu_month_label" style="font-size:11px;color:var(--muted);margin-left:6px"></span>';
 }
 
-function setStuMonth(mi){ setCurrentMonth(mi); }
 
 function renderStuCards(month){
   const hakEl=document.getElementById('stu_hak_cards');
@@ -3409,8 +3404,8 @@ function updateStudentTrend(){
 
 function initStudents(){
   buildStuMonthBar();
-  renderStuKpi(currentMonth);renderStuCards(currentMonth);renderStuBar(currentMonth);
-  renderStuMathEng(currentMonth);renderStuTable(currentMonth);updateStudentTrend();
+  renderStuKpi(stuMonth);renderStuCards(stuMonth);renderStuBar(stuMonth);
+  renderStuMathEng(stuMonth);renderStuTable(stuMonth);updateStudentTrend();
 }
 
 // ============================================================
@@ -3453,12 +3448,17 @@ function goMain(id,el){
   document.getElementById('pg-'+id).classList.add('on');
   el.classList.add('on');
   location.hash = 'main-'+id;
+  const lmi = latestActMi >= 0 ? latestActMi : 0;
   if(!inited[id]){
     inited[id]=true;
-    if(id==='students') initStudents();
+    if(id==='students'){ stuMonth=lmi; initStudents(); }
     if(id==='rawdata')  renderRaw();
-    if(id==='dept'){ initHakwon(); }
+    if(id==='dept'){ deptMonth=lmi; initHakwon(); }
   }
+  // 탭명 클릭 시 해당 탭의 월을 최신 실적 월로 리셋
+  if(id==='overview') setOvMonth(lmi);
+  if(id==='dept')     setDeptMonth(lmi);
+  if(id==='students') setStuMonth(lmi);
 }
 function goDept(id,el){
   document.querySelectorAll('#pg-dept .subpage').forEach(p=>p.classList.remove('on'));
@@ -3778,7 +3778,7 @@ function saveAdminStuData(){
   const stuInited = inited['students'];
   if(stuInited){
     inited['students'] = false; // 리셋해서 다음 방문시 재초기화
-    renderStuTable(currentMonth);
+    renderStuTable(stuMonth);
   }
 
   msg.style.color = 'var(--c26a)';
@@ -3860,7 +3860,7 @@ function handleStuXlsxUpload(event){
 
       // 재원생 탭 리렌더
       renderAdminStuInput();
-      if(inited['students']){ inited['students']=false; renderStuTable(currentMonth); }
+      if(inited['students']){ inited['students']=false; renderStuTable(stuMonth); }
 
       msg.style.color='var(--c26a)';
       msg.textContent=`✓ ${processedMonths.sort((a,b)=>a-b).map(m=>m+'월').join(', ')} 재원생 데이터 적용 완료`;
@@ -4086,14 +4086,24 @@ async function loadRawDB(){
     RAW_DB = [];
     if(data){
       data.forEach(row=>{ RAW_DB = RAW_DB.concat(row.data||[]); });
-      const latest = data.reduce((max,r)=>r.uploaded_at>max?r.uploaded_at:max,'');
-      if(latest){
+      const withTs = data.filter(r=>r.uploaded_at);
+      const latest = withTs.length ? withTs.reduce((max,r)=>r.uploaded_at>max?r.uploaded_at:max,'') : '';
+      const el = document.getElementById('lastModPill');
+      if(latest && el){
         const d = new Date(latest);
         const yy = String(d.getFullYear()).slice(2);
         const mm = String(d.getMonth()+1).padStart(2,'0');
         const dd = String(d.getDate()).padStart(2,'0');
-        const el = document.getElementById('lastModPill');
-        if(el) el.textContent = `최종수정일 : ${yy}.${mm}.${dd}`;
+        el.textContent = `최종수정일 : ${yy}.${mm}.${dd}`;
+      } else if(el && !latest){
+        // uploaded_at 없는 경우 dept_data 테이블 기반 날짜 조회 시도
+        try{
+          const {data:dd2}=await sb.from('dept_data').select('updated_at').order('updated_at',{ascending:false}).limit(1);
+          if(dd2&&dd2[0]&&dd2[0].updated_at){
+            const d2=new Date(dd2[0].updated_at);
+            el.textContent=`최종수정일 : ${String(d2.getFullYear()).slice(2)}.${String(d2.getMonth()+1).padStart(2,'0')}.${String(d2.getDate()).padStart(2,'0')}`;
+          }
+        }catch(e2){}
       }
     }
   }catch(e){ console.warn('raw_db load error:',e); RAW_DB = []; }
@@ -4173,7 +4183,6 @@ function handleXlsxUpload(event){
 
       // 대시보드 데이터 갱신
       applyRawToDashboard();
-      renderMonthKpi(currentMonth);
 
       msg.style.color='var(--c26a)';
       msg.textContent=`✓ ${uploadedMonths.join(', ')} 데이터 ${newRows}건 적용 완료`;
