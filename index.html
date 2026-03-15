@@ -4359,7 +4359,11 @@ function handleXlsxUpload(event){
       RAW_DB = RAW_DB.filter(r => !uploadedMonths.includes(r.m));
 
       // 새 데이터 추가
+      window._skippedCommon = [];
       rows.slice(1).forEach(r=>{
+        // 공통비 행 진단 (스킵 여부 무관하게 캡처)
+        if(r[1]&&String(r[1]).includes('공통비')&&!String(r[1]).includes('강사비'))
+          window._skippedCommon.push(`a=${r[1]}|t=${r[0]}|m=${r[3]}|d=${r[4]}|r[8]=${r[8]}|r[9]=${r[9]}|r[10]=${r[10]}`);
         if(!r[8] && r[8]!==0) return;
         if(!r[3]) return;
         RAW_DB.push({t:r[0],a:r[1],cc:r[2],m:r[3],d:r[4],cp:r[5],s:r[6],gr:r[7],v:Number(r[8])});
@@ -4426,6 +4430,8 @@ function runDiag(){
     const mgmtAccounts = [...new Set(mgmtRows.map(r=>r.a))];
     lines.push(`경영기획실/본부 계정(${mgmtRows.length}건): ${mgmtAccounts.join(', ')}`);
     lines.push(`경영기획실 판관비 합계: ${(RAW_DB.filter(r=>r.d==='경영기획실'&&r.t==='판매관리비').reduce((s,r)=>s+r.v,0)/1e6).toFixed(2)}M`);
+    const skipped = window._skippedCommon||[];
+    lines.push(`공통비 행 파싱 결과(${skipped.length}건): ${skipped.join(' / ')||'(업로드 후 확인)'}`);
     // effCamp 결과
     const campMap={};
     RAW_DB.forEach(r=>{const c=effC(r);if(c){campMap[c]=(campMap[c]||0)+1;}});
@@ -4577,14 +4583,15 @@ function applyRawToDashboard(){
   });
 
   // ── 5c. 총괄 overview: 캠퍼스 안분 공통비 반영 ──
-  // 계정과목='공통비' 행은 경영기획실 배분 항목으로 판관비 구분과 별도 집계되므로 overview에 직접 가산
+  // 경영기획실 공통비 배분은 별도 전표로 RAW_DB 미포함 → 월별 실적 확정값 직접 기입 (단위: M원)
+  // 매월 실적 확정 후 해당 월 값 입력
+  const CAMPUS_COMMON_ACTUAL = [64, null, null, null, null, null, null, null, null, null, null, null];
   months.forEach((mn,mi)=>{
     if(DEPT_DATA.overview.판관비.yr26actual[mi] == null) return;
-    const commonCost = sum(r=>r.m===mn && r.a==='공통비');
-    if(!commonCost) return;
-    const commonM = parseFloat((commonCost/1e6).toFixed(2));
-    DEPT_DATA.overview.판관비.yr26actual[mi] = parseFloat(((DEPT_DATA.overview.판관비.yr26actual[mi]) + commonM).toFixed(2));
-    DEPT_DATA.camps['학원본부'].영업이익.yr26actual[mi] = -commonM;
+    const hqCost = CAMPUS_COMMON_ACTUAL[mi];
+    if(hqCost == null) return;
+    DEPT_DATA.overview.판관비.yr26actual[mi] = parseFloat(((DEPT_DATA.overview.판관비.yr26actual[mi]) + hqCost).toFixed(2));
+    DEPT_DATA.camps['학원본부'].영업이익.yr26actual[mi] = -hqCost;
   });
 
   // CC별 월별 실적 집계 (수학/영어 분리, 영업이익은 매출비율로 배분)
