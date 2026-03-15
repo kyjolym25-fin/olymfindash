@@ -47,8 +47,8 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
 .subtabs{display:flex;gap:4px;margin-bottom:18px;border-bottom:1px solid var(--border);padding-bottom:0}
 .subtab{padding:8px 16px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s;white-space:nowrap}
 .subtab:hover{color:var(--text)}
-.subtab.on{color:var(--c26a);border-color:var(--c26a)}
-.mtn-btn{padding:3px 12px;font-size:11px;font-weight:500;color:var(--muted);background:var(--s3);border:1px solid var(--border);border-radius:12px;cursor:pointer;transition:all .2s}
+.subtab.on{color:#4361EE;border-color:#4361EE;font-weight:600}
+.mtn-btn{padding:4px 14px;font-size:11px;font-weight:500;color:var(--muted);background:#fff;border:1px solid var(--border);border-radius:20px;cursor:pointer;transition:all .2s}
 .mtn-btn:hover{color:var(--text);border-color:var(--border2)}
 .mtn-btn.on{color:#fff;background:var(--c26a);border-color:var(--c26a)}
 .month-bar .mtn-btn.on{color:#fff;background:var(--c25);border-color:var(--c25)}
@@ -111,8 +111,8 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
 .ctype-block{margin-bottom:10px}
 .ctype-label{font-size:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--muted2);margin-bottom:7px;padding-left:2px}
 .campus-row-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px}
-.campus-row{background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:12px 14px;display:flex;align-items:center;gap:10px;transition:border-color .15s}
-.campus-row:hover{border-color:var(--border2)}
+.campus-row{background:var(--s2);border:1px solid transparent;border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:10px;transition:all .15s}
+.campus-row:hover{background:#fff;box-shadow:var(--shadow);border-color:var(--border)}
 .cr-name{font-size:12px;font-weight:600;width:110px;flex-shrink:0}
 .cr-sales{font-size:12px;font-weight:600;min-width:70px;text-align:right}
 .cr-profit{font-size:12px;font-weight:700;min-width:70px;text-align:right}
@@ -146,22 +146,23 @@ tbody td.indent{padding-left:28px;color:var(--muted2)}
 
 /* ── FILTERS / PAGINATION ── */
 .fbar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
-.fsel,.finput{background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:7px 12px;font-size:12px;font-family:inherit;outline:none;cursor:pointer}
+.fsel,.finput{background:#fff;border:1px solid var(--border);border-radius:10px;color:var(--text);padding:8px 14px;font-size:12px;font-family:inherit;outline:none;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.04)}
 .finput{cursor:text;width:210px}
 .finput::placeholder{color:var(--muted)}
 .fsel:focus,.finput:focus{border-color:var(--c25)}
 .fcount{font-size:12px;color:var(--muted);margin-left:auto}
 .pag{display:flex;align-items:center;justify-content:space-between;padding-top:12px;font-size:11px;color:var(--muted)}
 .pbtns{display:flex;gap:3px}
-.pbtn{width:28px;height:28px;background:var(--s2);border:1px solid var(--border);border-radius:5px;color:var(--text);cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;transition:all .15s}
-.pbtn:hover,.pbtn.on{background:#2d74e8;border-color:#2d74e8;color:#fff}
+.pbtn{width:28px;height:28px;background:#fff;border:1px solid var(--border);border-radius:8px;color:var(--text);cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.pbtn:hover,.pbtn.on{background:#4361EE;border-color:#4361EE;color:#fff}
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:var(--bg)}
-::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--muted2)}
 
 /* ── STUDENTS ── */
 .stu-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
-.stu-card{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.stu-card{background:#fff;border-radius:14px;padding:14px 16px;box-shadow:var(--shadow)}
 .stu-card .name{font-size:12px;font-weight:600;margin-bottom:8px}
 .stu-card .num{font-size:22px;font-weight:700;color:var(--c25);line-height:1}
 .stu-bar-bg{height:5px;background:var(--border);border-radius:3px;margin-top:8px}
