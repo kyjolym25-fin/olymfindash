@@ -4421,6 +4421,11 @@ function runDiag(){
     const commonRows = RAW_DB.filter(r=>r.a&&r.a.includes('공통'));
     lines.push(`공통비 관련 행(${commonRows.length}건): ${commonRows.slice(0,3).map(r=>`t=${r.t}|a=${r.a}|d=${r.d}|v=${r.v}`).join(' / ')||'(없음)'}`);
     lines.push(`overview 판관비 yr26actual[0]: ${DEPT_DATA.overview.판관비.yr26actual[0]}`);
+    // 경영기획실 계정 목록
+    const mgmtRows = RAW_DB.filter(r=>r.d==='경영기획실'||r.cp==='경영기획실'||r.cp==='본부');
+    const mgmtAccounts = [...new Set(mgmtRows.map(r=>r.a))];
+    lines.push(`경영기획실/본부 계정(${mgmtRows.length}건): ${mgmtAccounts.join(', ')}`);
+    lines.push(`경영기획실 판관비 합계: ${(RAW_DB.filter(r=>r.d==='경영기획실'&&r.t==='판매관리비').reduce((s,r)=>s+r.v,0)/1e6).toFixed(2)}M`);
     // effCamp 결과
     const campMap={};
     RAW_DB.forEach(r=>{const c=effC(r);if(c){campMap[c]=(campMap[c]||0)+1;}});
