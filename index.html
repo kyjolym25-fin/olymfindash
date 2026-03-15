@@ -2545,11 +2545,11 @@ function renderOvKpi(mi){
     ? '#F59E0B,#FCD34D'
     : '#F43F5E,#FB7185';
   const fmtM = v => v>=1000 ? (v/1000).toFixed(1)+'B' : Math.round(v)+'M';
-  const achRow = (name, plan, actual, isSub=false) => {
+  const achRow = (name, plan, actual, isSub=false, forceGreen=false) => {
     const pct = plan>0 ? actual/plan*100 : 0;
     const barW = Math.min(pct, 100).toFixed(1);
-    const pctColor = pct>=100 ? '#7C5CFC' : pct>=90 ? '#F59E0B' : '#F43F5E';
-    const gr = achGr(pct);
+    const pctColor = forceGreen ? '#10B981' : pct>=100 ? '#7C5CFC' : pct>=90 ? '#F59E0B' : '#F43F5E';
+    const gr = forceGreen ? '#10B981,#34D399' : achGr(pct);
     if(isSub){
       return `<div class="ach-row sub">
         <div class="ach-row-top">
@@ -2597,10 +2597,10 @@ function renderOvKpi(mi){
   if(mTitle) mTitle.textContent = `목표달성률 (${mn})`;
 
   achEl.innerHTML =
-    achRow('학원사업본부', hakPlan, hakActual) +
-    achRow('└ 교습비 매출', hakPlan, hakTuit||hakActual, true) +
-    achRow('U2M사업본부', u2mPlan, u2mActual) +
-    achRow('└ 교습비 매출', u2mPlan, u2mTuit||u2mActual, true) +
+    achRow('학원사업본부', hakPlan, hakActual, false, true) +
+    achRow('└ 교습비 매출', hakPlan, hakTuit||hakActual, true, true) +
+    achRow('U2M사업본부', u2mPlan, u2mActual, false, true) +
+    achRow('└ 교습비 매출', u2mPlan, u2mTuit||u2mActual, true, true) +
     achRow('미래교육사업부', DEPT_DATA.mirae.교재매출.yr26base[mi]+DEPT_DATA.mirae.원격매출.yr26base[mi], gvM('교재매출')+gvM('원격매출')) +
     achRow('├ 교재매출', DEPT_DATA.mirae.교재매출.yr26base[mi]??0, gvM('교재매출'), true) +
     achRow('└ 원격매출', DEPT_DATA.mirae.원격매출.yr26base[mi]??0, gvM('원격매출'), true) +
@@ -2637,10 +2637,10 @@ function renderOvKpi(mi){
   if(ytdCs) ytdCs.textContent = '사업부별 누적 실적/계획';
 
   achElYtd.innerHTML =
-    achRow('학원사업본부', hakPlanY, hakActualY) +
-    achRow('└ 교습비 매출', hakPlanY, hakTuitY||hakActualY, true) +
-    achRow('U2M사업본부', u2mPlanY, u2mActualY) +
-    achRow('└ 교습비 매출', u2mPlanY, u2mTuitY||u2mActualY, true) +
+    achRow('학원사업본부', hakPlanY, hakActualY, false, true) +
+    achRow('└ 교습비 매출', hakPlanY, hakTuitY||hakActualY, true, true) +
+    achRow('U2M사업본부', u2mPlanY, u2mActualY, false, true) +
+    achRow('└ 교습비 매출', u2mPlanY, u2mTuitY||u2mActualY, true, true) +
     achRow('미래교육사업부', sumBase(DEPT_DATA.mirae.교재매출.yr26base)+sumBase(DEPT_DATA.mirae.원격매출.yr26base), gvMY('교재매출')+gvMY('원격매출')) +
     achRow('├ 교재매출', sumBase(DEPT_DATA.mirae.교재매출.yr26base), gvMY('교재매출'), true) +
     achRow('└ 원격매출', sumBase(DEPT_DATA.mirae.원격매출.yr26base), gvMY('원격매출'), true) +
