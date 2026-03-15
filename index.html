@@ -2540,15 +2540,15 @@ function renderOvKpi(mi){
   const gvCamp = (camp, metric) => DEPT_DATA.camps[camp][metric].yr26actual[mi] ?? DEPT_DATA.camps[camp][metric].yr26base[mi] ?? 0;
   const sumRAW = (fn) => RAW_DB.filter(r => r.m===curMon && fn(r)).reduce((s,r)=>s+(r.v||0),0) / 1e6;
   const achGr = pct => pct>=100
-    ? `${C26A},#34d399,#6ee7b7`
+    ? '#7C5CFC,#A78BFA'
     : pct>=90
-    ? `${C25},${C26P},#a78bfa`
-    : '#f87171,#fb923c,#fbbf24';
+    ? '#F59E0B,#FCD34D'
+    : '#F43F5E,#FB7185';
   const fmtM = v => v>=1000 ? (v/1000).toFixed(1)+'B' : Math.round(v)+'M';
   const achRow = (name, plan, actual, isSub=false) => {
     const pct = plan>0 ? actual/plan*100 : 0;
     const barW = Math.min(pct, 100).toFixed(1);
-    const pctColor = pct>=100 ? C26A : pct>=90 ? C25 : '#f87171';
+    const pctColor = pct>=100 ? '#7C5CFC' : pct>=90 ? '#F59E0B' : '#F43F5E';
     const gr = achGr(pct);
     if(isSub){
       return `<div class="ach-row sub">
