@@ -2205,7 +2205,13 @@ function buildCC3YMonth(mi){
       result[cc]={
         yr25: {s:Math.round(cs25*rs25), p2:Math.round(cp25*rp25)},
         yr26p:{s:Math.round(cs26p*rs26p), p2:Math.round(cp26p*rp26p)},
-        yr26a: CC_MONTH_ACTUAL[cc]?.[mi]||(latestActMi>=0?CC_MONTH_ACTUAL[cc]?.[latestActMi]:null)||null,
+        yr26a: (()=>{
+          const eMi=latestActMi>=0?Math.min(mi,latestActMi):mi;
+          const cc_a=CC_MONTH_ACTUAL[cc]?.[eMi]||(latestActMi>=0?CC_MONTH_ACTUAL[cc]?.[latestActMi]:null)||null;
+          if(cc_a) return cc_a;
+          const cS=cd.매출.yr26actual?.[eMi],cP=cd.영업이익.yr26actual?.[eMi];
+          return cS!=null?{s:Math.round(cS*M*rs26p),p2:Math.round((cP??0)*M*rp26p)}:null;
+        })(),
       };
     });
   }
@@ -2243,6 +2249,10 @@ function buildCC3YYtd(mi){
         for(let i=0;i<=actCap;i++){
           const a=CC_MONTH_ACTUAL[cc]?.[i];
           if(a){ytdS+=a.s;ytdP+=a.p2;hasAny=true;}
+          else{
+            const cS=cd.매출.yr26actual?.[i],cP=cd.영업이익.yr26actual?.[i];
+            if(cS!=null){ytdS+=Math.round(cS*M*rs26p);ytdP+=Math.round((cP??0)*M*rp26p);hasAny=true;}
+          }
         }
       }
       result[cc]={
@@ -4307,6 +4317,25 @@ function applyRawToDashboard(){
       const c = sum(r=>r.cp===camp && r.m===mn && r.t==='판매관리비');
       if(s) DEPT_DATA.camps[camp].매출.yr26actual[mi] = Math.round(s/1e6);
       if(s||c) DEPT_DATA.camps[camp].영업이익.yr26actual[mi] = Math.round((s-c)/1e6);
+    });
+  });
+
+  // ── 5b. camp yr26actual fallback: r.cp 없을 때 사업본부 합계를 yr25 비율로 배분 ──
+  const HAK_C=['광진','성동','동대문','중랑'];
+  const U2M_C=['중계','송파방이','미사','위례'];
+  [['학원사업본부',HAK_C],['U2M사업본부',U2M_C]].forEach(([dept,camps])=>{
+    months.forEach((mn,mi)=>{
+      if(camps.every(c=>DEPT_DATA.camps[c].매출.yr26actual[mi]!=null)) return;
+      const dS=sum(r=>r.d===dept&&r.m===mn&&r.t==='매출');
+      const dC=sum(r=>r.d===dept&&r.m===mn&&r.t==='판매관리비');
+      if(!dS) return;
+      const tot25=camps.reduce((s,c)=>s+(DEPT_DATA.camps[c].매출.yr25[mi]??0),0);
+      camps.forEach(c=>{
+        if(DEPT_DATA.camps[c].매출.yr26actual[mi]!=null) return;
+        const ratio=tot25>0?(DEPT_DATA.camps[c].매출.yr25[mi]??0)/tot25:1/camps.length;
+        DEPT_DATA.camps[c].매출.yr26actual[mi]=Math.round(dS*ratio/1e6);
+        DEPT_DATA.camps[c].영업이익.yr26actual[mi]=Math.round((dS-dC)*ratio/1e6);
+      });
     });
   });
 
