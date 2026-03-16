@@ -4111,19 +4111,13 @@ async function renderPendingTable(){
     <td>${u.join_date||'-'}</td>
     <td>
       <button onclick="approveUser('${u.email}','${u.name}')" style="font-size:10px;padding:3px 8px;background:#10B98122;border:1px solid var(--c26a);border-radius:4px;cursor:pointer;color:var(--c26a)">승인</button>
-      <button onclick="mailApprove('${u.email}','${u.name}')" style="font-size:10px;padding:3px 8px;background:#EEF2FF;border:1px solid #C7D2FE;border-radius:4px;cursor:pointer;color:#4361EE;margin-left:4px">✉ 안내메일</button>
       <button onclick="rejectUser('${u.email}')" style="font-size:10px;padding:3px 8px;background:var(--s3);border:1px solid var(--border2);border-radius:4px;cursor:pointer;color:var(--loss);margin-left:4px">거절</button>
     </td>
   </tr>`).join('')
   :`<tr><td colspan="5" style="padding:20px;text-align:center;color:var(--muted)">대기 중인 가입 신청이 없습니다</td></tr>`;
 }
 
-async function approveUser(email,name){await sb.from('users').update({status:'active'}).eq('email',email);renderPendingTable();renderUserTable();mailApprove(email,name);}
-function mailApprove(email,name){
-  const subject=encodeURIComponent('[올림피아드 대시보드] 가입이 승인되었습니다');
-  const body=encodeURIComponent(`안녕하세요 ${name}님,\n\n올림피아드교육 손익 대시보드 가입 신청이 승인되었습니다.\n아래 링크에서 로그인하세요.\n\n${location.origin+location.pathname}\n\n감사합니다.`);
-  window.open(`mailto:${email}?subject=${subject}&body=${body}`);
-}
+async function approveUser(email,name){await sb.from('users').update({status:'active'}).eq('email',email);renderPendingTable();renderUserTable();}
 async function rejectUser(email){await sb.from('users').delete().eq('email',email);renderPendingTable();}
 async function toggleRole(email){const {data}=await sb.from('users').select('role').eq('email',email).maybeSingle();if(data){await sb.from('users').update({role:data.role==='admin'?'viewer':'admin'}).eq('email',email);renderUserTable();}}
 async function removeUser(email){if(!confirm(`${email} 계정을 삭제할까요?`))return;await sb.from('users').delete().eq('email',email);renderUserTable();}
