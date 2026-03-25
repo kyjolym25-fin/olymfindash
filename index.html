@@ -543,7 +543,7 @@ thead th{font-size:13px}
       <div class="period-line"></div>
     </div>
     <div class="full card">
-      <div class="ch"><div><div class="ct">캠퍼스별 손익 <span style="font-size:11px;font-weight:400;color:var(--muted);margin-left:6px;background:var(--s3);padding:2px 8px;border-radius:10px;border:1px solid var(--border)">공통비 포함</span></div><div class="cs">(단위: 백만원)</div></div></div>
+      <div class="ch"><div><div class="ct">캠퍼스별 손익 <span style="font-size:11px;font-weight:400;color:var(--muted);margin-left:6px;background:var(--s3);padding:2px 8px;border-radius:10px;border:1px solid var(--border)">공통비 불포함</span></div><div class="cs">(단위: 백만원)</div></div></div>
       <div id="hakwon_tree"></div>
     </div>
   <div id="cb-hak-m2" class="comment-box" style="display:none"><div class="cb-label"><span>✦</span> COMMENT</div><div class="cb-text" id="cb-text-hak-m2"></div><div class="cb-date" id="cb-date-hak-m2"></div></div>
@@ -635,7 +635,7 @@ thead th{font-size:13px}
       <div class="period-line"></div>
     </div>
     <div class="full card">
-      <div class="ch"><div><div class="ct">캠퍼스별 손익 <span style="font-size:11px;font-weight:400;color:var(--muted);margin-left:6px;background:var(--s3);padding:2px 8px;border-radius:10px;border:1px solid var(--border)">공통비 포함</span></div><div class="cs">(단위: 백만원)</div></div></div>
+      <div class="ch"><div><div class="ct">캠퍼스별 손익 <span style="font-size:11px;font-weight:400;color:var(--muted);margin-left:6px;background:var(--s3);padding:2px 8px;border-radius:10px;border:1px solid var(--border)">공통비 불포함</span></div><div class="cs">(단위: 백만원)</div></div></div>
       <div id="u2m_tree"></div>
     </div>
   <div id="cb-u2m-m2" class="comment-box" style="display:none"><div class="cb-label"><span>✦</span> COMMENT</div><div class="cb-text" id="cb-text-u2m-m2"></div><div class="cb-date" id="cb-date-u2m-m2"></div></div>
@@ -4683,20 +4683,22 @@ function applyRawToDashboard(){
     months.forEach((mn,mi)=>{
       if(!RAW_DB.some(r=>effCamp(r)===camp&&r.m===mn)) return;
       const ccs=CC_SPLIT[camp]||[];
-      const cpWon=(DEPT_DATA.camps[camp].영업이익.yr26actual[mi]??null);
-      const profitWon=cpWon!=null?cpWon*1e6:null;
+      // 공통비 미반영 직접 영업이익 (yr25/yr26p와 기준 통일)
+      const totalS  = sum(r=>effCamp(r)===camp&&r.m===mn&&r.t==='매출');
+      const directC = sum(r=>effCamp(r)===camp&&r.m===mn&&r.t==='판매관리비');
+      const directP = totalS - directC;
       if(ccs.length===1){
-        const s=sum(r=>effCamp(r)===camp&&r.m===mn&&r.t==='매출');
+        const s=totalS;
         if(s){ if(!CC_MONTH_ACTUAL[ccs[0]])CC_MONTH_ACTUAL[ccs[0]]=Array(12).fill(null);
-          CC_MONTH_ACTUAL[ccs[0]][mi]={s,p2:profitWon??0}; }
+          CC_MONTH_ACTUAL[ccs[0]][mi]={s,p2:directP}; }
       } else {
         const s수=sum(r=>effCamp(r)===camp&&r.m===mn&&r.t==='매출'&&r.s!=='영어');
         const s영=sum(r=>effCamp(r)===camp&&r.m===mn&&r.t==='매출'&&r.s==='영어');
         const tot=s수+s영;
         if(s수){ if(!CC_MONTH_ACTUAL[ccs[0]])CC_MONTH_ACTUAL[ccs[0]]=Array(12).fill(null);
-          CC_MONTH_ACTUAL[ccs[0]][mi]={s:s수,p2:profitWon!=null&&tot>0?Math.round(profitWon*s수/tot):0}; }
+          CC_MONTH_ACTUAL[ccs[0]][mi]={s:s수,p2:tot>0?Math.round(directP*s수/tot):0}; }
         if(s영){ if(!CC_MONTH_ACTUAL[ccs[1]])CC_MONTH_ACTUAL[ccs[1]]=Array(12).fill(null);
-          CC_MONTH_ACTUAL[ccs[1]][mi]={s:s영,p2:profitWon!=null&&tot>0?Math.round(profitWon*s영/tot):0}; }
+          CC_MONTH_ACTUAL[ccs[1]][mi]={s:s영,p2:tot>0?Math.round(directP*s영/tot):0}; }
       }
     });
   });
