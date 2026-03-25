@@ -538,8 +538,7 @@ thead th{font-size:13px}
   <div id="cb-hak-rs1" class="comment-box" style="display:none"><div class="cb-label"><span>✦</span> COMMENT</div><div class="cb-text" id="cb-text-hak-rs1"></div><div class="cb-date" id="cb-date-hak-rs1"></div></div>
   <div id="ce-hak-rs1" class="comment-editor"><div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div><textarea id="ce-text-hak-rs1" placeholder="코멘트를 입력하세요..."></textarea><div class="cb-btns"><button class="cb-del" onclick="deleteComment('hak-rs1')">삭제</button><button class="cb-save" onclick="saveComment('hak-rs1')">저장</button></div></div>
 
-    <div id="dbg-campCost" style="background:#fffbe6;border:1px solid #f0b44d;border-radius:6px;padding:8px 12px;font-size:11px;color:#555;margin-bottom:8px;word-break:break-all">[디버그] 데이터 로딩 후 표시됩니다</div>
-    <div class="period-section-hd">
+<div class="period-section-hd">
       <span class="period-badge monthly" id="hak-badge-m">📅 당월 (1월)</span>
       <div class="period-line"></div>
     </div>
@@ -1690,7 +1689,7 @@ function buildCampRow(camp, mi) {
   // ── 26년 실적 ──
   const a26  = (CAMP_COST_BY_MONTH[mi] && CAMP_COST_BY_MONTH[mi][camp])
     ? CAMP_COST_BY_MONTH[mi][camp] : CAMP_COST_26A[camp];
-  const t26a = a26.total;  // 직접비만 (공통비 제외)
+  const t26a = a26.total - (a26.common??0);  // 직접비만 (공통비 제외)
   // 항목별 비율 (26실적 비율로 25년/26계획 배분)
   const ratio = k => t26a > 0 ? a26[k] / t26a : 0;
   const sc   = (base, k) => base != null ? Math.round(base * ratio(k)) : null;
@@ -2669,11 +2668,11 @@ function renderDeptKpi(mi){
     const vals = camps.map(c => DEPT_DATA.camps[c].매출.yr26actual[mi]);
     return vals.every(v=>v==null) ? null : vals.reduce((s,v)=>s+(v??0), 0);
   };
-  // 판관비 직접 집계 (CAMP_COST_BY_MONTH.total, 공통비 포함, 원→백만원)
+  // 판관비 직접 집계 (공통비 제외 직접비, 원→백만원)
   const campCost = (camps) => {
     const cb = CAMP_COST_BY_MONTH[mi];
     if(!cb || !camps.some(c=>cb[c])) return null;
-    return camps.reduce((s,c)=>s+(cb[c]?.total??0), 0) / 1e6;
+    return camps.reduce((s,c)=>s+((cb[c]?.total??0)-(cb[c]?.common??0)), 0) / 1e6;
   };
   // ── 학원 mini-cards ──
   const hakCamps=['광진','성동','동대문','중랑','학원본부'];
@@ -2683,9 +2682,7 @@ function renderDeptKpi(mi){
   const hS25=hakCamps.reduce((s,c)=>s+(DEPT_DATA.camps[c].매출.yr25[mi]??0),0);
   const hS26p=hakCamps.reduce((s,c)=>s+(DEPT_DATA.camps[c].매출.yr26base[mi]??0),0);
   set('hak-val-s',fmt억(hS)); set('hak-val-c',fmt억(hC)); set('hak-val-p',fmt억(hP));
-  // [DEBUG] campCost 분해
-  const _dbgEl = document.getElementById('dbg-campCost');
-  if(_dbgEl){ const cb=CAMP_COST_BY_MONTH[mi]; _dbgEl.textContent = hakCamps.map(c=>`${c}:${cb?.[c]?((cb[c].total/1e6).toFixed(1)+'M'):'없음'}`).join(' | ') + ` → 합계:${hC!=null?hC.toFixed(1):'null'}`; }
+
   const hYoY=hS!=null&&hS25>0?`<span style="color:${hS>=hS25?'var(--c26a)':'var(--loss)'}">25년比 ${hS>=hS25?'+':''}${fmt억(hS-hS25)} (${((hS-hS25)/hS25*100).toFixed(1)}%)</span>`:'-';
   const hPlan=hS!=null&&hS26p>0?`<span style="color:var(--c26p)">계획比 ${hS>=hS26p?'+':''}${((hS-hS26p)/hS26p*100).toFixed(1)}%</span>`:'';
   setH('hak-meta-s',`${hYoY}&nbsp;|&nbsp;${hPlan}`);
