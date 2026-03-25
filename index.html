@@ -1422,8 +1422,8 @@ const DEPT_DATA = {
   },
 };
 
-// 26년 유효값: RAW_DB 실적 우선, 없으면 기본값
-const getVal = (metric, i) => metric.yr26actual[i] ?? metric.yr26base[i];
+// 26년 실적값: 실적 없는 월은 null 반환 (계획값으로 대체하지 않음)
+const getVal = (metric, i) => metric.yr26actual[i] ?? null;
 
 let frCharts = {};
 
@@ -2659,55 +2659,62 @@ function renderOvKpi(mi){
 
 function renderDeptKpi(mi){
   const {MN,mn,pctStr,set,setH} = _mkKpiHelpers(mi);
-  // 실적 우선, 없으면 계획 폴백 (getVal 전역함수 사용)
-  const gv = (m) => getVal(m, mi) ?? 0;
+  // 실적값 취득 — 실적 없는 월은 null (계획으로 대체 안 함)
+  const gv = (m) => m.yr26actual[mi] ?? null;
+  // null-safe 캠프 합산: 전부 null이면 null, 아니면 null→0 처리 후 합산
+  const campSum = (camps, metric) => {
+    const vals = camps.map(c => DEPT_DATA.camps[c][metric].yr26actual[mi]);
+    return vals.every(v=>v==null) ? null : vals.reduce((s,v)=>s+(v??0), 0);
+  };
   // ── 학원 mini-cards ──
   const hakCamps=['광진','성동','동대문','중랑','학원본부'];
-  const hS=hakCamps.reduce((s,c)=>s+gv(DEPT_DATA.camps[c].매출),0);
-  const hP=hakCamps.reduce((s,c)=>s+gv(DEPT_DATA.camps[c].영업이익),0);
-  const hC=hS-hP;
+  const hS=campSum(hakCamps,'매출');
+  const hP=campSum(hakCamps,'영업이익');
+  const hC=hS!=null&&hP!=null?hS-hP:null;
   const hS25=hakCamps.reduce((s,c)=>s+(DEPT_DATA.camps[c].매출.yr25[mi]??0),0);
   const hS26p=hakCamps.reduce((s,c)=>s+(DEPT_DATA.camps[c].매출.yr26base[mi]??0),0);
   set('hak-val-s',fmt억(hS)); set('hak-val-c',fmt억(hC)); set('hak-val-p',fmt억(hP));
-  const hYoY=hS25>0?`<span style="color:${hS>=hS25?'var(--c26a)':'var(--loss)'}">25년比 ${hS>=hS25?'+':''}${fmt억(hS-hS25)} (${((hS-hS25)/hS25*100).toFixed(1)}%)</span>`:'-';
-  const hPlan=hS26p>0?`<span style="color:var(--c26p)">계획比 ${hS>=hS26p?'+':''}${((hS-hS26p)/hS26p*100).toFixed(1)}%</span>`:'';
+  const hYoY=hS!=null&&hS25>0?`<span style="color:${hS>=hS25?'var(--c26a)':'var(--loss)'}">25년比 ${hS>=hS25?'+':''}${fmt억(hS-hS25)} (${((hS-hS25)/hS25*100).toFixed(1)}%)</span>`:'-';
+  const hPlan=hS!=null&&hS26p>0?`<span style="color:var(--c26p)">계획比 ${hS>=hS26p?'+':''}${((hS-hS26p)/hS26p*100).toFixed(1)}%</span>`:'';
   setH('hak-meta-s',`${hYoY}&nbsp;|&nbsp;${hPlan}`);
-  setH('hak-meta-c',hS>0?`매출比 ${(hC/hS*100).toFixed(1)}%`:'');
-  setH('hak-meta-p',hS>0?`이익률 ${(hP/hS*100).toFixed(1)}%`:'');
+  setH('hak-meta-c',hS>0&&hC!=null?`매출比 ${(hC/hS*100).toFixed(1)}%`:'');
+  setH('hak-meta-p',hS>0&&hP!=null?`이익률 ${(hP/hS*100).toFixed(1)}%`:'');
   // ── U2M mini-cards ──
   const u2mCamps=['중계','송파방이','미사','위례'];
-  const uS=u2mCamps.reduce((s,c)=>s+gv(DEPT_DATA.camps[c].매출),0);
-  const uP=u2mCamps.reduce((s,c)=>s+gv(DEPT_DATA.camps[c].영업이익),0);
-  const uC=uS-uP;
+  const uS=campSum(u2mCamps,'매출');
+  const uP=campSum(u2mCamps,'영업이익');
+  const uC=uS!=null&&uP!=null?uS-uP:null;
   const uS25=u2mCamps.reduce((s,c)=>s+(DEPT_DATA.camps[c].매출.yr25[mi]??0),0);
   const uS26p=u2mCamps.reduce((s,c)=>s+(DEPT_DATA.camps[c].매출.yr26base[mi]??0),0);
   set('u2m-val-s',fmt억(uS)); set('u2m-val-c',fmt억(uC)); set('u2m-val-p',fmt억(uP));
-  const uYoY=uS25>0?`<span style="color:${uS>=uS25?'var(--c26a)':'var(--loss)'}">25년比 ${uS>=uS25?'+':''}${fmt억(uS-uS25)} (${((uS-uS25)/uS25*100).toFixed(1)}%)</span>`:'-';
-  const uPlan=uS26p>0?`<span style="color:var(--c26p)">계획比 ${uS>=uS26p?'+':''}${((uS-uS26p)/uS26p*100).toFixed(1)}%</span>`:'';
+  const uYoY=uS!=null&&uS25>0?`<span style="color:${uS>=uS25?'var(--c26a)':'var(--loss)'}">25년比 ${uS>=uS25?'+':''}${fmt억(uS-uS25)} (${((uS-uS25)/uS25*100).toFixed(1)}%)</span>`:'-';
+  const uPlan=uS!=null&&uS26p>0?`<span style="color:var(--c26p)">계획比 ${uS>=uS26p?'+':''}${((uS-uS26p)/uS26p*100).toFixed(1)}%</span>`:'';
   setH('u2m-meta-s',`${uYoY}&nbsp;|&nbsp;${uPlan}`);
-  setH('u2m-meta-c',uS>0?`매출比 ${(uC/uS*100).toFixed(1)}%`:'');
-  setH('u2m-meta-p',uS>0?`이익률 ${(uP/uS*100).toFixed(1)}%`:'');
+  setH('u2m-meta-c',uS>0&&uC!=null?`매출比 ${(uC/uS*100).toFixed(1)}%`:'');
+  setH('u2m-meta-p',uS>0&&uP!=null?`이익률 ${(uP/uS*100).toFixed(1)}%`:'');
   // ── 미래교육 mini-cards ──
   const mr=DEPT_DATA.mirae;
   const mrBook=gv(mr.교재매출), mrRemote=gv(mr.원격매출), mrProfit=gv(mr.영업이익);
-  const mrS=mrBook+mrRemote, mrC=mrS-mrProfit;
+  const mrS=mrBook!=null||mrRemote!=null?(mrBook??0)+(mrRemote??0):null;
+  const mrC=mrS!=null&&mrProfit!=null?mrS-mrProfit:null;
   const mrBook26p=mr.교재매출.yr26base[mi], mrRemote26p=mr.원격매출.yr26base[mi];
   set('mirae-val-s',fmt억(mrS)); set('mirae-val-book',fmt억(mrBook)); set('mirae-val-remote',fmt억(mrRemote));
   set('mirae-val-c',fmt억(mrC)); set('mirae-val-p',fmt억(mrProfit)); set('mirae-meta-s',`26년 ${mn}`);
-  set('mirae-meta-book',mrBook26p>0?`계획比 ${mrBook>=mrBook26p?'+':''}${((mrBook-mrBook26p)/mrBook26p*100).toFixed(1)}%`:'');
-  set('mirae-meta-remote',mrRemote26p>0?`계획比 ${mrRemote>=mrRemote26p?'+':''}${((mrRemote-mrRemote26p)/mrRemote26p*100).toFixed(1)}%`:'');
-  set('mirae-meta-c',mrS>0?`매출比 ${(mrC/mrS*100).toFixed(1)}%`:'');
-  set('mirae-meta-p',mrS>0?`이익률 ${(mrProfit/mrS*100).toFixed(1)}%`:'');
+  set('mirae-meta-book',mrBook!=null&&mrBook26p>0?`계획比 ${mrBook>=mrBook26p?'+':''}${((mrBook-mrBook26p)/mrBook26p*100).toFixed(1)}%`:'');
+  set('mirae-meta-remote',mrRemote!=null&&mrRemote26p>0?`계획比 ${mrRemote>=mrRemote26p?'+':''}${((mrRemote-mrRemote26p)/mrRemote26p*100).toFixed(1)}%`:'');
+  set('mirae-meta-c',mrS>0&&mrC!=null?`매출比 ${(mrC/mrS*100).toFixed(1)}%`:'');
+  set('mirae-meta-p',mrS>0&&mrProfit!=null?`이익률 ${(mrProfit/mrS*100).toFixed(1)}%`:'');
   // ── 방과후 mini-cards ──
   const bg=DEPT_DATA.bghu;
   const bgSuup=gv(bg.수업료매출), bgJae=gv(bg.재료비매출), bgProfit=gv(bg.영업이익);
-  const bgTotal=bgSuup+bgJae, bgC=bgTotal-bgProfit;
+  const bgTotal=bgSuup!=null||bgJae!=null?(bgSuup??0)+(bgJae??0):null;
+  const bgC=bgTotal!=null&&bgProfit!=null?bgTotal-bgProfit:null;
   set('bghu-val-total',fmt억(bgTotal)); set('bghu-val-suup',fmt억(bgSuup)); set('bghu-val-jae',fmt억(bgJae));
   set('bghu-val-c',fmt억(bgC)); set('bghu-val-p',fmt억(bgProfit));
-  setH('bghu-meta-suup',bg.수업료매출.yr25[mi]>0?`<span style="color:${bgSuup>=(bg.수업료매출.yr25[mi]??0)?'var(--c26a)':'var(--loss)'}">25년比 ${((bgSuup-(bg.수업료매출.yr25[mi]??0))/(bg.수업료매출.yr25[mi]??1)*100).toFixed(1)}%</span>`:'계정: 방과후학교');
-  setH('bghu-meta-jae',bg.재료비매출.yr25[mi]>0?`<span style="color:${bgJae>=(bg.재료비매출.yr25[mi]??0)?'var(--c26a)':'var(--loss)'}">25년比 ${((bgJae-(bg.재료비매출.yr25[mi]??0))/(bg.재료비매출.yr25[mi]??1)*100).toFixed(1)}%</span>`:'계정: 재료비수입');
-  set('bghu-meta-c',bgTotal>0?`매출比 ${(bgC/bgTotal*100).toFixed(1)}%`:'');
-  set('bghu-meta-p',bgTotal>0?`이익률 ${(bgProfit/bgTotal*100).toFixed(1)}%`:'');
+  setH('bghu-meta-suup',bgSuup!=null&&bg.수업료매출.yr25[mi]>0?`<span style="color:${bgSuup>=(bg.수업료매출.yr25[mi]??0)?'var(--c26a)':'var(--loss)'}">25년比 ${((bgSuup-(bg.수업료매출.yr25[mi]??0))/(bg.수업료매출.yr25[mi]??1)*100).toFixed(1)}%</span>`:'계정: 방과후학교');
+  setH('bghu-meta-jae',bgJae!=null&&bg.재료비매출.yr25[mi]>0?`<span style="color:${bgJae>=(bg.재료비매출.yr25[mi]??0)?'var(--c26a)':'var(--loss)'}">25년比 ${((bgJae-(bg.재료비매출.yr25[mi]??0))/(bg.재료비매출.yr25[mi]??1)*100).toFixed(1)}%</span>`:'계정: 재료비수입');
+  set('bghu-meta-c',bgTotal>0&&bgC!=null?`매출比 ${(bgC/bgTotal*100).toFixed(1)}%`:'');
+  set('bghu-meta-p',bgTotal>0&&bgProfit!=null?`이익률 ${(bgProfit/bgTotal*100).toFixed(1)}%`:'');
   // ── 배지 + 트리 ──
   const ytdMn=latestActMi>=0&&latestActMi<mi?MN[latestActMi]:mn;
   set('hak-badge-m',  `📅 당월 (${mn})`);
@@ -2741,7 +2748,7 @@ function initFranchise(){
 function renderFranchiseKpi(){
   const mi = frMonth;
   const fr = DEPT_DATA.franchise;
-  const set = (id,v,digits=1) => { const el=document.getElementById(id); if(el&&v!=null) el.textContent=Number(v).toFixed(digits); };
+  const set = (id,v,digits=1) => { const el=document.getElementById(id); if(el) el.textContent=v!=null?Number(v).toFixed(digits):'-'; };
   set('fr-val-new',    getVal(fr.신규가맹수, mi),  0);
   set('fr-val-renew',  getVal(fr.재가맹수, mi),    0);
   set('fr-val-sales',  getVal(fr.매출, mi),        1);
