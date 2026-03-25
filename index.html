@@ -2250,8 +2250,17 @@ function _ccRatios(ccs, src){
   }));
 }
 
+function getCampDirectProfitActual(camp, mi){
+  const cost = CAMP_COST_BY_MONTH[mi]?.[camp];
+  if(cost){
+    const directCost = cost.total - (cost.common ?? 0);
+    return Math.round((cost.sales - directCost) / 1e6);
+  }
+  return DEPT_DATA.camps[camp]?.영업이익?.yr26actual?.[mi] ?? null;
+}
+
 // CC yr26a 단일 월 조회: CC_MONTH_ACTUAL → camp yr26actual × CC비율 순으로 fallback
-function _getCC26a(cc, mi, cd, rs26p, rp26p){
+function _getCC26a(cc, camp, mi, cd, rs26p, rp26p){
   const M=1e6;
   // 1. CC 직접 데이터 (step 6에서 구축)
   if(CC_MONTH_ACTUAL[cc]?.[mi]) return CC_MONTH_ACTUAL[cc][mi];
@@ -2260,9 +2269,11 @@ function _getCC26a(cc, mi, cd, rs26p, rp26p){
     return CC_MONTH_ACTUAL[cc][latestActMi];
   // 3. camp yr26actual × CC비율
   const effMi = (cd.매출.yr26actual[mi]!=null) ? mi
-               : (latestActMi>=0 && cd.매출.yr26actual[latestActMi]!=null) ? latestActMi : -1;
+              : (latestActMi>=0 && cd.매출.yr26actual[latestActMi]!=null) ? latestActMi : -1;
   if(effMi<0) return null;
-  const cS=cd.매출.yr26actual[effMi], cP=cd.영업이익.yr26actual[effMi]??0;
+  const cS=cd.매출.yr26actual[effMi];
+  const cP=getCampDirectProfitActual(camp, effMi);
+  if(cS==null || cP==null) return null;
   return {s:Math.round(cS*M*rs26p), p2:Math.round(cP*M*rp26p)};
 }
 
@@ -2285,7 +2296,7 @@ function buildCC3YMonth(mi){
       result[cc]={
         yr25: {s:s25, p2:p25v},
         yr26p:{s:s26p, p2:p26p},
-        yr26a: _getCC26a(cc,mi,cd,rs26p,rp26p),
+        yr26a: _getCC26a(cc,camp,mi,cd,rs26p,rp26p),
       };
     }
   }
@@ -2314,9 +2325,10 @@ function buildCC3YYtd(mi){
           if(a){ytdS+=a.s;ytdP+=a.p2;hasAny=true;}
           else{
             const cS=cd.매출.yr26actual?.[i];
-            if(cS!=null){
+            const cP=getCampDirectProfitActual(camp, i);
+            if(cS!=null && cP!=null){
               ytdS+=Math.round(cS*M*rs26p);
-              ytdP+=Math.round((cd.영업이익.yr26actual[i]??0)*M*rp26p);
+              ytdP+=Math.round(cP*M*rp26p);
               hasAny=true;
             }
           }
@@ -4539,11 +4551,13 @@ function handleXlsxUpload(event){
 function runDiag(){
   const lines=[];
   const campPfx=['광진','성동','동대문','중랑','중계','송파방이','미사','위례'];
+  const monthList=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
   const effC=r=>{
     if(r.cp&&r.cp.trim()&&r.cp!=='-') return r.cp;
     for(const c of campPfx){if(r.cc&&r.cc.startsWith(c))return c;}
     return null;
   };
+  const fmtM = v => v==null ? 'null' : `${v}M`;
   lines.push(`RAW_DB: ${RAW_DB.length}건`);
   if(RAW_DB.length){
     const s=RAW_DB[0];
@@ -4571,13 +4585,35 @@ function runDiag(){
     const campMap={};
     RAW_DB.forEach(r=>{const c=effC(r);if(c){campMap[c]=(campMap[c]||0)+1;}});
     lines.push(`effCamp 결과: ${JSON.stringify(campMap)}`);
+    lines.push('');
+    lines.push('[월별 RAW_DB 건수]');
+    monthList.forEach(mn=>{
+      const cnt = RAW_DB.filter(r=>r.m===mn).length;
+      if(cnt) lines.push(`  ${mn}: ${cnt}건`);
+    });
+    lines.push('');
+    lines.push('[캠퍼스별 직접 영업이익 검증]');
+    campPfx.forEach(camp=>{
+      const parts = monthList.map((mn,mi)=>{
+        const cost = CAMP_COST_BY_MONTH[mi]?.[camp];
+        if(!cost) return null;
+        const directCost = cost.total - (cost.common ?? 0);
+        const profit = Math.round((cost.sales - directCost)/1e6);
+        const stored = DEPT_DATA.camps[camp]?.영업이익?.yr26actual?.[mi];
+        return `${mn}: 매출${Math.round(cost.sales/1e6)} / 판관비${Math.round(directCost/1e6)} / 직접이익${profit} / 저장${stored ?? 'null'}`;
+      }).filter(Boolean);
+      if(parts.length){
+        lines.push(`  ${camp}`);
+        parts.forEach(p=>lines.push(`    ${p}`));
+      }
+    });
   }
   lines.push('');
   lines.push(`latestActMi: ${latestActMi}`);
   lines.push('camp yr26actual(매출) [0]:');
   for(const c of campPfx){
     const v=DEPT_DATA.camps[c]?.매출?.yr26actual?.[0];
-    lines.push(`  ${c}: ${v!=null?v:'null'}`);
+    lines.push(`  ${c}: ${fmtM(v)}`);
   }
   lines.push('');
   const ccKeys=Object.keys(CC_MONTH_ACTUAL);
