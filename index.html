@@ -2583,7 +2583,11 @@ function renderOvKpi(mi){
   const hakCamps2=['광진','성동','동대문','중랑'];
   const u2mCamps2=['중계','송파방이','미사','위례'];
   const _effCamp = r => {
-    if(r.cp && r.cp.trim() && r.cp !== '-') return r.cp;
+    if(r.cp && r.cp.trim() && r.cp !== '-') {
+      if(r.cp === '본부') return '학원본부';   // 학원사업본부 본부비용
+      if(r.cp === 'U2M본부') return null;       // U2M 본부는 별도 camp 없음
+      return r.cp;
+    }
     if(r.cc === '학원본부') return '학원본부';
     for(const c of ['광진','성동','동대문','중랑','중계','송파방이','미사','위례']){
       if(r.cc && r.cc.startsWith(c)) return c;
@@ -4496,7 +4500,11 @@ function applyRawToDashboard(){
   // r.cp가 없을 때 r.cc 접두사로 캠퍼스 유추
   const _campPfx = ['광진','성동','동대문','중랑','중계','송파방이','미사','위례'];
   const effCamp = r => {
-    if(r.cp && r.cp.trim() && r.cp !== '-') return r.cp;
+    if(r.cp && r.cp.trim() && r.cp !== '-') {
+      if(r.cp === '본부') return '학원본부';   // 학원사업본부 본부비용
+      if(r.cp === 'U2M본부') return null;       // U2M 본부는 별도 camp 없음
+      return r.cp;
+    }
     if(r.cc === '학원본부') return '학원본부';
     for(const c of _campPfx){ if(r.cc && r.cc.startsWith(c)) return c; }
     return null;
