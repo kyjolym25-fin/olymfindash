@@ -4788,14 +4788,19 @@ function applyRawToDashboard(){
         const s수=campRows
           .filter(r=>r.t==='매출' && classifyHakwonCc(camp, r)===`${camp}수학`)
           .reduce((s,r)=>s+r.v,0);
+        const c수=campRows
+          .filter(r=>r.t==='판매관리비' && classifyHakwonCc(camp, r)===`${camp}수학`)
+          .reduce((s,r)=>s+r.v,0);
         const s영=campRows
           .filter(r=>r.t==='매출' && classifyHakwonCc(camp, r)===`${camp}영어`)
           .reduce((s,r)=>s+r.v,0);
-        const tot=s수+s영;
+        const c영=campRows
+          .filter(r=>r.t==='판매관리비' && classifyHakwonCc(camp, r)===`${camp}영어`)
+          .reduce((s,r)=>s+r.v,0);
         if(s수){ if(!CC_MONTH_ACTUAL[ccs[0]])CC_MONTH_ACTUAL[ccs[0]]=Array(12).fill(null);
-          CC_MONTH_ACTUAL[ccs[0]][mi]={s:s수,p2:tot>0?Math.round(directP*s수/tot):0}; }
+          CC_MONTH_ACTUAL[ccs[0]][mi]={s:s수,p2:s수-c수}; }
         if(s영){ if(!CC_MONTH_ACTUAL[ccs[1]])CC_MONTH_ACTUAL[ccs[1]]=Array(12).fill(null);
-          CC_MONTH_ACTUAL[ccs[1]][mi]={s:s영,p2:tot>0?Math.round(directP*s영/tot):0}; }
+          CC_MONTH_ACTUAL[ccs[1]][mi]={s:s영,p2:s영-c영}; }
       }
     });
   });
