@@ -4629,6 +4629,19 @@ function runDiag(){
   if(panel) panel.style.display='block';
 }
 
+function classifyHakwonCc(camp, row){
+  const cc = String(row.cc||'');
+  const subject = String(row.s||'');
+  if(cc.includes('영어') || subject === '영어') return `${camp}영어`;
+  if(
+    cc.includes('수학') ||
+    cc.includes('영재') ||
+    subject === '수학' ||
+    subject === '영재'
+  ) return `${camp}수학`;
+  return null;
+}
+
 function applyRawToDashboard(){
   if(!RAW_DB.length) return;
 
@@ -4771,8 +4784,13 @@ function applyRawToDashboard(){
         if(s){ if(!CC_MONTH_ACTUAL[ccs[0]])CC_MONTH_ACTUAL[ccs[0]]=Array(12).fill(null);
           CC_MONTH_ACTUAL[ccs[0]][mi]={s,p2:directP}; }
       } else {
-        const s수=sum(r=>effCamp(r)===camp&&r.m===mn&&r.t==='매출'&&r.s!=='영어');
-        const s영=sum(r=>effCamp(r)===camp&&r.m===mn&&r.t==='매출'&&r.s==='영어');
+        const campRows = RAW_DB.filter(r=>effCamp(r)===camp&&r.m===mn);
+        const s수=campRows
+          .filter(r=>r.t==='매출' && classifyHakwonCc(camp, r)===`${camp}수학`)
+          .reduce((s,r)=>s+r.v,0);
+        const s영=campRows
+          .filter(r=>r.t==='매출' && classifyHakwonCc(camp, r)===`${camp}영어`)
+          .reduce((s,r)=>s+r.v,0);
         const tot=s수+s영;
         if(s수){ if(!CC_MONTH_ACTUAL[ccs[0]])CC_MONTH_ACTUAL[ccs[0]]=Array(12).fill(null);
           CC_MONTH_ACTUAL[ccs[0]][mi]={s:s수,p2:tot>0?Math.round(directP*s수/tot):0}; }
