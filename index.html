@@ -1689,7 +1689,8 @@ function buildCampRow(camp, mi) {
   // ── 26년 실적 ──
   const a26  = (CAMP_COST_BY_MONTH[mi] && CAMP_COST_BY_MONTH[mi][camp])
     ? CAMP_COST_BY_MONTH[mi][camp] : CAMP_COST_26A[camp];
-  const t26a = a26.total - (a26.common??0);  // 직접비만 (공통비 제외)
+  const t26a    = a26.total - (a26.common??0);  // 직접비 합계 (공통비 제외)
+  const common26a = a26.common ?? 0;             // 공통비
   // 항목별 비율 (26실적 비율로 25년/26계획 배분)
   const ratio = k => t26a > 0 ? a26[k] / t26a : 0;
   const sc   = (base, k) => base != null ? Math.round(base * ratio(k)) : null;
@@ -1702,7 +1703,9 @@ function buildCampRow(camp, mi) {
     bldg:    { yr25: sc(c25,'bldg'),         yr26p: sc(c26p,'bldg'),    yr26a: a26.bldg },
     adv:     { yr25: sc(c25,'adv'),          yr26p: sc(c26p,'adv'),     yr26a: a26.adv },
     other:   { yr25: sc(c25,'other'),        yr26p: sc(c26p,'other'),   yr26a: a26.other },
-    total:   { yr25: c25,                    yr26p: c26p,               yr26a: t26a },
+    total:   { yr25: null,                   yr26p: null,               yr26a: t26a },
+    common:  { yr25: null,                   yr26p: null,               yr26a: common26a },
+    total2:  { yr25: c25,                    yr26p: c26p,               yr26a: a26.total },
   };
 }
 
@@ -1782,12 +1785,26 @@ function renderCostTable(containerId, camps, mi) {
           ${cells3(v.yr25||0,v.yr26p||0,v.yr26a||0,d.sales.yr25,d.sales.yr26p,d.sales.yr26a,false)}
         </tr>`;
       }
-      // 합계
+      // 합계 (직접비)
       const tot=d.total;
       rows+=`<tr style="background:var(--s2);border-top:2px solid var(--border2)">
-        <td style="padding:5px 10px;font-size:14px;font-weight:700;display:flex;align-items:center">${dot(di++)}합계</td>
-        <td></td>
+        <td style="padding:5px 10px;font-size:14px;font-weight:700;display:flex;align-items:center">${dot(di++)}합계(직접비)</td>
+        <td style="padding:4px 10px;font-size:11px;color:var(--muted)">공통비 제외</td>
         ${cells3(tot.yr25,tot.yr26p,tot.yr26a,d.sales.yr25,d.sales.yr26p,d.sales.yr26a,true)}
+      </tr>`;
+      // 공통비
+      const com=d.common;
+      rows+=`<tr style="border-bottom:1px solid var(--border)">
+        <td style="padding:4px 10px;font-size:14px;display:flex;align-items:center">${dot(di++)}공통비</td>
+        <td style="padding:4px 10px;font-size:11px;color:var(--muted)">본부 배부 공통비</td>
+        ${cells3(com.yr25,com.yr26p,com.yr26a,d.sales.yr25,d.sales.yr26p,d.sales.yr26a,false)}
+      </tr>`;
+      // 합계2 (공통비 포함)
+      const tot2=d.total2;
+      rows+=`<tr style="background:var(--s2);border-top:2px solid var(--border2)">
+        <td style="padding:5px 10px;font-size:14px;font-weight:700;display:flex;align-items:center">${dot(di++)}합계(공통비포함)</td>
+        <td></td>
+        ${cells3(tot2.yr25,tot2.yr26p,tot2.yr26a,d.sales.yr25,d.sales.yr26p,d.sales.yr26a,true)}
       </tr>`;
 
       html+=`<div style="margin-bottom:24px">
@@ -2668,11 +2685,11 @@ function renderDeptKpi(mi){
     const vals = camps.map(c => DEPT_DATA.camps[c].매출.yr26actual[mi]);
     return vals.every(v=>v==null) ? null : vals.reduce((s,v)=>s+(v??0), 0);
   };
-  // 판관비 직접 집계 (공통비 제외 직접비, 원→백만원)
+  // 판관비 직접 집계 (공통비 포함 총액, 원→백만원)
   const campCost = (camps) => {
     const cb = CAMP_COST_BY_MONTH[mi];
     if(!cb || !camps.some(c=>cb[c])) return null;
-    return camps.reduce((s,c)=>s+((cb[c]?.total??0)-(cb[c]?.common??0)), 0) / 1e6;
+    return camps.reduce((s,c)=>s+(cb[c]?.total??0), 0) / 1e6;
   };
   // ── 학원 mini-cards ──
   const hakCamps=['광진','성동','동대문','중랑','학원본부'];
