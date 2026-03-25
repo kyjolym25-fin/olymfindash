@@ -1363,6 +1363,10 @@ const PL={
 // 단위: 별도 표기 없으면 백만원
 // ============================================================
 const N12 = () => Array(12).fill(null);
+const FRANCHISE_COUNT_ACTUAL_FALLBACK = {
+  신규가맹수: [0, 1, null, null, null, null, null, null, null, null, null, null],
+  재가맹수: [1, 0, null, null, null, null, null, null, null, null, null, null],
+};
 
 const DEPT_DATA = {
 
@@ -1415,8 +1419,8 @@ const DEPT_DATA = {
 
   // ── 가맹사업 ──
   franchise: {
-    신규가맹수: { yr25:[4,1,1,2,0,2,2,0,4,1,3,1],                               yr26base:[0,null,null,null,null,null,null,null,null,null,null,null],    yr26actual:N12() },
-    재가맹수:   { yr25:[2,3,0,0,20,4,0,1,0,2,32,15],                            yr26base:[1,null,null,null,null,null,null,null,null,null,null,null],    yr26actual:N12() },
+    신규가맹수: { yr25:[4,1,1,2,0,2,2,0,4,1,3,1],                               yr26base:[0,null,null,null,null,null,null,null,null,null,null,null],    yr26actual:[...FRANCHISE_COUNT_ACTUAL_FALLBACK.신규가맹수] },
+    재가맹수:   { yr25:[2,3,0,0,20,4,0,1,0,2,32,15],                            yr26base:[1,null,null,null,null,null,null,null,null,null,null,null],    yr26actual:[...FRANCHISE_COUNT_ACTUAL_FALLBACK.재가맹수] },
     매출:       { yr25:[44,24,9,46,7,4,2,4,12,100,3,1],                         yr26base:[12.0,25.5,21.0,30.0,27.0,37.0,6.0,18.0,24.0,95.5,24.0,18.0], yr26actual:N12() },
     판관비:     { yr25:[51.7,42.1,37.3,44.6,45.5,61.7,35.4,44.8,44.1,49.1,51.4,57.4], yr26base:[42.5,55.4,49.0,41.1,44.0,43.9,62.1,56.6,40.8,56.3,49.3,44.6], yr26actual:N12() },
     영업이익:   { yr25:[-7.7,-18.1,-28.3,1.4,-38.5,-57.7,-33.4,-40.8,-32.1,50.9,-48.4,-56.4], yr26base:[-30.5,-29.9,-28.0,-11.1,-17.0,-6.9,-56.1,-38.6,-16.8,39.2,-25.3,-26.6], yr26actual:N12() },
@@ -4300,6 +4304,13 @@ async function loadDeptData(){
       if(Array.isArray(row.values) && row.values.length === 12){
         m.yr26actual = row.values;
       }
+    });
+    Object.entries(FRANCHISE_COUNT_ACTUAL_FALLBACK).forEach(([metric, values])=>{
+      const m = DEPT_DATA.franchise[metric];
+      if(!m) return;
+      values.forEach((v, i)=>{
+        if(v != null && m.yr26actual[i] == null) m.yr26actual[i] = v;
+      });
     });
   }catch(e){ console.warn('dept_data load error:',e); }
 }
