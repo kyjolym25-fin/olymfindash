@@ -4379,7 +4379,13 @@ async function loadRawDB(){
     if(error) throw error;
     RAW_DB = [];
     if(data){
-      data.forEach(row=>{ RAW_DB = RAW_DB.concat(row.data||[]); });
+      data.forEach(row=>{
+        const normalized = (row.data||[]).map(r=>({
+          ...r,
+          m: normalizeMonthLabel(r.m)
+        }));
+        RAW_DB = RAW_DB.concat(normalized);
+      });
       const withTs = data.filter(r=>r.uploaded_at);
       const latest = withTs.length ? withTs.reduce((max,r)=>r.uploaded_at>max?r.uploaded_at:max,'') : '';
       const el = document.getElementById('lastModPill');
@@ -4402,6 +4408,29 @@ async function loadRawDB(){
     }
   }catch(e){ console.warn('raw_db load error:',e); RAW_DB = []; }
 }
+
+function normalizeMonthLabel(value){
+  if(value == null) return '';
+  const raw = String(value).trim();
+  if(!raw) return '';
+  const direct = raw.match(/^(\d{1,2})\s*월$/);
+  if(direct){
+    const month = Number(direct[1]);
+    return month >= 1 && month <= 12 ? `${month}월` : raw;
+  }
+  const numeric = raw.match(/^0?(\d{1,2})$/);
+  if(numeric){
+    const month = Number(numeric[1]);
+    return month >= 1 && month <= 12 ? `${month}월` : raw;
+  }
+  const iso = raw.match(/(\d{4})[-/.](\d{1,2})(?:[-/.]\d{1,2})?$/);
+  if(iso){
+    const month = Number(iso[2]);
+    return month >= 1 && month <= 12 ? `${month}월` : raw;
+  }
+  return raw.replace(/\s+/g,'');
+}
+
 async function saveRawDB(months){
   const now = new Date().toISOString();
   const rows = months.map(m=>({
@@ -4410,7 +4439,20 @@ async function saveRawDB(months){
     uploaded_at: now
   }));
   const {error} = await sb.from('raw_db').upsert(rows, {onConflict:'month'});
-  if(error){ console.warn('raw_db save error:',error); return; }
+  if(error){
+    console.warn('raw_db save error:',error);
+    throw new Error(`raw_db 저장 실패: ${error.message||error}`);
+  }
+  const {data:verifyRows,error:verifyError} = await sb.from('raw_db').select('month').in('month', months);
+  if(verifyError){
+    console.warn('raw_db verify error:', verifyError);
+    throw new Error(`raw_db 검증 실패: ${verifyError.message||verifyError}`);
+  }
+  const savedMonths = new Set((verifyRows||[]).map(r=>r.month));
+  const missingMonths = months.filter(m=>!savedMonths.has(m));
+  if(missingMonths.length){
+    throw new Error(`raw_db 저장 후 검증 실패: ${missingMonths.join(', ')} 월 누락`);
+  }
   // 최종수정일 즉시 갱신
   const d = new Date(now);
   const yy=String(d.getFullYear()).slice(2), mm=String(d.getMonth()+1).padStart(2,'0'), dd=String(d.getDate()).padStart(2,'0');
@@ -4439,7 +4481,7 @@ function handleXlsxUpload(event){
 
       rows.slice(1).forEach(r=>{
         if(!r[8] && r[8]!==0) return;
-        const month = r[3];
+        const month = normalizeMonthLabel(r[3]);
         if(!month) return;
         newMonths.add(month);
         // 같은 월 기존 데이터 제거 후 교체
@@ -4457,8 +4499,9 @@ function handleXlsxUpload(event){
         if(r[1]&&String(r[1]).includes('공통비')&&!String(r[1]).includes('강사비'))
           window._skippedCommon.push(`a=${r[1]}|t=${r[0]}|m=${r[3]}|d=${r[4]}|r[8]=${r[8]}|r[9]=${r[9]}|r[10]=${r[10]}`);
         if(!r[8] && r[8]!==0) return;
-        if(!r[3]) return;
-        RAW_DB.push({t:r[0],a:r[1],cc:r[2],m:r[3],d:r[4],cp:r[5],s:r[6],gr:r[7],v:Number(r[8])});
+        const month = normalizeMonthLabel(r[3]);
+        if(!month) return;
+        RAW_DB.push({t:r[0],a:r[1],cc:r[2],m:month,d:r[4],cp:r[5],s:r[6],gr:r[7],v:Number(r[8])});
       });
 
       await saveRawDB(uploadedMonths);
