@@ -430,11 +430,11 @@ thead th{font-size:13px}
   <!-- 목표달성률 2열 -->
   <div class="g2">
     <div class="card">
-      <div class="ch"><div><div class="ct" id="ach-title-monthly">목표달성률 (당월)</div><div class="cs">사업부별 실적/계획</div></div></div>
+      <div class="ch"><div><div class="ct" id="ach-title-monthly">매출 목표달성률 (당월)</div><div class="cs">사업부별 실적/계획</div></div></div>
       <div id="ach_list" style="margin-top:6px"></div>
     </div>
     <div class="card">
-      <div class="ch"><div><div class="ct" id="ach-title-ytd">목표달성률 (YTD)</div><div class="cs" id="ach-cs-ytd">사업부별 누적 실적/계획</div></div></div>
+      <div class="ch"><div><div class="ct" id="ach-title-ytd">매출 목표달성률 (YTD)</div><div class="cs" id="ach-cs-ytd">사업부별 누적 실적/계획</div></div></div>
       <div id="ach_list_ytd" style="margin-top:6px"></div>
     </div>
   </div>
@@ -498,7 +498,7 @@ thead th{font-size:13px}
         <div class="mc-meta" id="hak-meta-c" style="color:var(--muted)">매출比 67.4%</div>
       </div>
       <div class="mini-card c26a">
-        <div class="mc-lbl">영업이익(공통비 불포함)</div>
+        <div class="mc-lbl">영업이익(공통비 포함)</div>
         <div class="mc-val"><span id="hak-val-p">5.05</span><span class="mc-unit">억</span></div>
         <div class="mc-meta" id="hak-meta-p" style="color:var(--c26a)">이익률 32.6%</div>
       </div>
@@ -555,12 +555,12 @@ thead th{font-size:13px}
     </div>
 
 
-  <div id="cb-hak-s1" class="comment-box" style="display:none;margin-top:16px">
+  <div id="cb-hak-s1" class="comment-box" style="display:none;margin-top:24px">
     <div class="cb-label"><span>✦</span> COMMENT</div>
     <div class="cb-text" id="cb-text-hak-s1"></div>
     <div class="cb-date" id="cb-date-hak-s1"></div>
   </div>
-  <div id="ce-hak-s1" class="comment-editor" style="margin-top:16px">
+  <div id="ce-hak-s1" class="comment-editor" style="margin-top:24px">
     <div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div>
     <textarea id="ce-text-hak-s1" placeholder="코멘트를 입력하세요..."></textarea>
     <div class="cb-btns">
@@ -598,7 +598,7 @@ thead th{font-size:13px}
     <div class="mini-cards" style="grid-template-columns:repeat(4,1fr)">
       <div class="mini-card c26a"><div class="mc-lbl">U2M 매출</div><div class="mc-val"><span id="u2m-val-s">3.8</span><span class="mc-unit">억</span></div><div class="mc-meta" id="u2m-meta-s" style="color:var(--c25)">25년比 -0.05억 (-1.2%) &nbsp;|&nbsp; <span style="color:var(--c26p)">계획比 +0.6억 (+18.9%)</span></div></div>
       <div class="mini-card cr"><div class="mc-lbl">판매관리비</div><div class="mc-val"><span id="u2m-val-c">3.3</span><span class="mc-unit">억</span></div><div class="mc-meta" id="u2m-meta-c" style="color:var(--muted)">매출比 88.0%</div></div>
-      <div class="mini-card c26a"><div class="mc-lbl">영업이익(공통비 불포함)</div><div class="mc-val"><span id="u2m-val-p">0.26</span><span class="mc-unit">억</span></div><div class="mc-meta" id="u2m-meta-p" style="color:var(--c26a)">이익률 6.8%</div></div>
+      <div class="mini-card c26a"><div class="mc-lbl">영업이익(공통비 포함)</div><div class="mc-val"><span id="u2m-val-p">0.26</span><span class="mc-unit">억</span></div><div class="mc-meta" id="u2m-meta-p" style="color:var(--c26a)">이익률 6.8%</div></div>
       <div class="mini-card cy"><div class="mc-lbl">캠퍼스 수</div><div class="mc-val">4<span class="mc-unit">개</span></div><div class="mc-meta" style="color:var(--muted)">미사·송파방이·위례·중계</div></div>
     </div>
 
@@ -646,12 +646,12 @@ thead th{font-size:13px}
       <div id="u2m_cost_table"></div>
     </div>
 
-      <div id="cb-u2m-s1" class="comment-box" style="display:none;margin-top:16px">
+      <div id="cb-u2m-s1" class="comment-box" style="display:none;margin-top:24px">
     <div class="cb-label"><span>✦</span> COMMENT</div>
     <div class="cb-text" id="cb-text-u2m-s1"></div>
     <div class="cb-date" id="cb-date-u2m-s1"></div>
   </div>
-  <div id="ce-u2m-s1" class="comment-editor" style="margin-top:16px">
+  <div id="ce-u2m-s1" class="comment-editor" style="margin-top:24px">
     <div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div>
     <textarea id="ce-text-u2m-s1" placeholder="코멘트를 입력하세요..."></textarea>
     <div class="cb-btns">
@@ -2602,7 +2602,7 @@ function renderOvKpi(mi){
 
   // 타이틀 동적 업데이트
   const mTitle = document.getElementById('ach-title-monthly');
-  if(mTitle) mTitle.textContent = `목표달성률 (${mn})`;
+  if(mTitle) mTitle.textContent = `매출 목표달성률 (${mn})`;
 
   achEl.innerHTML =
     achRow('학원사업본부', hakPlan, hakActual, false, true) +
@@ -4528,10 +4528,11 @@ function applyRawToDashboard(){
       const bldg    = sc(r => r.t==='판매관리비' && costCat(r.a)==='bldg');
       const adv     = sc(r => r.t==='판매관리비' && costCat(r.a)==='adv');
       const other   = sc(r => r.t==='판매관리비' && costCat(r.a)==='other');
+      const common  = sc(r => r.t==='공통비');
       CAMP_COST_BY_MONTH[mi][camp] = {
         sales: sc(r => r.t==='매출'),
-        staff, instr, vehicle, rent, bldg, adv, other,
-        total: staff+instr+vehicle+rent+bldg+adv+other,
+        staff, instr, vehicle, rent, bldg, adv, other, common,
+        total: staff+instr+vehicle+rent+bldg+adv+other+common,
       };
     });
   });
@@ -4620,7 +4621,7 @@ function applyRawToDashboard(){
   // 미래교육
   const 미래명 = ['미래교육사업부','미래교육사업본부'];
   months.forEach((mn,mi)=>{
-    const 교재 = sum(r=>미래명.includes(effDept(r)) && r.m===mn && r.t==='매출' && r.a&&r.a.includes('교재'));
+    const 교재 = sum(r=>미래명.includes(effDept(r)) && r.m===mn && r.t==='매출' && r.a&&(r.a.includes('교재')||r.a.includes('도서')));
     const 원격 = sum(r=>미래명.includes(effDept(r)) && r.m===mn && r.t==='매출' && r.a&&(r.a.includes('원격')||r.a.includes('온라인')));
     const ms   = sum(r=>미래명.includes(effDept(r)) && r.m===mn && r.t==='매출');
     const mc   = sum(r=>미래명.includes(effDept(r)) && r.m===mn && r.t==='판매관리비');
