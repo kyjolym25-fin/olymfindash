@@ -2659,16 +2659,22 @@ function renderOvKpi(mi){
 
 function renderDeptKpi(mi){
   const {MN,mn,pctStr,set,setH} = _mkKpiHelpers(mi);
-  // null-safe 캠프 합산: 전부 null이면 null, 아니면 null→0 처리 후 합산
-  const campSum = (camps, metric) => {
-    const vals = camps.map(c => DEPT_DATA.camps[c][metric].yr26actual[mi]);
+  // 매출 합산 (yr26actual, 백만원)
+  const campSum = (camps) => {
+    const vals = camps.map(c => DEPT_DATA.camps[c].매출.yr26actual[mi]);
     return vals.every(v=>v==null) ? null : vals.reduce((s,v)=>s+(v??0), 0);
+  };
+  // 판관비 직접 집계 (CAMP_COST_BY_MONTH.total, 공통비 포함, 원→백만원)
+  const campCost = (camps) => {
+    const cb = CAMP_COST_BY_MONTH[mi];
+    if(!cb || !camps.some(c=>cb[c])) return null;
+    return camps.reduce((s,c)=>s+(cb[c]?.total??0), 0) / 1e6;
   };
   // ── 학원 mini-cards ──
   const hakCamps=['광진','성동','동대문','중랑','학원본부'];
-  const hS=campSum(hakCamps,'매출');
-  const hP=campSum(hakCamps,'영업이익');
-  const hC=hS!=null&&hP!=null?hS-hP:null;
+  const hS=campSum(hakCamps);
+  const hC=campCost(hakCamps);
+  const hP=hS!=null&&hC!=null?hS-hC:null;
   const hS25=hakCamps.reduce((s,c)=>s+(DEPT_DATA.camps[c].매출.yr25[mi]??0),0);
   const hS26p=hakCamps.reduce((s,c)=>s+(DEPT_DATA.camps[c].매출.yr26base[mi]??0),0);
   set('hak-val-s',fmt억(hS)); set('hak-val-c',fmt억(hC)); set('hak-val-p',fmt억(hP));
@@ -2679,9 +2685,9 @@ function renderDeptKpi(mi){
   setH('hak-meta-p',hS>0&&hP!=null?`이익률 ${(hP/hS*100).toFixed(1)}%`:'');
   // ── U2M mini-cards ──
   const u2mCamps=['중계','송파방이','미사','위례'];
-  const uS=campSum(u2mCamps,'매출');
-  const uP=campSum(u2mCamps,'영업이익');
-  const uC=uS!=null&&uP!=null?uS-uP:null;
+  const uS=campSum(u2mCamps);
+  const uC=campCost(u2mCamps);
+  const uP=uS!=null&&uC!=null?uS-uC:null;
   const uS25=u2mCamps.reduce((s,c)=>s+(DEPT_DATA.camps[c].매출.yr25[mi]??0),0);
   const uS26p=u2mCamps.reduce((s,c)=>s+(DEPT_DATA.camps[c].매출.yr26base[mi]??0),0);
   set('u2m-val-s',fmt억(uS)); set('u2m-val-c',fmt억(uC)); set('u2m-val-p',fmt억(uP));
