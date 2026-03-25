@@ -4294,9 +4294,27 @@ async function loadDeptData(){
     const {data,error} = await sb.from('dept_data').select('*');
     if(error) throw error;
     if(!data||!data.length) return;
-    // yr25 actual / yr26 base는 소스코드(CC3Y 배열 포함)가 정본이므로 DB에서 덮어쓰지 않음
-    // yr26actual만 Supabase에서 로드하는 경우 여기에 추가
+    data.forEach(row=>{
+      const m = getDeptMetric(row.section, row.camp||'', row.metric);
+      if(!m || row.year !== 2026 || row.dtype !== 'actual') return;
+      if(Array.isArray(row.values) && row.values.length === 12){
+        m.yr26actual = row.values;
+      }
+    });
   }catch(e){ console.warn('dept_data load error:',e); }
+}
+
+async function saveDeptActual(section, camp, metric, values){
+  const row = {
+    section,
+    camp: camp || '',
+    metric,
+    year: 2026,
+    dtype: 'actual',
+    values
+  };
+  const {error} = await sb.from('dept_data').upsert([row], {onConflict:'section,camp,metric,year,dtype'});
+  if(error) throw error;
 }
 
 async function seedDeptData(btn){
@@ -4532,6 +4550,8 @@ function handleXlsxUpload(event){
           if(r268){ const v=r268[10]; if(v!=null&&v!=='') DEPT_DATA.franchise.신규가맹수.yr26actual[mi]=Number(v); }
           if(r269){ const v=r269[10]; if(v!=null&&v!=='') DEPT_DATA.franchise.재가맹수.yr26actual[mi]=Number(v); }
         });
+        await saveDeptActual('franchise','', '신규가맹수', DEPT_DATA.franchise.신규가맹수.yr26actual);
+        await saveDeptActual('franchise','', '재가맹수', DEPT_DATA.franchise.재가맹수.yr26actual);
       }
 
       // 대시보드 데이터 갱신
