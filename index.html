@@ -555,12 +555,12 @@ thead th{font-size:13px}
     </div>
 
 
-  <div id="cb-hak-s1" class="comment-box" style="display:none">
+  <div id="cb-hak-s1" class="comment-box" style="display:none;margin-top:16px">
     <div class="cb-label"><span>✦</span> COMMENT</div>
     <div class="cb-text" id="cb-text-hak-s1"></div>
     <div class="cb-date" id="cb-date-hak-s1"></div>
   </div>
-  <div id="ce-hak-s1" class="comment-editor">
+  <div id="ce-hak-s1" class="comment-editor" style="margin-top:16px">
     <div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div>
     <textarea id="ce-text-hak-s1" placeholder="코멘트를 입력하세요..."></textarea>
     <div class="cb-btns">
@@ -646,12 +646,12 @@ thead th{font-size:13px}
       <div id="u2m_cost_table"></div>
     </div>
 
-      <div id="cb-u2m-s1" class="comment-box" style="display:none">
+      <div id="cb-u2m-s1" class="comment-box" style="display:none;margin-top:16px">
     <div class="cb-label"><span>✦</span> COMMENT</div>
     <div class="cb-text" id="cb-text-u2m-s1"></div>
     <div class="cb-date" id="cb-date-u2m-s1"></div>
   </div>
-  <div id="ce-u2m-s1" class="comment-editor">
+  <div id="ce-u2m-s1" class="comment-editor" style="margin-top:16px">
     <div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div>
     <textarea id="ce-text-u2m-s1" placeholder="코멘트를 입력하세요..."></textarea>
     <div class="cb-btns">
@@ -1690,23 +1690,19 @@ function buildCampRow(camp, mi) {
   const a26  = (CAMP_COST_BY_MONTH[mi] && CAMP_COST_BY_MONTH[mi][camp])
     ? CAMP_COST_BY_MONTH[mi][camp] : CAMP_COST_26A[camp];
   const t26a = a26.total;  // 직접비만 (공통비 제외)
-  // 26년 실적 공통비포함 영업이익
-  const p26a_common = cd.영업이익.yr26actual[mi] != null ? cd.영업이익.yr26actual[mi] * M : null;
   // 항목별 비율 (26실적 비율로 25년/26계획 배분)
   const ratio = k => t26a > 0 ? a26[k] / t26a : 0;
   const sc   = (base, k) => base != null ? Math.round(base * ratio(k)) : null;
   return {
-    sales:         { yr25: s25,            yr26p: s26p,  yr26a: a26.sales },
-    staff:         { yr25: sc(c25,'staff'),   yr26p: sc(c26p,'staff'),   yr26a: a26.staff },
-    instr:         { yr25: sc(c25,'instr'),   yr26p: sc(c26p,'instr'),   yr26a: a26.instr },
-    vehicle:       { yr25: sc(c25,'vehicle'), yr26p: sc(c26p,'vehicle'), yr26a: a26.vehicle },
-    rent:          { yr25: sc(c25,'rent'),    yr26p: sc(c26p,'rent'),    yr26a: a26.rent },
-    bldg:          { yr25: sc(c25,'bldg'),    yr26p: sc(c26p,'bldg'),    yr26a: a26.bldg },
-    adv:           { yr25: sc(c25,'adv'),     yr26p: sc(c26p,'adv'),     yr26a: a26.adv },
-    other:         { yr25: sc(c25,'other'),   yr26p: sc(c26p,'other'),   yr26a: a26.other },
-    total:         { yr25: c25,            yr26p: c26p,  yr26a: t26a },
-    profit_direct: { yr25: p25,            yr26p: p26p,  yr26a: a26.sales - t26a },
-    profit_common: { yr25: p25,            yr26p: p26p,  yr26a: p26a_common },
+    sales:   { yr25: s25,                    yr26p: s26p,              yr26a: a26.sales },
+    staff:   { yr25: sc(c25,'staff'),        yr26p: sc(c26p,'staff'),   yr26a: a26.staff },
+    instr:   { yr25: sc(c25,'instr'),        yr26p: sc(c26p,'instr'),   yr26a: a26.instr },
+    vehicle: { yr25: sc(c25,'vehicle'),      yr26p: sc(c26p,'vehicle'), yr26a: a26.vehicle },
+    rent:    { yr25: sc(c25,'rent'),         yr26p: sc(c26p,'rent'),    yr26a: a26.rent },
+    bldg:    { yr25: sc(c25,'bldg'),         yr26p: sc(c26p,'bldg'),    yr26a: a26.bldg },
+    adv:     { yr25: sc(c25,'adv'),          yr26p: sc(c26p,'adv'),     yr26a: a26.adv },
+    other:   { yr25: sc(c25,'other'),        yr26p: sc(c26p,'other'),   yr26a: a26.other },
+    total:   { yr25: c25,                    yr26p: c26p,               yr26a: t26a },
   };
 }
 
@@ -1792,24 +1788,6 @@ function renderCostTable(containerId, camps, mi) {
         <td style="padding:5px 10px;font-size:14px;font-weight:700;display:flex;align-items:center">${dot(di++)}합계</td>
         <td></td>
         ${cells3(tot.yr25,tot.yr26p,tot.yr26a,d.sales.yr25,d.sales.yr26p,d.sales.yr26a,true)}
-      </tr>`;
-      // 영업이익 직접 (매출 - 직접판관비)
-      const pd=d.profit_direct;
-      rows+=`<tr style="border-top:1px solid var(--border2)">
-        <td style="padding:4px 10px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:4px">
-          <span style="font-size:10px;background:#e8f0fe;color:#4361EE;border-radius:4px;padding:1px 5px">직접</span>영업이익
-        </td>
-        <td style="padding:3px 10px;font-size:11px;color:var(--muted)">매출 − 직접판관비 (25년/계획은 공통비포함)</td>
-        ${cells3(pd.yr25,pd.yr26p,pd.yr26a,d.sales.yr25,d.sales.yr26p,d.sales.yr26a,true)}
-      </tr>`;
-      // 영업이익 공통비포함
-      const pc=d.profit_common;
-      rows+=`<tr style="background:rgba(67,97,238,0.04);border-bottom:2px solid var(--border2)">
-        <td style="padding:4px 10px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:4px">
-          <span style="font-size:10px;background:#fce8e8;color:#c0392b;border-radius:4px;padding:1px 5px">포함</span>영업이익
-        </td>
-        <td style="padding:3px 10px;font-size:11px;color:var(--muted)">공통비 배분 후 영업이익 (경영계획 기준)</td>
-        ${cells3(pc.yr25,pc.yr26p,pc.yr26a,d.sales.yr25,d.sales.yr26p,d.sales.yr26a,true)}
       </tr>`;
 
       html+=`<div style="margin-bottom:24px">
