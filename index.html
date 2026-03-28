@@ -105,6 +105,7 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
 
 /* ── METRIC MINI CARDS ── */
 .mini-cards{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px}
+.mc4{grid-template-columns:repeat(4,1fr)}
 .mini-card{background:var(--s1);border-radius:14px;padding:17px 16px;position:relative;overflow:hidden;box-shadow:var(--shadow)}
 .mini-card::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:14px 14px 0 0}
 .mini-card.c25::after{background:linear-gradient(90deg,#4361EE,#738EFF)}
@@ -499,7 +500,7 @@ thead th{font-size:13px}
 
   <!-- ── 학원사업본부 ── -->
   <div class="subpage on" id="sp-hakwon">
-    <div class="mini-cards" style="grid-template-columns:repeat(4,1fr)">
+    <div class="mini-cards mc4">
       <div class="mini-card c26a">
         <div class="mc-lbl">학원사업본부 매출</div>
         <div class="mc-val"><span id="hak-val-s">15.5</span><span class="mc-unit">억</span></div>
@@ -608,7 +609,7 @@ thead th{font-size:13px}
 
   <!-- ── U2M사업본부 ── -->
   <div class="subpage" id="sp-u2m">
-    <div class="mini-cards" style="grid-template-columns:repeat(4,1fr)">
+    <div class="mini-cards mc4">
       <div class="mini-card c26a"><div class="mc-lbl">U2M 매출</div><div class="mc-val"><span id="u2m-val-s">3.8</span><span class="mc-unit">억</span></div><div class="mc-meta" id="u2m-meta-s" style="color:var(--c25)">25년比 -0.05억 (-1.2%) &nbsp;|&nbsp; <span style="color:var(--c26p)">계획比 +0.6억 (+18.9%)</span></div></div>
       <div class="mini-card cr"><div class="mc-lbl">판매관리비</div><div class="mc-val"><span id="u2m-val-c">3.3</span><span class="mc-unit">억</span></div><div class="mc-meta" id="u2m-meta-c" style="color:var(--muted)">매출比 88.0%</div></div>
       <div class="mini-card c26a"><div class="mc-lbl">영업이익(공통비 포함)</div><div class="mc-val"><span id="u2m-val-p">0.26</span><span class="mc-unit">억</span></div><div class="mc-meta" id="u2m-meta-p" style="color:var(--c26a)">이익률 6.8%</div></div>
@@ -895,7 +896,7 @@ thead th{font-size:13px}
 
   <!-- ── 경영기획실 ── -->
   <div class="subpage" id="sp-mgmt">
-    <div class="mini-cards" style="grid-template-columns:repeat(4,1fr)">
+    <div class="mini-cards mc4">
       <div class="mini-card cr"><div class="mc-lbl">매출</div><div class="mc-val">0<span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--muted)">매출 없음</div></div>
       <div class="mini-card cr"><div class="mc-lbl">판매관리비</div><div class="mc-val">0.40<span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--muted)">경영기획실</div></div>
       <div class="mini-card cr"><div class="mc-lbl">영업손실</div><div class="mc-val">-0.40<span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--loss)">전액 비용</div></div>
@@ -945,7 +946,7 @@ thead th{font-size:13px}
   <div class="month-bar" id="stu-month-bar"></div>
 
   <!-- KPI 카드 (동적) -->
-  <div id="stu_kpi_cards" class="mini-cards" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px"></div>
+  <div id="stu_kpi_cards" class="mini-cards mc4" style="margin-bottom:20px"></div>
 
   <!-- 차트 영역 (그래프 먼저) -->
   <div class="g2" style="margin-bottom:16px">
