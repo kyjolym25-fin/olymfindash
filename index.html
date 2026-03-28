@@ -325,6 +325,10 @@ thead th{font-size:13px}
   table{font-size:11px}
   thead th{font-size:10px;padding:7px 6px}
   tbody td{padding:7px 6px}
+  /* 카드 헤더: 제목+버튼 세로 배치 */
+  .ch{flex-direction:column;gap:8px;align-items:flex-start}
+  /* 버튼 그룹 줄바꿈 허용 */
+  .ch > div:last-child{flex-wrap:wrap}
   /* 테이블 래퍼 스크롤 */
   .tw{-webkit-overflow-scrolling:touch}
   .card > div[style*="overflow-x"]{-webkit-overflow-scrolling:touch}
