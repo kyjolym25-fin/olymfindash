@@ -306,24 +306,28 @@ thead th{font-size:13px}
   .stu-grid{grid-template-columns:repeat(2,1fr)}
   /* 미니카드 → 2열 */
   .mini-cards{grid-template-columns:repeat(2,1fr)!important}
-  .mc-val{font-size:20px}
+  .mc-val{font-size:20px;white-space:nowrap}
   .mc-lbl,.mc-meta{font-size:10px}
   .mc-unit{font-size:11px}
+  .mini-card{overflow:hidden}
   /* 카드 패딩 */
   .card{padding:12px 14px}
   .kpi-box{padding:12px 14px}
   .kpi-item{padding:10px 12px}
-  .kpi-main-val{font-size:18px}
-  .kpi-row-val{font-size:13px}
+  .kpi-main-val{font-size:18px;white-space:nowrap}
+  .kpi-row-val{font-size:13px;white-space:nowrap}
   .kpi-item-lbl,.kpi-row-lbl,.kpi-delta{font-size:11px}
   /* 캠퍼스 행 */
   .campus-row-grid{grid-template-columns:1fr}
   .cr-name{width:80px;font-size:13px}
-  .cr-sales,.cr-profit{font-size:13px}
+  .cr-sales,.cr-profit{font-size:13px;white-space:nowrap}
   /* 테이블 */
   table{font-size:11px}
-  thead th{font-size:10px;padding:7px 8px}
-  tbody td{padding:7px 8px}
+  thead th{font-size:10px;padding:7px 6px}
+  tbody td{padding:7px 6px}
+  /* 테이블 래퍼 스크롤 */
+  .tw{-webkit-overflow-scrolling:touch}
+  .card > div[style*="overflow-x"]{-webkit-overflow-scrolling:touch}
   /* 폰트 되돌리기 */
   .tab{font-size:12px}
   .subtab{font-size:11px}
@@ -346,6 +350,10 @@ thead th{font-size:13px}
   .kpi-grid{grid-template-columns:1fr}
   .mini-cards{grid-template-columns:repeat(2,1fr)!important}
   .hdr-sub{display:none}
+  .mc-val{font-size:17px}
+  .kpi-main-val{font-size:16px}
+  thead th{font-size:9px;padding:6px 5px}
+  tbody td{padding:6px 5px;font-size:10px}
 }
 </style>
 </head>
