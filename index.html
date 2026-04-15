@@ -901,9 +901,9 @@ thead th{font-size:13px}
   <!-- ── 경영기획실 ── -->
   <div class="subpage" id="sp-mgmt">
     <div class="mini-cards mc4">
-      <div class="mini-card cr"><div class="mc-lbl">매출</div><div class="mc-val">0<span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--muted)">매출 없음</div></div>
-      <div class="mini-card cr"><div class="mc-lbl">판매관리비</div><div class="mc-val">0.40<span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--muted)">경영기획실</div></div>
-      <div class="mini-card cr"><div class="mc-lbl">영업손실</div><div class="mc-val">-0.40<span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--loss)">전액 비용</div></div>
+      <div class="mini-card cr"><div class="mc-lbl">매출</div><div class="mc-val" id="mc-mgmt-sales">-<span class="mc-unit">억</span></div><div class="mc-meta" id="mc-mgmt-sales-meta" style="color:var(--muted)">임대료수입</div></div>
+      <div class="mini-card cr"><div class="mc-lbl">판매관리비</div><div class="mc-val" id="mc-mgmt-cost">-<span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--muted)">경영기획실</div></div>
+      <div class="mini-card cr"><div class="mc-lbl">영업이익</div><div class="mc-val" id="mc-mgmt-profit">-<span class="mc-unit">억</span></div><div class="mc-meta" id="mc-mgmt-profit-meta" style="color:var(--muted)">매출−판관비</div></div>
       <div class="mini-card cy"><div class="mc-lbl">캠퍼스 안분 공통비</div><div class="mc-val">0.64<span class="mc-unit">억</span></div><div class="mc-meta" style="color:var(--muted)">학원·U2M 캠퍼스 배분</div></div>
     </div>
     <div class="g2">
@@ -3277,6 +3277,17 @@ function initMgmt(mi){
   const mgmtCostM = RAW_DB.length
     ? RAW_DB.filter(r=>r.d==='경영기획실' && r.m===mn && r.t==='판매관리비').reduce((s,r)=>s+r.v,0) / 1e6
     : PL['경영기획실'].cost / 1e6;
+  const mgmtSalesM = RAW_DB.length
+    ? RAW_DB.filter(r=>r.d==='경영기획실' && r.m===mn && r.t==='매출').reduce((s,r)=>s+r.v,0) / 1e6
+    : 0;
+  const mgmtProfitM = mgmtSalesM - mgmtCostM;
+  // KPI 카드 업데이트
+  const _setMc = (id, valM) => { const el=document.getElementById(id); if(el) el.innerHTML = (valM!==0?valM.toFixed(2):'0')+'<span class="mc-unit">억</span>'; };
+  _setMc('mc-mgmt-sales', mgmtSalesM/100);
+  _setMc('mc-mgmt-cost',  mgmtCostM/100);
+  _setMc('mc-mgmt-profit', mgmtProfitM/100);
+  const profMeta = document.getElementById('mc-mgmt-profit-meta');
+  if(profMeta){ profMeta.style.color = mgmtProfitM>=0 ? 'var(--profit)' : 'var(--loss)'; }
   // 월별 12개월 실적 (RAW_DB에서 집계)
   const mgmtTrend = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'].map(m=>{
     const v = RAW_DB.filter(r=>r.d==='경영기획실' && r.m===m && r.t==='판매관리비').reduce((s,r)=>s+r.v,0);
