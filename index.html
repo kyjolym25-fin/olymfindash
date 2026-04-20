@@ -1710,25 +1710,24 @@ function buildCampRow(camp, mi) {
   const p26p  = _p26p != null ? _p26p * M : null;  // 공통비 포함 영업이익
   const c26p  = s26p != null && p26p != null ? s26p - p26p : null;
   // ── 26년 실적 ──
-  const a26  = (CAMP_COST_BY_MONTH[mi] && CAMP_COST_BY_MONTH[mi][camp])
-    ? CAMP_COST_BY_MONTH[mi][camp] : CAMP_COST_26A[camp];
-  const t26a    = a26.total - (a26.common??0);  // 직접비 합계 (공통비 제외)
-  const common26a = a26.common ?? 0;             // 공통비
+  const a26  = CAMP_COST_BY_MONTH[mi]?.[camp] ?? null;  // 데이터 없으면 null (fallback 제거)
+  const t26a    = a26!=null ? a26.total - (a26.common??0) : null;
+  const common26a = a26!=null ? (a26.common ?? 0) : null;
   // 항목별 비율 (26실적 비율로 25년/26계획 배분)
-  const ratio = k => t26a > 0 ? a26[k] / t26a : 0;
-  const sc   = (base, k) => base != null ? Math.round(base * ratio(k)) : null;
+  const ratio = k => (a26!=null && t26a>0) ? a26[k] / t26a : 0;
+  const sc   = (base, k) => (base!=null && a26!=null) ? Math.round(base * ratio(k)) : null;
   return {
-    sales:   { yr25: s25,                    yr26p: s26p,              yr26a: a26.sales },
-    staff:   { yr25: sc(c25,'staff'),        yr26p: sc(c26p,'staff'),   yr26a: a26.staff },
-    instr:   { yr25: sc(c25,'instr'),        yr26p: sc(c26p,'instr'),   yr26a: a26.instr },
-    vehicle: { yr25: sc(c25,'vehicle'),      yr26p: sc(c26p,'vehicle'), yr26a: a26.vehicle },
-    rent:    { yr25: sc(c25,'rent'),         yr26p: sc(c26p,'rent'),    yr26a: a26.rent },
-    bldg:    { yr25: sc(c25,'bldg'),         yr26p: sc(c26p,'bldg'),    yr26a: a26.bldg },
-    adv:     { yr25: sc(c25,'adv'),          yr26p: sc(c26p,'adv'),     yr26a: a26.adv },
-    other:   { yr25: sc(c25,'other'),        yr26p: sc(c26p,'other'),   yr26a: a26.other },
+    sales:   { yr25: s25,                    yr26p: s26p,              yr26a: a26?.sales??null },
+    staff:   { yr25: sc(c25,'staff'),        yr26p: sc(c26p,'staff'),   yr26a: a26?.staff??null },
+    instr:   { yr25: sc(c25,'instr'),        yr26p: sc(c26p,'instr'),   yr26a: a26?.instr??null },
+    vehicle: { yr25: sc(c25,'vehicle'),      yr26p: sc(c26p,'vehicle'), yr26a: a26?.vehicle??null },
+    rent:    { yr25: sc(c25,'rent'),         yr26p: sc(c26p,'rent'),    yr26a: a26?.rent??null },
+    bldg:    { yr25: sc(c25,'bldg'),         yr26p: sc(c26p,'bldg'),    yr26a: a26?.bldg??null },
+    adv:     { yr25: sc(c25,'adv'),          yr26p: sc(c26p,'adv'),     yr26a: a26?.adv??null },
+    other:   { yr25: sc(c25,'other'),        yr26p: sc(c26p,'other'),   yr26a: a26?.other??null },
     total:   { yr25: null,                   yr26p: null,               yr26a: t26a },
     common:  { yr25: null,                   yr26p: null,               yr26a: common26a },
-    total2:  { yr25: c25,                    yr26p: c26p,               yr26a: a26.total },
+    total2:  { yr25: c25,                    yr26p: c26p,               yr26a: a26?.total??null },
   };
 }
 
@@ -2286,12 +2285,8 @@ function _getCC26a(cc, camp, mi, cd, rs26p, rp26p){
   const M=1e6;
   // 1. CC 직접 데이터 (step 6에서 구축)
   if(CC_MONTH_ACTUAL[cc]?.[mi]) return CC_MONTH_ACTUAL[cc][mi];
-  // 2. latestActMi 이후 월이면 최신 실적 월로 대체
-  if(latestActMi>=0 && mi>latestActMi && CC_MONTH_ACTUAL[cc]?.[latestActMi])
-    return CC_MONTH_ACTUAL[cc][latestActMi];
-  // 3. camp yr26actual × CC비율
-  const effMi = (cd.매출.yr26actual[mi]!=null) ? mi
-              : (latestActMi>=0 && cd.매출.yr26actual[latestActMi]!=null) ? latestActMi : -1;
+  // 2. 해당 월 데이터 없으면 null (latestActMi fallback 제거 - 빈 월은 빈값 표시)
+  const effMi = cd.매출.yr26actual[mi]!=null ? mi : -1;
   if(effMi<0) return null;
   const cS=cd.매출.yr26actual[effMi];
   const cP=getCampDirectProfitActual(camp, effMi);
