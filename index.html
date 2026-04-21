@@ -299,7 +299,26 @@ tbody td.indent{padding-left:28px;color:var(--muted2)}
 .dir-pl-tbl td:first-child{text-align:left;font-weight:500;color:var(--text)}
 .dir-pl-tbl tr.dir-subtotal td{font-weight:600;background:var(--s2)}
 .dir-pl-tbl tr.dir-profit td{font-weight:700;background:var(--s3)}
-.dir-upload-area{background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 12px rgba(0,0,0,.08);display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:14px}
+.dir-group{margin-bottom:28px}
+.dir-group-hd{font-size:13px;font-weight:700;color:var(--text);padding:10px 0 8px;border-bottom:2px solid var(--border2);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.dir-group-hd .dir-group-tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:#4361EE22;color:#4361EE}
+.dir-camp-cards{display:flex;flex-wrap:wrap;gap:10px}
+.dir-camp-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px 20px;cursor:pointer;transition:all .15s;min-width:110px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.dir-camp-card:hover:not(.disabled){border-color:#4361EE;box-shadow:0 4px 16px rgba(67,97,238,.15);transform:translateY(-2px)}
+.dir-camp-card.disabled{opacity:.35;cursor:not-allowed;pointer-events:none}
+.dir-camp-card-name{font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px}
+.dir-camp-card-sub{font-size:10px;color:var(--muted)}
+.dir-pl-full-tbl{width:100%;border-collapse:collapse;font-size:12px}
+.dir-pl-full-tbl th{background:var(--s3);padding:7px 14px;text-align:right;color:var(--muted);font-weight:600;border-bottom:2px solid var(--border2);white-space:nowrap}
+.dir-pl-full-tbl th:first-child{text-align:left;min-width:180px}
+.dir-pl-full-tbl td{padding:6px 14px;border-bottom:1px solid var(--border);text-align:right}
+.dir-pl-full-tbl td:first-child{text-align:left;color:var(--text)}
+.dir-pl-full-tbl tr.row-section td{font-weight:700;color:var(--muted);background:var(--s3);font-size:11px;padding:5px 14px;letter-spacing:.05em}
+.dir-pl-full-tbl tr.row-total td{font-weight:700;background:#f0f4ff;border-top:1px solid #c7d2fe}
+.dir-pl-full-tbl tr.row-profit td{font-weight:700;background:#ecfdf5;color:#065f46;border-top:2px solid #6ee7b7}
+.dir-pl-full-tbl tr.row-profit2 td{font-weight:700;background:#eff6ff;color:#1d4ed8;border-top:2px solid #93c5fd}
+.dir-pl-full-tbl tr:hover td{background:#f8faff}
+.dir-pl-full-tbl tr.row-section:hover td,.dir-pl-full-tbl tr.row-total:hover td,.dir-pl-full-tbl tr.row-profit:hover td,.dir-pl-full-tbl tr.row-profit2:hover td{background:inherit}
 .rbadge.director{background:#f59e0b22;color:#d97706}
 
 /* ═══════════════════════════════════
@@ -460,28 +479,31 @@ thead th{font-size:13px}
 <!-- ══ 원장단 대시보드 ══ -->
 <div id="director-wrap">
   <div class="main">
+    <!-- 공통 헤더 -->
     <div class="dir-header">
-      <button class="dir-back-btn" onclick="goHub()">← 홈</button>
+      <button class="dir-back-btn" id="dirBackBtn" onclick="dirNavBack()">← 홈</button>
       <div>
-        <div class="dir-camp-name" id="dirCampName">캠퍼스</div>
-        <div class="dir-camp-sub">손익 현황</div>
+        <div class="dir-camp-name" id="dirCampName">직영캠퍼스 손익</div>
+        <div class="dir-camp-sub" id="dirCampSub">캠퍼스를 선택하세요</div>
       </div>
-      <div id="dirCampSelector" style="margin-left:auto"></div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
+        <div id="dirUploadMsg" style="font-size:11px;color:var(--muted)"></div>
+        <button class="auth-btn-primary" style="width:auto;padding:8px 18px;font-size:12px;white-space:nowrap" onclick="document.getElementById('dirXlsxFile').click()">📂 파일 업로드</button>
+        <input type="file" id="dirXlsxFile" accept=".xlsx" style="display:none" onchange="handleDirXlsxUpload(this)">
+      </div>
     </div>
-    <div class="dir-upload-area" id="dirUploadArea">
-      <div style="flex:1;min-width:200px">
-        <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px">📂 손익계산서 업로드</div>
-        <div style="font-size:11px;color:var(--muted)">3월 손익계산서.xlsx 형태의 파일을 업로드하세요</div>
+
+    <!-- 리스트 뷰: 그룹 카드 -->
+    <div id="dir-list-view">
+      <div style="text-align:center;padding:60px 20px;color:var(--muted);font-size:13px" id="dirListEmpty">
+        캠퍼스별_손익.xlsx 파일을 업로드하면 목록이 표시됩니다.
       </div>
-      <button class="auth-btn-primary" style="width:auto;padding:9px 22px;white-space:nowrap" onclick="document.getElementById('dirXlsxFile').click()">파일 선택</button>
-      <input type="file" id="dirXlsxFile" accept=".xlsx" style="display:none" onchange="handleDirXlsxUpload(this)">
-      <div id="dirUploadMsg" style="font-size:11px;color:var(--muted);min-width:120px"></div>
     </div>
-    <div class="month-bar" id="dir-month-bar" style="margin-bottom:16px"></div>
-    <div id="dir-content">
-      <div style="text-align:center;padding:60px 20px;color:var(--muted);font-size:13px">
-        손익계산서 파일을 업로드하면 캠퍼스별 수학·영어 손익이 표시됩니다.
-      </div>
+
+    <!-- 상세 뷰: 월별 손익표 -->
+    <div id="dir-detail-view" style="display:none">
+      <div class="month-bar" id="dir-month-bar" style="margin-bottom:16px"></div>
+      <div id="dir-detail-content"></div>
     </div>
   </div>
 </div>
@@ -5345,138 +5367,159 @@ function renderUploadSummary(){
 // ============================================================
 // 원장단 대시보드
 // ============================================================
-// DIR_PL: { '광진': { '수학': { 0:{rev,cost,profit1,common,profit2}, ... }, '영어': {...} }, ... }
+// DIR_PL['광진수학'] = { months:[0,1,2], rows:[{label,type,vals:{0:숫자,...}},...] }
 const DIR_PL = {};
-let dirMonth = 0;
-let dirCamp  = '';   // 현재 표시 중인 캠퍼스 (admin/viewer는 선택 가능)
+let dirMonth  = 0;
+let dirSheet  = '';   // 현재 상세 보기 중인 시트명
+let dirView   = 'list'; // 'list' | 'detail'
 
-const DIR_SKIP_SHEETS = new Set(['학원본부','U2M본부','교육넷수학']);
-function parseDirSheet(name){
+const DIR_GROUPS = [
+  { name:'올림피아드', icon:'🏫', tag:'수학', sheets:['광진수학','성동수학','동대문수학','중랑수학'] },
+  { name:'GLEC',       icon:'📚', tag:'영어', sheets:['광진영어','성동영어','동대문영어','중랑영어'] },
+  { name:'U2M',        icon:'🎯', tag:'수학', sheets:['중계수학','송파방이수학','미사수학'] },
+];
+
+const DIR_SKIP_SHEETS = new Set(['학원본부','U2M본부','교육넷수학','위례수학']);
+function parseDirSheetName(name){
   if(name.includes('고등')||name.includes('영재')) return null;
   if(DIR_SKIP_SHEETS.has(name)) return null;
-  if(name.endsWith('수학')) return {campus:name.slice(0,-2), subject:'수학'};
-  if(name.endsWith('영어')) return {campus:name.slice(0,-2), subject:'영어'};
+  if(name.endsWith('수학')) return {sheetKey:name, displayName:name.slice(0,-2)};
+  if(name.endsWith('영어')) return {sheetKey:name, displayName:name.slice(0,-2)};
   return null;
 }
 
-const DIR_KEY_PATTERNS = {
-  rev:     ['매출 합계'],
-  cost:    ['비용 소계'],
-  profit1: ['영업이익 1'],
-  common:  ['공통비 합계'],
-  profit2: ['영업이익 2'],
-};
-
-function parseOneDirSheet(ws){
+function parseFullDirSheet(ws){
   const rows = XLSX.utils.sheet_to_json(ws,{header:1,defval:null});
-  // 헤더 행에서 월 컬럼 인덱스 추출 (1월=0, ...)
-  const headerRow = rows.find(r=>r&&String(r[0]||'').trim()==='계정과목') || rows[1];
-  const monthCols = {}; // mi → colIndex
-  if(headerRow){
-    for(let c=1;c<headerRow.length;c++){
-      const m=/^(\d{1,2})월$/.exec(String(headerRow[c]||'').trim());
-      if(m) monthCols[parseInt(m[1])-1]=c;
-    }
+  // 헤더 행 탐색 (계정과목 행)
+  let headerIdx = rows.findIndex(r=>r&&String(r[0]||'').trim()==='계정과목');
+  if(headerIdx<0) headerIdx=1;
+  const headerRow = rows[headerIdx]||[];
+  const monthCols = {}; // mi(0-based) → colIdx
+  for(let c=1;c<headerRow.length;c++){
+    const m=/^(\d{1,2})월$/.exec(String(headerRow[c]||'').trim());
+    if(m) monthCols[parseInt(m[1])-1]=c;
   }
-  // 키 행 탐색
-  const keyRows = {};
-  for(const row of rows){
-    if(!row) continue;
-    const lbl=String(row[0]||'').trim();
-    for(const [key,pats] of Object.entries(DIR_KEY_PATTERNS)){
-      if(!keyRows[key] && pats.some(p=>lbl.includes(p))) keyRows[key]=row;
-    }
-  }
-  // 월별 데이터 조립
-  const result={};
-  for(const [mi,ci] of Object.entries(monthCols)){
-    const d={};
-    for(const [key,row] of Object.entries(keyRows)){
+  // 데이터 행 파싱
+  const parsedRows = [];
+  for(let i=headerIdx+1;i<rows.length;i++){
+    const row=rows[i]; if(!row) continue;
+    const lbl=String(row[0]||'').trim(); if(!lbl) continue;
+    // 행 타입 분류
+    let type='item';
+    if(lbl.startsWith('[')) type='section';
+    else if(lbl.includes('영업이익 2')||lbl.includes('공통비 포함')) type='profit2';
+    else if(lbl.includes('영업이익')) type='profit1';
+    else if(lbl.endsWith('합계')||lbl.endsWith('소계')) type='total';
+    // 월별 값
+    const vals={};
+    for(const [mi,ci] of Object.entries(monthCols)){
       const v=row[ci];
-      if(v!=null&&v!==''&&!isNaN(Number(v))) d[key]=Number(v);
+      if(v!=null&&v!==''&&!isNaN(Number(v))) vals[parseInt(mi)]=Number(v);
     }
-    if(Object.keys(d).length) result[parseInt(mi)]=d;
+    // item인데 값이 하나도 없으면 건너뜀
+    if(type==='item'&&!Object.keys(vals).length) continue;
+    parsedRows.push({label:lbl, type, vals});
   }
-  return result;
+  return {months:Object.keys(monthCols).map(Number).sort((a,b)=>a-b), rows:parsedRows};
 }
 
-function dirAvailableMonths(camp){
-  const pl=DIR_PL[camp]; if(!pl) return [];
-  const miSet=new Set();
-  Object.values(pl).forEach(sub=>Object.keys(sub).forEach(mi=>miSet.add(Number(mi))));
-  return [...miSet].sort((a,b)=>a-b);
+// 전체 사용 가능 월 (모든 로드된 시트 기준)
+function dirAllMonths(){
+  const s=new Set();
+  Object.values(DIR_PL).forEach(d=>d.months.forEach(m=>s.add(m)));
+  return [...s].sort((a,b)=>a-b);
 }
 
-function initDirectorMonthBar(){
-  const bar=document.getElementById('dir-month-bar'); if(!bar) return;
-  const MN=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
-  const avail=dirAvailableMonths(dirCamp);
-  if(!avail.length){ bar.innerHTML=''; return; }
-  if(!avail.includes(dirMonth)) dirMonth=avail[avail.length-1];
-  bar.innerHTML='<span class="month-bar-lbl">월 선택</span>'+
-    avail.map(mi=>`<button class="atab${mi===dirMonth?' on':''}" onclick="setDirMonth(${mi})">${MN[mi]}</button>`).join('');
-}
+// ── 리스트 뷰 ──
+function renderDirList(){
+  dirView='list';
+  const listEl=document.getElementById('dir-list-view');
+  const detailEl=document.getElementById('dir-detail-view');
+  if(!listEl||!detailEl) return;
+  listEl.style.display=''; detailEl.style.display='none';
+  document.getElementById('dirCampName').textContent='직영캠퍼스 손익';
+  document.getElementById('dirCampSub').textContent='캠퍼스를 선택하세요';
+  document.getElementById('dirBackBtn').textContent='← 홈';
+  document.getElementById('dirBackBtn').onclick=goHub;
 
-function setDirMonth(mi){ dirMonth=mi; initDirectorMonthBar(); renderDirContent(); }
-
-function renderDirCampSelector(){
-  const s=getSession(); if(!s||s.role==='director') return;
-  const camps=Object.keys(DIR_PL).sort();
-  if(!camps.length) return;
-  const sel=document.getElementById('dirCampSelector');
-  if(!sel) return;
-  sel.innerHTML=`<select class="dde-sel" onchange="setDirCamp(this.value)" style="font-size:13px;padding:6px 12px">
-    ${camps.map(c=>`<option value="${c}" ${c===dirCamp?'selected':''}>${c}</option>`).join('')}
-  </select>`;
-}
-
-function setDirCamp(camp){
-  dirCamp=camp;
-  document.getElementById('dirCampName').textContent=camp+' 캠퍼스';
-  renderDirCampSelector();
-  initDirectorMonthBar();
-  renderDirContent();
-}
-
-function renderDirContent(){
-  const el=document.getElementById('dir-content'); if(!el) return;
-  const pl=DIR_PL[dirCamp];
-  if(!pl||!dirCamp){
-    el.innerHTML='<div style="text-align:center;padding:60px 20px;color:var(--muted);font-size:13px">캠퍼스별_손익.xlsx 파일을 업로드하면 수학·영어 손익이 표시됩니다.</div>';
+  const s=getSession();
+  const hasData=Object.keys(DIR_PL).length>0;
+  if(!hasData){
+    listEl.innerHTML='<div id="dirListEmpty" style="text-align:center;padding:60px 20px;color:var(--muted);font-size:13px">캠퍼스별_손익.xlsx 파일을 업로드하면 목록이 표시됩니다.</div>';
     return;
   }
-  const MN=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
-  const fx=v=>v==null?'-':(v<0?'△':'')+Math.abs(v/1e4).toLocaleString('ko-KR',{maximumFractionDigits:0})+'만';
-  const fxColor=v=>v==null?'':v<0?'color:var(--loss)':'';
-
-  const ITEMS=[
-    {key:'rev',     label:'매출',               cls:''},
-    {key:'cost',    label:'비용 (공통비 제외)',   cls:''},
-    {key:'profit1', label:'영업이익 (공통비 제외)', cls:'dir-subtotal', profit:true},
-    {key:'common',  label:'공통비',              cls:''},
-    {key:'profit2', label:'영업이익 (공통비 포함)', cls:'dir-profit', profit:true},
-  ];
-
-  const cardHtml=(title,icon,d)=>{
-    if(!d||!Object.keys(d).length) return `<div class="dir-pl-card"><h4>${icon} ${title}</h4><div style="color:var(--muted);font-size:12px;padding:20px 0">데이터 없음</div></div>`;
-    const rows=ITEMS.map(it=>{
-      const v=d[it.key]??null;
-      return `<tr class="${it.cls}"><td>${it.label}</td><td style="${fxColor(v)}">${fx(v)}</td></tr>`;
-    });
-    return `<div class="dir-pl-card">
-      <h4>${icon} ${title}</h4>
-      <table class="dir-pl-tbl">
-        <thead><tr><th>항목</th><th>${MN[dirMonth]} 실적</th></tr></thead>
-        <tbody>${rows.join('')}</tbody>
-      </table>
+  let html='';
+  for(const grp of DIR_GROUPS){
+    const cards=grp.sheets.filter(sh=>DIR_PL[sh]).map(sh=>{
+      const info=parseDirSheetName(sh); if(!info) return '';
+      const isDir=s&&s.role==='director';
+      // director는 본인 캠퍼스 수학/영어만 활성
+      const mySheet=isDir?(s.campus+'수학'===sh||s.campus+'영어'===sh):true;
+      const disabled=isDir&&!mySheet?' disabled':'';
+      const months=DIR_PL[sh].months;
+      const MN=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+      const mLabel=months.length?MN[months[0]]+'~'+MN[months[months.length-1]]:'';
+      return `<div class="dir-camp-card${disabled?'':''}" ${disabled?'style="opacity:.35;cursor:not-allowed"':''} onclick="${disabled?'':'goToDirDetail(\''+sh+'\')'}" >
+        <div class="dir-camp-card-name">${info.displayName}</div>
+        <div class="dir-camp-card-sub">${mLabel}</div>
+      </div>`;
+    }).join('');
+    if(!cards) continue;
+    html+=`<div class="dir-group">
+      <div class="dir-group-hd">${grp.icon} ${grp.name} <span class="dir-group-tag">${grp.tag}</span></div>
+      <div class="dir-camp-cards">${cards}</div>
     </div>`;
-  };
+  }
+  listEl.innerHTML=html||'<div style="text-align:center;padding:40px;color:var(--muted);font-size:13px">표시할 데이터 없음</div>';
+}
 
-  const math=pl['수학']?.[dirMonth];
-  const eng =pl['영어']?.[dirMonth];
-  let cards=cardHtml('수학 손익','📐',math);
-  if(eng!=null) cards+=cardHtml('영어 손익','📖',eng);
-  el.innerHTML=`<div class="dir-pl-grid">${cards}</div>`;
+// ── 상세 뷰 ──
+function goToDirDetail(sheetName){
+  dirSheet=sheetName;
+  dirView='detail';
+  const data=DIR_PL[sheetName];
+  const listEl=document.getElementById('dir-list-view');
+  const detailEl=document.getElementById('dir-detail-view');
+  if(!listEl||!detailEl) return;
+  listEl.style.display='none'; detailEl.style.display='';
+  const info=parseDirSheetName(sheetName);
+  document.getElementById('dirCampName').textContent=(info?info.displayName:sheetName)+' 손익';
+  document.getElementById('dirCampSub').textContent=sheetName;
+  document.getElementById('dirBackBtn').textContent='← 목록';
+  document.getElementById('dirBackBtn').onclick=renderDirList;
+  // 월 선택: 해당 시트 가용 월
+  const MN=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  if(data&&!data.months.includes(dirMonth)) dirMonth=data.months[data.months.length-1]??0;
+  const bar=document.getElementById('dir-month-bar');
+  if(bar&&data) bar.innerHTML='<span class="month-bar-lbl">월 선택</span>'+
+    data.months.map(mi=>`<button class="atab${mi===dirMonth?' on':''}" onclick="setDirMonth(${mi})">${MN[mi]}</button>`).join('');
+  renderDirDetail();
+}
+
+function setDirMonth(mi){ dirMonth=mi; goToDirDetail(dirSheet); }
+
+function dirNavBack(){
+  if(dirView==='detail') renderDirList();
+  else goHub();
+}
+
+function renderDirDetail(){
+  const el=document.getElementById('dir-detail-content'); if(!el) return;
+  const data=DIR_PL[dirSheet];
+  if(!data){ el.innerHTML=''; return; }
+  const MN=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  const fx=v=>v==null?'':v===0?'-':(v<0?'▲':'')+Math.abs(v).toLocaleString('ko-KR')+'원';
+  let html=`<div style="overflow-x:auto"><table class="dir-pl-full-tbl">
+    <thead><tr><th>계정과목</th><th>${MN[dirMonth]}</th></tr></thead><tbody>`;
+  for(const row of data.rows){
+    const v=row.vals[dirMonth];
+    const cls=`row-${row.type}`;
+    const valHtml=row.type==='section'?'':fx(v)??'';
+    const color=(row.type==='profit1'||row.type==='profit2')&&v<0?'color:var(--loss)':'';
+    html+=`<tr class="${cls}"><td>${row.label}</td><td style="${color}">${valHtml}</td></tr>`;
+  }
+  html+='</tbody></table></div>';
+  el.innerHTML=html;
 }
 
 async function handleDirXlsxUpload(input){
@@ -5485,38 +5528,27 @@ async function handleDirXlsxUpload(input){
   msg.textContent='읽는 중...'; msg.style.color='var(--muted)';
   input.value='';
   const s=getSession(); if(!s) return;
-
   try{
     const buf=await file.arrayBuffer();
     const wb=XLSX.read(buf,{type:'array'});
-    let parsed=0;
+    let cnt=0;
     for(const shName of wb.SheetNames){
-      const info=parseDirSheet(shName); if(!info) continue;
-      // director는 본인 캠퍼스만
-      if(s.role==='director'&&info.campus!==s.campus) continue;
-      const ws=wb.Sheets[shName];
-      const monthly=parseOneDirSheet(ws);
-      if(!Object.keys(monthly).length) continue;
-      if(!DIR_PL[info.campus]) DIR_PL[info.campus]={};
-      DIR_PL[info.campus][info.subject]=monthly;
-      parsed++;
+      const info=parseDirSheetName(shName); if(!info) continue;
+      if(s.role==='director'){
+        if(shName!==s.campus+'수학'&&shName!==s.campus+'영어') continue;
+      }
+      const parsed=parseFullDirSheet(wb.Sheets[shName]);
+      if(!parsed.months.length) continue;
+      DIR_PL[shName]=parsed;
+      cnt++;
     }
-
-    // 표시 캠퍼스 결정
-    if(s.role==='director') dirCamp=s.campus||'';
-    else if(!dirCamp||!DIR_PL[dirCamp]) dirCamp=Object.keys(DIR_PL).sort()[0]||'';
-
-    // 최신 월 선택
-    const avail=dirAvailableMonths(dirCamp);
-    if(avail.length) dirMonth=avail[avail.length-1];
-
-    document.getElementById('dirCampName').textContent=dirCamp+(dirCamp?' 캠퍼스':'');
-    renderDirCampSelector();
-    initDirectorMonthBar();
-    renderDirContent();
+    // 최신 월
+    const allM=dirAllMonths();
+    if(allM.length) dirMonth=allM[allM.length-1];
     const MN=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
-    msg.textContent=`✓ ${parsed}개 시트 업로드 완료 (${MN[dirMonth]}) · ${new Date().toLocaleTimeString('ko-KR')}`;
+    msg.textContent=`✓ ${cnt}개 시트 · ${MN[dirMonth]} · ${new Date().toLocaleTimeString('ko-KR')}`;
     msg.style.color='var(--c26a)';
+    renderDirList();
   }catch(e){
     msg.textContent='파싱 오류: '+e.message;
     msg.style.color='var(--loss)';
