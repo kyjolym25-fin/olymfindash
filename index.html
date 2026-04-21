@@ -1258,6 +1258,7 @@ thead th{font-size:13px}
     <div class="atab-row">
       <button class="atab on" id="atab-users"   onclick="showATab('users')">사용자 목록</button>
       <button class="atab"    id="atab-pending" onclick="showATab('pending')">가입 승인 대기</button>
+      <button class="atab"    id="atab-adduser" onclick="showATab('adduser')">➕ 계정 추가</button>
       <button class="atab"    id="atab-pwreset" onclick="showATab('pwreset')">비밀번호 초기화</button>
     </div>
     <div id="atab-c-users">
@@ -1269,6 +1270,33 @@ thead th{font-size:13px}
       <table class="utbl"><thead><tr>
         <th>이름</th><th>이메일</th><th>요청역할</th><th>신청일</th><th>작업</th>
       </tr></thead><tbody id="adminPendingBody"></tbody></table>
+    </div>
+    <div id="atab-c-adduser" style="display:none;max-width:420px">
+      <div class="auth-field"><label>이름</label><input type="text" id="auName" placeholder="실명"></div>
+      <div class="auth-field"><label>이메일</label><input type="email" id="auEmail" placeholder="example@olympiad.ac"></div>
+      <div class="auth-field"><label>초기 비밀번호</label><input type="text" id="auPw" placeholder="초기 비밀번호 (8자 이상)"></div>
+      <div class="auth-field"><label>역할</label>
+        <select id="auRole" onchange="onAuRoleChange()">
+          <option value="director">원장 (캠퍼스 손익 조회)</option>
+          <option value="viewer">뷰어 (보기 전용)</option>
+          <option value="admin">관리자</option>
+        </select>
+      </div>
+      <div class="auth-field" id="auCampusField"><label>소속 캠퍼스</label>
+        <select id="auCampus">
+          <option value="">-- 선택 --</option>
+          <option value="광진">광진</option>
+          <option value="성동">성동</option>
+          <option value="동대문">동대문</option>
+          <option value="중랑">중랑</option>
+          <option value="중계">중계</option>
+          <option value="송파방이">송파방이</option>
+          <option value="미사">미사</option>
+          <option value="위례">위례</option>
+        </select>
+      </div>
+      <button class="auth-btn-primary" style="margin-top:4px" onclick="adminAddUser()">계정 생성</button>
+      <div class="auth-err" id="auMsg" style="margin-top:8px"></div>
     </div>
     <div id="atab-c-pwreset" style="display:none;max-width:380px">
       <div class="auth-field"><label>이메일</label><input type="email" id="rtEmail" placeholder="초기화할 계정 이메일"></div>
@@ -4376,13 +4404,47 @@ async function deleteComment(sid){
 // ADMIN PAGE
 // ============================================================
 function showATab(tab){
-  ['users','pending','pwreset'].forEach(t=>{
+  ['users','pending','adduser','pwreset'].forEach(t=>{
     document.getElementById('atab-c-'+t).style.display=t===tab?'':'none';
     const btn=document.getElementById('atab-'+t);
-    if(btn){btn.classList.toggle('on',t===tab);}
+    if(btn) btn.classList.toggle('on',t===tab);
   });
-  if(tab==='users')renderUserTable();
-  if(tab==='pending')renderPendingTable();
+  if(tab==='users') renderUserTable();
+  if(tab==='pending') renderPendingTable();
+}
+
+function onAuRoleChange(){
+  const role=document.getElementById('auRole').value;
+  document.getElementById('auCampusField').style.display=role==='director'?'':'none';
+}
+
+async function adminAddUser(){
+  const name=document.getElementById('auName').value.trim();
+  const email=document.getElementById('auEmail').value.trim();
+  const pw=document.getElementById('auPw').value.trim();
+  const role=document.getElementById('auRole').value;
+  const campus=role==='director'?document.getElementById('auCampus').value:'';
+  const msg=document.getElementById('auMsg');
+  msg.style.color='var(--loss)';
+  if(!name||!email||!pw){msg.textContent='이름, 이메일, 비밀번호를 모두 입력하세요.';return;}
+  if(pw.length<8){msg.textContent='비밀번호는 8자 이상이어야 합니다.';return;}
+  if(role==='director'&&!campus){msg.textContent='소속 캠퍼스를 선택하세요.';return;}
+  msg.textContent='생성 중...'; msg.style.color='var(--muted)';
+  const {error}=await sb.from('users').insert({
+    name, email, pw, role, campus:campus||null,
+    status:'active', join_date:new Date().toISOString().slice(0,10)
+  });
+  if(error){
+    msg.style.color='var(--loss)';
+    msg.textContent=error.code==='23505'?'이미 등록된 이메일입니다.':'오류: '+error.message;
+    return;
+  }
+  msg.style.color='var(--c26a)';
+  msg.textContent=`✓ ${name} (${email}) 계정 생성 완료`;
+  document.getElementById('auName').value='';
+  document.getElementById('auEmail').value='';
+  document.getElementById('auPw').value='';
+  renderUserTable();
 }
 
 // ── 관리자 월별 재원생 입력 ──
