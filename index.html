@@ -4266,7 +4266,11 @@ function applyAuth(){
         dirWrap.style.display='block';
         const uploadBtn=document.getElementById('dirUploadBtn');
         if(uploadBtn) uploadBtn.style.display=(s&&s.role==='admin')?'':'none';
-        loadCampusPl().then(()=>renderDirList());
+        // 세션 campus 최신화 후 렌더
+        sb.from('users').select('campus,role').eq('email',s.email).maybeSingle().then(({data:fresh})=>{
+          if(fresh){ saveSession({...s,campus:fresh.campus||'',role:fresh.role||s.role}); }
+          loadCampusPl().then(()=>renderDirList());
+        });
       } else {
         hub.style.display='flex';
         tabs.style.display='none';
@@ -4349,8 +4353,14 @@ function goSoinDash(){
 }
 
 async function goDirectorDash(){
-  const s=getSession();
+  let s=getSession();
   if(!s) return;
+  // 세션 campus가 변경됐을 수 있으므로 DB에서 최신값 갱신
+  const {data:fresh}=await sb.from('users').select('campus,role').eq('email',s.email).maybeSingle();
+  if(fresh){
+    s={...s, campus:fresh.campus||'', role:fresh.role||s.role};
+    saveSession(s);
+  }
   const hub=document.getElementById('hub-screen');
   const dirWrap=document.getElementById('director-wrap');
   hub.style.display='none';
@@ -4358,7 +4368,6 @@ async function goDirectorDash(){
   saveDashView('director');
   const nameEl=document.getElementById('dirCampName');
   if(nameEl) nameEl.textContent='불러오는 중...';
-  // 업로드 버튼: 관리자만
   const uploadBtn=document.getElementById('dirUploadBtn');
   if(uploadBtn) uploadBtn.style.display=(s.role==='admin')?'':'none';
   await loadCampusPl();
