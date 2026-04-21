@@ -1332,7 +1332,6 @@ thead th{font-size:13px}
 </div>
 
 <script>
-console.log('[OLYMFIN a2c2de5] 스크립트 로드됨');
 // ============================================================
 // DATA
 // ============================================================
@@ -1680,18 +1679,6 @@ function initOverview(){
 // ============================================================
 // DEPT: 학원사업본부
 // ============================================================
-// ── 판매관리비 캠퍼스별 상세 데이터 (모듈 레벨) ──
-// yr26a는 1월 손익계산서 실측값 (fallback). 실제 사용은 CAMP_COST_BY_MONTH[mi]
-const CAMP_COST_26A = {
-  '광진':    {sales:597393600, staff:35540068, instr:233149851, vehicle:45530521, rent:43897438, bldg:13638900, adv:3857241,  other:26532790, total:402146809},
-  '동대문':  {sales:358780200, staff:28516834, instr:126546150, vehicle:38871680, rent:24686501, bldg:2663100,  adv:681215,   other:19458641, total:241424121},
-  '성동':    {sales:360410100, staff:26745673, instr:120950160, vehicle:39600100, rent:32946200, bldg:6153444,  adv:892963,   other:19267531, total:246556071},
-  '중랑':    {sales:232948800, staff:16972593, instr:102310980, vehicle:24485770, rent:19556740, bldg:4718999,  adv:1417042,  other:15236929, total:184699053},
-  '미사':    {sales:67143300,  staff:5033415,  instr:30059390,  vehicle:11565330, rent:526170,   bldg:2403968,  adv:6647071,  other:8485861,  total:64721205},
-  '송파방이':{sales:123244100, staff:9774552,  instr:62309360,  vehicle:14420440, rent:11961800, bldg:4785000,  adv:4872899,  other:8497549,  total:116621600},
-  '위례':    {sales:60397100,  staff:5208053,  instr:19692740,  vehicle:0,        rent:415400,   bldg:2182170,  adv:26840,    other:7819765,  total:35344968},
-  '중계':    {sales:127233500, staff:10585041, instr:64678060,  vehicle:17274550, rent:408700,   bldg:5104030,  adv:223219,   other:17753982, total:116027582},
-};
 // buildCampRow: DEPT_DATA.camps에서 월별 직접 계산 (CAMP_TOTALS 제거)
 // 25년/26년계획 판관비합계 = 매출 - 영업이익(공통비포함) → 공통비 포함 총판관비
 // 26년실적 판관비합계 = CAMP_COST_BY_MONTH 직접비만 → 공통비 미포함
@@ -2298,8 +2285,6 @@ function _getCC26a(cc, camp, mi, cd, rs26p, rp26p){
 function buildCC3YMonth(mi){
   const M=1e6;
   const result={};
-  // DEBUG: 브라우저 콘솔에서 확인 — 배열 로드 여부
-  console.log('[CC3Y] mi='+mi+' 광진수학 yr25.p2 isArray:', Array.isArray(CC3Y['광진수학']?.yr25?.p2), CC3Y['광진수학']?.yr25?.p2?.[mi]);
   for(const [camp,{ccs,src:srcFn}] of Object.entries(CAMP_CC_MAP)){
     const cd=DEPT_DATA.camps[camp]; if(!cd) continue;
     const src=srcFn();
@@ -3955,12 +3940,6 @@ function applyAuth(){
   });
 
   loadComments();
-}
-
-// 개발/테스트용: 관리자로 강제 로그인
-function devAdminLogin(){
-  saveSession({email:'admin@olympiad.ac',name:'관리자',role:'admin'});
-  applyAuth();
 }
 
 // ============================================================
