@@ -232,6 +232,12 @@ tbody td.indent{padding-left:28px;color:var(--muted2)}
 .auth-btn-primary:hover{filter:brightness(1.06)}
 .auth-btn-sec{width:100%;padding:10px;background:var(--s2);color:var(--text);font-weight:600;font-size:13px;border:1px solid var(--border);border-radius:10px;cursor:pointer;margin-top:8px}
 .auth-err{font-size:11px;color:var(--loss);margin-top:6px;min-height:16px}
+.camp-checks-box{background:var(--s2);border-radius:8px;padding:10px 14px;font-size:12px;display:flex;flex-direction:column;gap:4px}
+.camp-checks-group{font-size:10px;font-weight:700;color:var(--muted);margin-top:4px}
+.camp-checks-group:first-child{margin-top:0}
+.camp-checks-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:4px 8px}
+.camp-chk{display:flex;align-items:center;gap:6px;cursor:pointer;padding:4px 6px;border-radius:6px}
+.camp-chk:hover{background:var(--s3)}
 .auth-ok{font-size:11px;color:var(--c26a);margin-top:6px;min-height:16px}
 .auth-links{font-size:11px;color:var(--muted);text-align:center;margin-top:14px}
 .auth-links a{color:var(--c26a);cursor:pointer;text-decoration:none}
@@ -1283,21 +1289,27 @@ thead th{font-size:13px}
         </select>
       </div>
       <div class="auth-field" id="auCampusField"><label>소속 캠퍼스 · 과목 (복수 선택 가능)</label>
-        <div id="auCampusChecks" style="background:var(--s2);border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:6px;font-size:12px">
-          <div style="font-size:10px;font-weight:700;color:var(--muted);margin-bottom:2px">올림피아드 (수학)</div>
-          <label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="checkbox" value="광진수학"> 광진</label>
-          <label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="checkbox" value="성동수학"> 성동</label>
-          <label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="checkbox" value="동대문수학"> 동대문</label>
-          <label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="checkbox" value="중랑수학"> 중랑</label>
-          <div style="font-size:10px;font-weight:700;color:var(--muted);margin-top:4px;margin-bottom:2px">GLEC (영어)</div>
-          <label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="checkbox" value="광진영어"> 광진</label>
-          <label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="checkbox" value="성동영어"> 성동</label>
-          <label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="checkbox" value="동대문영어"> 동대문</label>
-          <label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="checkbox" value="중랑영어"> 중랑</label>
-          <div style="font-size:10px;font-weight:700;color:var(--muted);margin-top:4px;margin-bottom:2px">U2M (수학)</div>
-          <label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="checkbox" value="중계수학"> 중계</label>
-          <label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="checkbox" value="송파방이수학"> 송파방이</label>
-          <label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="checkbox" value="미사수학"> 미사</label>
+        <div id="auCampusChecks" class="camp-checks-box">
+          <div class="camp-checks-group">올림피아드 (수학)</div>
+          <div class="camp-checks-grid">
+            <label class="camp-chk"><input type="checkbox" value="광진수학"> 광진</label>
+            <label class="camp-chk"><input type="checkbox" value="성동수학"> 성동</label>
+            <label class="camp-chk"><input type="checkbox" value="동대문수학"> 동대문</label>
+            <label class="camp-chk"><input type="checkbox" value="중랑수학"> 중랑</label>
+          </div>
+          <div class="camp-checks-group">GLEC (영어)</div>
+          <div class="camp-checks-grid">
+            <label class="camp-chk"><input type="checkbox" value="광진영어"> 광진</label>
+            <label class="camp-chk"><input type="checkbox" value="성동영어"> 성동</label>
+            <label class="camp-chk"><input type="checkbox" value="동대문영어"> 동대문</label>
+            <label class="camp-chk"><input type="checkbox" value="중랑영어"> 중랑</label>
+          </div>
+          <div class="camp-checks-group">U2M (수학)</div>
+          <div class="camp-checks-grid">
+            <label class="camp-chk"><input type="checkbox" value="중계수학"> 중계</label>
+            <label class="camp-chk"><input type="checkbox" value="송파방이수학"> 송파방이</label>
+            <label class="camp-chk"><input type="checkbox" value="미사수학"> 미사</label>
+          </div>
         </div>
       </div>
       <button class="auth-btn-primary" style="margin-top:4px" onclick="adminAddUser()">계정 생성</button>
@@ -1442,21 +1454,27 @@ thead th{font-size:13px}
         </select>
       </div>
       <div class="auth-field" id="suCampusField" style="display:none"><label>소속 캠퍼스 · 과목 (복수 선택 가능)</label>
-        <div id="suCampusChecks" style="background:var(--s2);border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:6px;font-size:12px">
-          <div style="font-size:10px;font-weight:700;color:var(--muted);margin-bottom:2px">올림피아드 (수학)</div>
-          <label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="checkbox" value="광진수학"> 광진</label>
-          <label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="checkbox" value="성동수학"> 성동</label>
-          <label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="checkbox" value="동대문수학"> 동대문</label>
-          <label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="checkbox" value="중랑수학"> 중랑</label>
-          <div style="font-size:10px;font-weight:700;color:var(--muted);margin-top:4px;margin-bottom:2px">GLEC (영어)</div>
-          <label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="checkbox" value="광진영어"> 광진</label>
-          <label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="checkbox" value="성동영어"> 성동</label>
-          <label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="checkbox" value="동대문영어"> 동대문</label>
-          <label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="checkbox" value="중랑영어"> 중랑</label>
-          <div style="font-size:10px;font-weight:700;color:var(--muted);margin-top:4px;margin-bottom:2px">U2M (수학)</div>
-          <label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="checkbox" value="중계수학"> 중계</label>
-          <label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="checkbox" value="송파방이수학"> 송파방이</label>
-          <label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="checkbox" value="미사수학"> 미사</label>
+        <div id="suCampusChecks" class="camp-checks-box">
+          <div class="camp-checks-group">올림피아드 (수학)</div>
+          <div class="camp-checks-grid">
+            <label class="camp-chk"><input type="checkbox" value="광진수학"> 광진</label>
+            <label class="camp-chk"><input type="checkbox" value="성동수학"> 성동</label>
+            <label class="camp-chk"><input type="checkbox" value="동대문수학"> 동대문</label>
+            <label class="camp-chk"><input type="checkbox" value="중랑수학"> 중랑</label>
+          </div>
+          <div class="camp-checks-group">GLEC (영어)</div>
+          <div class="camp-checks-grid">
+            <label class="camp-chk"><input type="checkbox" value="광진영어"> 광진</label>
+            <label class="camp-chk"><input type="checkbox" value="성동영어"> 성동</label>
+            <label class="camp-chk"><input type="checkbox" value="동대문영어"> 동대문</label>
+            <label class="camp-chk"><input type="checkbox" value="중랑영어"> 중랑</label>
+          </div>
+          <div class="camp-checks-group">U2M (수학)</div>
+          <div class="camp-checks-grid">
+            <label class="camp-chk"><input type="checkbox" value="중계수학"> 중계</label>
+            <label class="camp-chk"><input type="checkbox" value="송파방이수학"> 송파방이</label>
+            <label class="camp-chk"><input type="checkbox" value="미사수학"> 미사</label>
+          </div>
         </div>
       </div>
       <div class="auth-err" id="suErr"></div>
@@ -4728,12 +4746,28 @@ async function toggleRole(email){
     renderUserTable();
   }
 }
-async function setCampusPrompt(email,cur){
-  const camps=['광진수학','성동수학','동대문수학','중랑수학','광진영어','성동영어','동대문영어','중랑영어','중계수학','송파방이수학','미사수학'];
-  const val=prompt(`${email} 캠퍼스 입력 (현재: ${cur||'없음'})\n선택: ${camps.join(', ')}`,(cur||''));
-  if(val===null) return;
-  await sb.from('users').update({campus:val||null}).eq('email',email);
-  renderUserTable();
+let _campEditEmail='';
+function setCampusPrompt(email,cur){
+  _campEditEmail=email;
+  const overlay=document.getElementById('campEditOverlay');
+  document.getElementById('campEditEmail').textContent=email;
+  document.getElementById('campEditMsg').textContent='';
+  const curList=(cur||'').split(',').map(c=>c.trim()).filter(Boolean);
+  document.querySelectorAll('#campEditChecks input[type=checkbox]').forEach(cb=>{
+    cb.checked=curList.includes(cb.value);
+  });
+  overlay.style.display='flex';
+}
+function closeCampEdit(){
+  document.getElementById('campEditOverlay').style.display='none';
+}
+async function saveCampEdit(){
+  const campus=[...document.querySelectorAll('#campEditChecks input:checked')].map(c=>c.value).join(',');
+  const msg=document.getElementById('campEditMsg');
+  msg.style.color='var(--muted)'; msg.textContent='저장 중...';
+  await sb.from('users').update({campus:campus||null}).eq('email',_campEditEmail);
+  msg.style.color='var(--c26a)'; msg.textContent='저장됐습니다.';
+  setTimeout(()=>{ closeCampEdit(); renderUserTable(); },700);
 }
 async function removeUser(email){if(!confirm(`${email} 계정을 삭제할까요?`))return;await sb.from('users').delete().eq('email',email);renderUserTable();}
 async function adminResetPw(){
@@ -5721,5 +5755,40 @@ applyAuth();
 })();
 window.addEventListener('beforeunload',()=>sessionStorage.setItem('olymp_scrollY', window.scrollY));
 </script>
+
+<!-- 캠퍼스 편집 모달 -->
+<div id="campEditOverlay" onclick="if(event.target===this)closeCampEdit()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9500;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:16px;padding:28px 32px;width:340px;max-width:94vw;box-shadow:0 20px 60px rgba(99,119,185,.25)">
+    <div style="font-size:15px;font-weight:700;margin-bottom:4px">캠퍼스 변경</div>
+    <div id="campEditEmail" style="font-size:11px;color:var(--muted);margin-bottom:16px"></div>
+    <div id="campEditChecks" class="camp-checks-box" style="margin-bottom:16px">
+      <div class="camp-checks-group">올림피아드 (수학)</div>
+      <div class="camp-checks-grid">
+        <label class="camp-chk"><input type="checkbox" value="광진수학"> 광진</label>
+        <label class="camp-chk"><input type="checkbox" value="성동수학"> 성동</label>
+        <label class="camp-chk"><input type="checkbox" value="동대문수학"> 동대문</label>
+        <label class="camp-chk"><input type="checkbox" value="중랑수학"> 중랑</label>
+      </div>
+      <div class="camp-checks-group">GLEC (영어)</div>
+      <div class="camp-checks-grid">
+        <label class="camp-chk"><input type="checkbox" value="광진영어"> 광진</label>
+        <label class="camp-chk"><input type="checkbox" value="성동영어"> 성동</label>
+        <label class="camp-chk"><input type="checkbox" value="동대문영어"> 동대문</label>
+        <label class="camp-chk"><input type="checkbox" value="중랑영어"> 중랑</label>
+      </div>
+      <div class="camp-checks-group">U2M (수학)</div>
+      <div class="camp-checks-grid">
+        <label class="camp-chk"><input type="checkbox" value="중계수학"> 중계</label>
+        <label class="camp-chk"><input type="checkbox" value="송파방이수학"> 송파방이</label>
+        <label class="camp-chk"><input type="checkbox" value="미사수학"> 미사</label>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button onclick="closeCampEdit()" style="flex:1;padding:10px;background:var(--s2);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:13px">취소</button>
+      <button onclick="saveCampEdit()" style="flex:2;padding:10px;background:linear-gradient(135deg,#4361EE,#7C5CFC);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:700">저장</button>
+    </div>
+    <div id="campEditMsg" style="font-size:11px;margin-top:8px;min-height:16px"></div>
+  </div>
+</div>
 </body>
 </html>
