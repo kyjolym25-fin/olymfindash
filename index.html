@@ -1861,7 +1861,7 @@ function renderCostTable(containerId, camps, mi) {
       // onclick 속성 안에서 큰따옴표 충돌 방지 → 단따옴표 배열 문자열 사용
       const campsCopy = '['+camps.map(c=>`'${c}'`).join(',')+']';
       const modeHtml = isHak
-        ? `<span style="display:flex;gap:4px;margin-left:auto">${['수학','영어','합산'].map(m=>`<button onclick="campCostMode['${camp}']='${m}';renderCostTable('${containerId}',${campsCopy},${mi})" style="${btnSt(mode===m)}">${m}</button>`).join('')}</span>`
+        ? `<span style="display:flex;gap:4px;margin-left:auto">${['수학','영어'].map(m=>`<button onclick="campCostMode['${camp}']='${m}';renderCostTable('${containerId}',${campsCopy},${mi})" style="${btnSt(mode===m)}">${m}</button>`).join('')}</span>`
         : `<span style="margin-left:auto;font-size:10px;color:var(--muted)">※ 25년 합산비율 추정값</span>`;
       const campLabel = isHak && mode !== '합산' ? `${camp} (${mode})` : camp;
 
