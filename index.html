@@ -1790,7 +1790,7 @@ function renderCostTable(containerId, camps, mi) {
     ];
 
     const HAK_CAMPS_SET = new Set(['광진','성동','동대문','중랑']);
-    const btnSt = (active) => `cursor:pointer;padding:2px 8px;font-size:11px;border-radius:4px;border:1px solid var(--border);background:${active?'#4361EE':'var(--s3)'};color:${active?'#fff':'var(--text)'};font-weight:${active?'700':'400'}`;
+    const btnSt = (active) => `cursor:pointer;padding:3px 12px;font-size:11px;border-radius:20px;border:none;background:${active?'#10B981':'var(--s2)'};color:${active?'#fff':'var(--muted)'};font-weight:${active?'600':'400'};transition:background .15s`;
 
     let html='<div style="overflow-x:auto">';
     for(const camp of camps){
@@ -1857,23 +1857,23 @@ function renderCostTable(containerId, camps, mi) {
         </tr>`;
       }
 
-      // 헤더: 학원 캠퍼스는 [수학][영어][합산] 토글, U2M은 추정값 노트
       // onclick 속성 안에서 큰따옴표 충돌 방지 → 단따옴표 배열 문자열 사용
       const campsCopy = '['+camps.map(c=>`'${c}'`).join(',')+']';
-      const modeHtml = isHak
-        ? `<span style="display:flex;gap:4px;margin-left:auto">${['수학','영어'].map(m=>`<button onclick="campCostMode['${camp}']='${m}';renderCostTable('${containerId}',${campsCopy},${mi})" style="${btnSt(mode===m)}">${m}</button>`).join('')}</span>`
-        : `<span style="margin-left:auto;font-size:10px;color:var(--muted)">※ 25년 합산비율 추정값</span>`;
-      const campLabel = isHak && mode !== '합산' ? `${camp} (${mode})` : camp;
+      const toggleHtml = isHak
+        ? `<span style="display:flex;gap:2px;background:var(--s3);border-radius:20px;padding:2px">${['수학','영어'].map(m=>`<button onclick="campCostMode['${camp}']='${m}';renderCostTable('${containerId}',${campsCopy},${mi})" style="${btnSt(mode===m)}">${m}</button>`).join('')}</span>`
+        : '';
+      const salesNote = !isHak ? `<span style="font-size:10px;color:var(--muted)">※ 25년 합산비율 추정값</span>` : '';
 
       html+=`<div style="margin-bottom:24px">
-        <div style="padding:6px 10px 4px;font-size:12px;font-weight:700;border-bottom:2px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-          <span style="background:var(--s3);border:1px solid var(--border);border-radius:6px;padding:2px 10px">${campLabel}</span>
-          <span style="font-size:11px;font-weight:400;color:var(--muted)">
+        <div style="padding:6px 10px 4px;font-size:12px;font-weight:700;border-bottom:2px solid var(--border);display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span style="background:var(--s3);border:1px solid var(--border);border-radius:6px;padding:2px 10px">${camp}</span>
+          ${toggleHtml}
+          <span style="font-size:11px;font-weight:400;color:var(--muted);margin-left:auto">
             매출 <span style="color:var(--c25)">${d.sales.yr25!=null?(d.sales.yr25/M).toFixed(1):'-'}</span> /
             <span style="color:var(--c26p)">${d.sales.yr26p!=null?(d.sales.yr26p/M).toFixed(1):'-'}</span> /
             <span style="color:var(--c26a)">${d.sales.yr26a!=null?(d.sales.yr26a/M).toFixed(1):'-'}</span>
+            ${salesNote}
           </span>
-          ${modeHtml}
         </div>
         <table style="width:100%;border-collapse:collapse">
           <thead><tr style="background:var(--s3)">
