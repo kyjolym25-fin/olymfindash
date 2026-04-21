@@ -3059,14 +3059,30 @@ function initMirae(mi){
   };
   const CCS = ['직영수학','직영영어','FC수학'];
   const COLORS = {'직영수학':'#4361EE','직영영어':'#7C5CFC','FC수학':'#0ea872'};
-  // MIRAE: yr25/yr26p는 1월 고정, yr26a는 당월 RAW_DB 추출
+  // yr25/yr26p: DEPT_DATA.mirae 월별 합계를 1월 CC 비율로 배분
+  const mr = DEPT_DATA.mirae;
+  const tot1b25 = CCS.reduce((s,c)=>s+(MIRAE_1월[c].yr25.book||0),0);
+  const tot1o25 = CCS.reduce((s,c)=>s+(MIRAE_1월[c].yr25.online||0),0);
+  const tot1b26p= CCS.reduce((s,c)=>s+(MIRAE_1월[c].yr26p.book||0),0);
+  const tot1o26p= CCS.reduce((s,c)=>s+(MIRAE_1월[c].yr26p.online||0),0);
+  const totB25  = (mr.교재매출.yr25[mi]   ??0)*1e6;
+  const totO25  = (mr.원격매출.yr25[mi]   ??0)*1e6;
+  const totB26p = (mr.교재매출.yr26base[mi]??0)*1e6;
+  const totO26p = (mr.원격매출.yr26base[mi]??0)*1e6;
+  // MIRAE: yr25/yr26p는 1월 비율로 배분, yr26a는 당월 RAW_DB 추출
   const MIRAE = {};
   CCS.forEach(cc => {
     const book26a   = hasAct ? sumCC(cc, isBook)   : (mi===0 ? (cc==='직영수학'?7511600:cc==='직영영어'?886200:96586840) : 0);
     const online26a = hasAct ? sumCC(cc, isOnline) : (mi===0 ? (cc==='직영수학'?58672500:cc==='직영영어'?26538400:201166300) : 0);
+    const rb25 = tot1b25>0 ? MIRAE_1월[cc].yr25.book/tot1b25 : 1/CCS.length;
+    const ro25 = tot1o25>0 ? MIRAE_1월[cc].yr25.online/tot1o25 : 1/CCS.length;
+    const rb26p= tot1b26p>0? MIRAE_1월[cc].yr26p.book/tot1b26p: 1/CCS.length;
+    const ro26p= tot1o26p>0? MIRAE_1월[cc].yr26p.online/tot1o26p:1/CCS.length;
+    const b25=Math.round(totB25*rb25), o25=Math.round(totO25*ro25);
+    const b26p=Math.round(totB26p*rb26p), o26p=Math.round(totO26p*ro26p);
     MIRAE[cc] = {
-      yr25: mi===0 ? MIRAE_1월[cc].yr25 : {book:0,online:0,total:0},
-      yr26p:mi===0 ? MIRAE_1월[cc].yr26p: {book:0,online:0,total:0},
+      yr25: {book:b25, online:o25, total:b25+o25},
+      yr26p:{book:b26p,online:o26p,total:b26p+o26p},
       yr26a:{book:book26a, online:online26a, total:book26a+online26a},
     };
   });
