@@ -733,6 +733,7 @@ thead th{font-size:13px}
       <div class="mini-card c26a"><div class="mc-lbl">미래교육 전체 매출</div><div class="mc-val"><span id="mirae-val-s">3.9억</span></div><div class="mc-meta" id="mirae-meta-s" style="color:var(--muted)">26년 1월 실적</div></div>
       <div class="mini-card c26a"><div class="mc-lbl">교재 매출</div><div class="mc-val"><span id="mirae-val-book">1.1억</span></div><div class="mc-meta" id="mirae-meta-book" style="color:var(--c26a)">계획比 +0.18억 (+21.2%)</div></div>
       <div class="mini-card c26a"><div class="mc-lbl">원격 매출</div><div class="mc-val"><span id="mirae-val-remote">2.9억</span></div><div class="mc-meta" id="mirae-meta-remote" style="color:var(--c26a)">계획比 +0.29억 (+11.4%)</div></div>
+      <div class="mini-card c26a"><div class="mc-lbl">B2B 매출</div><div class="mc-val"><span id="mirae-val-b2b">-</span></div><div class="mc-meta" id="mirae-meta-b2b" style="color:var(--muted)">FC 가맹비수입</div></div>
       <div class="mini-card cr"><div class="mc-lbl">판매관리비</div><div class="mc-val"><span id="mirae-val-c">3.5억</span></div><div class="mc-meta" id="mirae-meta-c" style="color:var(--muted)">매출比 88.5%</div></div>
       <div class="mini-card c26a"><div class="mc-lbl">영업이익</div><div class="mc-val"><span id="mirae-val-p">0.45억</span></div><div class="mc-meta" id="mirae-meta-p" style="color:var(--c26a)">이익률 11.5%</div></div>
     </div>
@@ -1424,6 +1425,7 @@ const DEPT_DATA = {
   mirae: {
     교재매출: { yr25:[100,498,166,70,260,229,190,304,97,66,341,180],             yr26base:[93,426,161,71,227,203,177,268,96,68,296,158],  yr26actual:N12() },
     원격매출: { yr25:[296,323,308,292,309,285,287,309,276,304,278,274],          yr26base:[273,270,283,279,278,275,278,278,282,281,271,269], yr26actual:N12() },
+    b2b매출:  { yr25:N12(),                                                      yr26base:N12(),                                            yr26actual:N12() },
     영업이익: { yr25:[79,266,16,19,107,-108,92,206,-166,3,81,-214],              yr26base:[13,165,28,-84,-15,-29,35,116,32,-9,97,75],       yr26actual:N12() },
   },
 
@@ -2864,11 +2866,13 @@ function renderDeptKpi(mi){
   setH('u2m-meta-p',uS>0&&uP!=null?`이익률 ${(uP/uS*100).toFixed(1)}%`:'');
   // ── 미래교육 mini-cards ──
   const mr=DEPT_DATA.mirae;
-  const mrBook=mr.교재매출.yr26actual[mi]??null, mrRemote=mr.원격매출.yr26actual[mi]??null, mrProfit=mr.영업이익.yr26actual[mi]??null;
-  const mrS=mrBook!=null||mrRemote!=null?(mrBook??0)+(mrRemote??0):null;
+  const mrBook=mr.교재매출.yr26actual[mi]??null, mrRemote=mr.원격매출.yr26actual[mi]??null;
+  const mrB2b=mr.b2b매출.yr26actual[mi]??null, mrProfit=mr.영업이익.yr26actual[mi]??null;
+  const mrS=mrBook!=null||mrRemote!=null||mrB2b!=null?(mrBook??0)+(mrRemote??0)+(mrB2b??0):null;
   const mrC=mrS!=null&&mrProfit!=null?mrS-mrProfit:null;
   const mrBook26p=mr.교재매출.yr26base[mi], mrRemote26p=mr.원격매출.yr26base[mi];
   set('mirae-val-s',fmt억(mrS)); set('mirae-val-book',fmt억(mrBook)); set('mirae-val-remote',fmt억(mrRemote));
+  set('mirae-val-b2b',mrB2b!=null?fmt억(mrB2b):'-');
   set('mirae-val-c',fmt억(mrC)); set('mirae-val-p',fmt억(mrProfit)); set('mirae-meta-s',`26년 ${mn}`);
   set('mirae-meta-book',mrBook!=null&&mrBook26p>0?`계획比 ${mrBook>=mrBook26p?'+':''}${((mrBook-mrBook26p)/mrBook26p*100).toFixed(1)}%`:'');
   set('mirae-meta-remote',mrRemote!=null&&mrRemote26p>0?`계획比 ${mrRemote>=mrRemote26p?'+':''}${((mrRemote-mrRemote26p)/mrRemote26p*100).toFixed(1)}%`:'');
@@ -4829,7 +4833,7 @@ function applyRawToDashboard(){
   // ── 4. 가맹사업 월별 재무 데이터 갱신 (RAW_DB → DEPT_DATA.franchise) ──
   months.forEach((mn,mi)=>{
     if(!RAW_DB.some(r=>r.m===mn && effCamp(r)==='교육넷')) return;
-    const s = sum(r=>r.m===mn && r.t==='매출' && r.a==='가맹비수입');
+    const s = sum(r=>r.m===mn && r.t==='매출' && r.a==='가맹비수입' && effCamp(r)==='교육넷');
     const c = sum(r=>r.m===mn && effCamp(r)==='교육넷' && r.t==='판매관리비');
     if(s || c){
       DEPT_DATA.franchise.매출.yr26actual[mi]     = parseFloat((s/1e6).toFixed(1));
@@ -4867,8 +4871,8 @@ function applyRawToDashboard(){
     months.forEach((mn,mi)=>{
       const nullCamps=camps.filter(c=>DEPT_DATA.camps[c].매출.yr26actual[mi]==null);
       if(!nullCamps.length) return;
-      const dS=sum(r=>effDept(r)===dept&&r.m===mn&&r.t==='매출');
-      const dC=sum(r=>effDept(r)===dept&&r.m===mn&&(r.t==='판매관리비'||r.t==='공통비'));
+      const dS=sum(r=>effDept(r)===dept&&r.m===mn&&r.t==='매출'&&effCamp(r)!=='교육넷');
+      const dC=sum(r=>effDept(r)===dept&&r.m===mn&&(r.t==='판매관리비'||r.t==='공통비')&&effCamp(r)!=='교육넷');
       if(!dS) return;
       // 이미 식별된 캠퍼스 합계 제외 → 미귀속 잔여분만 배분
       const knownS=camps.reduce((s,c)=>{const v=DEPT_DATA.camps[c].매출.yr26actual[mi];return s+(v!=null?v*1e6:0);},0);
@@ -4934,12 +4938,14 @@ function applyRawToDashboard(){
   months.forEach((mn,mi)=>{
     const 교재 = sum(r=>미래명.includes(effDept(r)) && r.m===mn && r.t==='매출' && r.a&&(r.a.includes('교재')||r.a.includes('도서')));
     const 원격 = sum(r=>미래명.includes(effDept(r)) && r.m===mn && r.t==='매출' && r.a&&(r.a.includes('원격')||r.a.includes('온라인')));
+    const b2b  = sum(r=>미래명.includes(effDept(r)) && r.m===mn && r.t==='매출' && r.a==='가맹비수입' && effCamp(r)==='FC');
     const ms   = sum(r=>미래명.includes(effDept(r)) && r.m===mn && r.t==='매출');
     const mc   = sum(r=>미래명.includes(effDept(r)) && r.m===mn && r.t==='판매관리비');
     const hasMirae = RAW_DB.some(r=>미래명.includes(effDept(r)) && r.m===mn);
     if(hasMirae){
       DEPT_DATA.mirae.교재매출.yr26actual[mi] = Math.round(교재/1e6);
       DEPT_DATA.mirae.원격매출.yr26actual[mi] = Math.round(원격/1e6);
+      if(b2b) DEPT_DATA.mirae.b2b매출.yr26actual[mi] = Math.round(b2b/1e6);
       DEPT_DATA.mirae.영업이익.yr26actual[mi] = Math.round((ms-mc)/1e6);
     }
   });
