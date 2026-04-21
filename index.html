@@ -4233,6 +4233,7 @@ function applyAuth(){
       } else if(saved==='director'){
         hub.style.display='none';
         dirWrap.style.display='block';
+        loadCampusPl().then(()=>renderDirList());
       } else {
         hub.style.display='flex';
         tabs.style.display='none';
@@ -4314,7 +4315,7 @@ function goSoinDash(){
   if(ovEl) goMain('overview',ovEl);
 }
 
-function goDirectorDash(){
+async function goDirectorDash(){
   const s=getSession();
   if(!s) return;
   const hub=document.getElementById('hub-screen');
@@ -4322,10 +4323,11 @@ function goDirectorDash(){
   hub.style.display='none';
   dirWrap.style.display='block';
   saveDashView('director');
-  const camp=s.campus||'';
   const nameEl=document.getElementById('dirCampName');
-  if(nameEl) nameEl.textContent=camp?(camp+' 캠퍼스'):'캠퍼스';
-  initDirectorMonthBar();
+  if(nameEl) nameEl.textContent='불러오는 중...';
+  await loadCampusPl();
+  if(nameEl) nameEl.textContent='직영캠퍼스 손익';
+  renderDirList();
 }
 
 // ============================================================
@@ -5602,6 +5604,22 @@ function renderDirDetail(){
   el.innerHTML=html;
 }
 
+async function saveCampusPl(){
+  const rows=Object.entries(DIR_PL).map(([sheet_name,data])=>({
+    sheet_name, data, updated_at: new Date().toISOString()
+  }));
+  if(!rows.length) return;
+  await sb.from('campus_pl').upsert(rows, {onConflict:'sheet_name'});
+}
+
+async function loadCampusPl(){
+  const {data,error}=await sb.from('campus_pl').select('*');
+  if(error||!data) return;
+  data.forEach(r=>{ DIR_PL[r.sheet_name]=r.data; });
+  const allM=dirAllMonths();
+  if(allM.length) dirMonth=allM[allM.length-1];
+}
+
 async function handleDirXlsxUpload(input){
   const file=input.files[0]; if(!file) return;
   const msg=document.getElementById('dirUploadMsg');
@@ -5622,11 +5640,11 @@ async function handleDirXlsxUpload(input){
       DIR_PL[shName]=parsed;
       cnt++;
     }
-    // 최신 월
+    await saveCampusPl();
     const allM=dirAllMonths();
     if(allM.length) dirMonth=allM[allM.length-1];
     const MN=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
-    msg.textContent=`✓ ${cnt}개 시트 · ${MN[dirMonth]} · ${new Date().toLocaleTimeString('ko-KR')}`;
+    msg.textContent=`✓ ${cnt}개 시트 저장 완료 · ${MN[dirMonth]} · ${new Date().toLocaleTimeString('ko-KR')}`;
     msg.style.color='var(--c26a)';
     renderDirList();
   }catch(e){
