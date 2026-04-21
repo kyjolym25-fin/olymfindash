@@ -4263,6 +4263,15 @@ function handleStuXlsxUpload(event){
         const rE대입 = rows[inRow+5] || []; // 영어 대입
         const rE소계 = rows[inRow+6] || []; // 영어 소계
         const rTot  = rows[inRow+7] || []; // 합계
+        // 인원 2025년 행들 (inRow+8~inRow+15)
+        const r25M초중 = rows[inRow+8]  || [];
+        const r25M영재 = rows[inRow+9]  || [];
+        const r25M대입 = rows[inRow+10] || [];
+        const r25M소계 = rows[inRow+11] || [];
+        const r25E초중 = rows[inRow+12] || [];
+        const r25E대입 = rows[inRow+13] || [];
+        const r25E소계 = rows[inRow+14] || [];
+        const r25Tot  = rows[inRow+15] || [];
 
         CAMP_COLS.forEach((camp, ci)=>{
           const col = 4 + ci;
@@ -4272,21 +4281,34 @@ function handleStuXlsxUpload(event){
 
           const toN = v => (v===null||v===undefined||v==='') ? null : Number(v)||0;
 
+          // 26년 실적
           if(!s.yr26a['합계']) s.yr26a['합계'] = Array(12).fill(null);
           s.yr26a['합계'][monthIdx] = toN(rTot[col]);
 
-          const setV = (cat, sub, val)=>{
-            if(!s.yr26a[cat]) s.yr26a[cat] = {};
-            if(!s.yr26a[cat][sub]) s.yr26a[cat][sub] = Array(12).fill(null);
-            s.yr26a[cat][sub][monthIdx] = toN(val);
+          const setV = (yr, cat, sub, val)=>{
+            if(!s[yr]) s[yr] = {};
+            if(!s[yr][cat]) s[yr][cat] = {};
+            if(!s[yr][cat][sub]) s[yr][cat][sub] = Array(12).fill(null);
+            s[yr][cat][sub][monthIdx] = toN(val);
           };
-          setV('수학','소계', rM소계[col]);
-          setV('수학','초중', rM초중[col]);
-          setV('수학','영재', rM영재[col]);
-          setV('수학','대입', rM대입[col]);
-          setV('영어','소계', rE소계[col]);
-          setV('영어','초중', rE초중[col]);
-          setV('영어','대입', rE대입[col]);
+          setV('yr26a','수학','소계', rM소계[col]);
+          setV('yr26a','수학','초중', rM초중[col]);
+          setV('yr26a','수학','영재', rM영재[col]);
+          setV('yr26a','수학','대입', rM대입[col]);
+          setV('yr26a','영어','소계', rE소계[col]);
+          setV('yr26a','영어','초중', rE초중[col]);
+          setV('yr26a','영어','대입', rE대입[col]);
+
+          // 25년 실적 (전년 동월)
+          if(!s.yr25['합계']) s.yr25['합계'] = Array(12).fill(null);
+          s.yr25['합계'][monthIdx] = toN(r25Tot[col]);
+          setV('yr25','수학','소계', r25M소계[col]);
+          setV('yr25','수학','초중', r25M초중[col]);
+          setV('yr25','수학','영재', r25M영재[col]);
+          setV('yr25','수학','대입', r25M대입[col]);
+          setV('yr25','영어','소계', r25E소계[col]);
+          setV('yr25','영어','초중', r25E초중[col]);
+          setV('yr25','영어','대입', r25E대입[col]);
         });
 
         processedMonths.push(parseInt(m[1]));
@@ -4314,13 +4336,22 @@ function handleStuXlsxUpload(event){
 
 // stu26 Supabase 저장/로드 헬퍼
 async function saveStu26(){
-  const rows = Object.keys(STU).map(c=>({camp:c, data:STU[c].yr26a||{}}));
+  const rows = Object.keys(STU).map(c=>({camp:c, data:{yr26a:STU[c].yr26a||{}, yr25sub:STU[c].yr25||{}}}));
   await sb.from('stu26').upsert(rows, {onConflict:'camp'});
 }
 async function loadStu26(){
   const {data}=await sb.from('stu26').select('*');
   if(!data||!data.length) return;
-  data.forEach(r=>{ if(STU[r.camp]) STU[r.camp].yr26a = r.data; });
+  data.forEach(r=>{
+    if(!STU[r.camp]) return;
+    const d = r.data;
+    if(d && d.yr26a !== undefined){
+      STU[r.camp].yr26a = d.yr26a;
+      if(d.yr25sub) Object.assign(STU[r.camp].yr25, d.yr25sub);
+    } else {
+      STU[r.camp].yr26a = d; // 구버전 호환
+    }
+  });
 }
 
 function renderAdminPage(){
