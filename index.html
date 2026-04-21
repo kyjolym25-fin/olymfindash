@@ -4345,7 +4345,11 @@ function handleStuXlsxUpload(event){
 
       // 재원생 탭 리렌더
       renderAdminStuInput();
-      if(inited['students']){ inited['students']=false; renderStuTable(stuMonth); }
+      if(inited['students']){
+        buildStuMonthBar();
+        const lmi = processedMonths.length ? Math.max(...processedMonths)-1 : stuMonth;
+        setStuMonth(lmi);
+      }
 
       msg.style.color='var(--c26a)';
       msg.textContent=`✓ ${processedMonths.sort((a,b)=>a-b).map(m=>m+'월').join(', ')} 재원생 데이터 적용 완료`;
