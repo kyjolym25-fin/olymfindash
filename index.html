@@ -4718,12 +4718,12 @@ async function renderUserTable(){
           <option value="director" ${u.role==='director'?'selected':''}>원장</option>
           <option value="admin" ${u.role==='admin'?'selected':''}>관리자</option>
         </select>`;
+    const campusText=u.campus?`<span style="font-size:10px;color:var(--muted);margin-right:6px">${u.campus.replace(/,/g,' · ')}</span>`:'';
     const campusBtn=`<button onclick="setCampusPrompt('${u.email}','${u.campus||''}')" style="font-size:10px;padding:3px 8px;background:var(--s3);border:1px solid var(--border);border-radius:4px;cursor:pointer;color:var(--text)">캠퍼스${u.campus?` <span style='color:var(--c26a)'>✓</span>`:''}</button>`;
-    const campusTag=u.campus?`<div style="font-size:10px;color:var(--muted);margin-top:3px">${u.campus.replace(/,/g,' · ')}</div>`:'';
     return `<tr>
       <td>${u.name}</td><td style="font-size:11px">${u.email}</td>
       <td>${roleSelect}</td>
-      <td>${campusTag}${campusBtn}</td>
+      <td style="white-space:nowrap">${campusText}${campusBtn}</td>
       <td><span class="sbadge active">활성</span></td>
       <td>${u.join_date||'-'}</td>
       <td>
