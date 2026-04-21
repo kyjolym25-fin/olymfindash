@@ -4799,20 +4799,27 @@ function applyRawToDashboard(){
   });
 
   // ── 5b. camp yr26actual fallback: 캠퍼스 미식별 시 사업본부 합계를 yr25 비율로 배분 ──
+  // (이미 식별된 캠퍼스 합계를 제외한 잔여분만 배분 → 위례처럼 진짜 데이터 없는 경우 배분 방지)
   const HAK_C=['광진','성동','동대문','중랑'];
   const U2M_C=['중계','송파방이','미사','위례'];
   [['학원사업본부',HAK_C],['U2M사업본부',U2M_C]].forEach(([dept,camps])=>{
     months.forEach((mn,mi)=>{
-      if(camps.every(c=>DEPT_DATA.camps[c].매출.yr26actual[mi]!=null)) return;
+      const nullCamps=camps.filter(c=>DEPT_DATA.camps[c].매출.yr26actual[mi]==null);
+      if(!nullCamps.length) return;
       const dS=sum(r=>effDept(r)===dept&&r.m===mn&&r.t==='매출');
       const dC=sum(r=>effDept(r)===dept&&r.m===mn&&(r.t==='판매관리비'||r.t==='공통비'));
       if(!dS) return;
-      const tot25=camps.reduce((s,c)=>s+(DEPT_DATA.camps[c].매출.yr25[mi]??0),0);
-      camps.forEach(c=>{
-        if(DEPT_DATA.camps[c].매출.yr26actual[mi]!=null) return;
-        const ratio=tot25>0?(DEPT_DATA.camps[c].매출.yr25[mi]??0)/tot25:1/camps.length;
-        DEPT_DATA.camps[c].매출.yr26actual[mi]=Math.round(dS*ratio/1e6);
-        DEPT_DATA.camps[c].영업이익.yr26actual[mi]=Math.round((dS-dC)*ratio/1e6);
+      // 이미 식별된 캠퍼스 합계 제외 → 미귀속 잔여분만 배분
+      const knownS=camps.reduce((s,c)=>{const v=DEPT_DATA.camps[c].매출.yr26actual[mi];return s+(v!=null?v*1e6:0);},0);
+      const knownC=camps.reduce((s,c)=>{const ms=DEPT_DATA.camps[c].매출.yr26actual[mi];const op=DEPT_DATA.camps[c].영업이익.yr26actual[mi];return s+(ms!=null&&op!=null?(ms-op)*1e6:0);},0);
+      const residual=dS-knownS;
+      if(residual<5e6) return; // 잔여 500만원 미만이면 배분 불필요 (실제 데이터 없는 캠퍼스)
+      const residualC=dC-knownC;
+      const tot25=nullCamps.reduce((s,c)=>s+(DEPT_DATA.camps[c].매출.yr25[mi]??0),0);
+      nullCamps.forEach(c=>{
+        const ratio=tot25>0?(DEPT_DATA.camps[c].매출.yr25[mi]??0)/tot25:1/nullCamps.length;
+        DEPT_DATA.camps[c].매출.yr26actual[mi]=Math.round(residual*ratio/1e6);
+        DEPT_DATA.camps[c].영업이익.yr26actual[mi]=Math.round((residual-residualC)*ratio/1e6);
       });
     });
   });
