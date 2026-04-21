@@ -3555,11 +3555,12 @@ function getStu(campus,month){
 function buildStuMonthBar(){
   const bar=document.getElementById('stu-month-bar'); if(!bar) return;
   const MN=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
-  // 재원생 실적 있는 월: 전체 캠퍼스 합계가 0 초과인 월
+  // 재원생 실적 있는 월: STU yr26a 합계 또는 RAW_DB 업로드 월 기준
+  const rawMths = new Set(RAW_DB.map(r=>MN.indexOf(r.m)).filter(i=>i>=0));
   const actMths=[];
   for(let i=0;i<12;i++){
     const tot=CAMPS_ALL.reduce((s,c)=>s+(STU[c]?.yr26a?.['합계']?.[i]??0),0);
-    if(tot>0) actMths.push(i);
+    if(tot>0 || rawMths.has(i)) actMths.push(i);
   }
   if(!actMths.length) actMths.push(0);
   bar.innerHTML='<span class="month-bar-lbl">기준 월</span>'+
