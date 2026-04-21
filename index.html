@@ -1269,7 +1269,7 @@ thead th{font-size:13px}
     </div>
     <div id="atab-c-users">
       <table class="utbl"><thead><tr>
-        <th>이름</th><th>이메일</th><th>역할</th><th>상태</th><th>가입일</th><th>최근로그인</th><th>작업</th>
+        <th>이름</th><th>이메일</th><th>역할</th><th>캠퍼스</th><th>상태</th><th>가입일</th><th>작업</th>
       </tr></thead><tbody id="adminUserBody"></tbody></table>
     </div>
     <div id="atab-c-pending" style="display:none">
@@ -4709,17 +4709,28 @@ function roleLabel(role){ return role==='admin'?'관리자':role==='director'?'�
 async function renderUserTable(){
   const tbody=document.getElementById('adminUserBody'); if(!tbody)return;
   const {data:users}=await sb.from('users').select('*').eq('status','active').order('join_date');
-  tbody.innerHTML=(users||[]).map(u=>`<tr>
-    <td>${u.name}</td><td>${u.email}</td>
-    <td><span class="rbadge ${u.role}">${roleLabel(u.role)}</span>${u.campus?` <span style="font-size:10px;color:var(--muted)">${u.campus}</span>`:''}</td>
-    <td><span class="sbadge active">활성</span></td>
-    <td>${u.join_date||'-'}</td><td>${u.last_login||'-'}</td>
-    <td>
-      <button onclick="toggleRole('${u.email}')" style="font-size:10px;padding:3px 8px;background:var(--s3);border:1px solid var(--border);border-radius:4px;cursor:pointer;color:var(--fg)">역할변경</button>
-      <button onclick="setCampusPrompt('${u.email}','${u.campus||''}')" style="font-size:10px;padding:3px 8px;background:var(--s3);border:1px solid var(--border);border-radius:4px;cursor:pointer;color:var(--fg);margin-left:4px">캠퍼스</button>
-      ${u.email!=='admin@olympiad.ac'?`<button onclick="removeUser('${u.email}')" style="font-size:10px;padding:3px 8px;background:var(--s3);border:1px solid var(--border2);border-radius:4px;cursor:pointer;color:var(--loss);margin-left:4px">삭제</button>`:''}
-    </td>
-  </tr>`).join('');
+  tbody.innerHTML=(users||[]).map(u=>{
+    const isProtected=u.email==='admin@olympiad.ac';
+    const roleSelect=isProtected
+      ?`<span class="rbadge ${u.role}">${roleLabel(u.role)}</span>`
+      :`<select onchange="changeRole('${u.email}',this.value)" style="font-size:11px;padding:3px 6px;border:1px solid var(--border);border-radius:6px;background:var(--s2);cursor:pointer;color:var(--text)">
+          <option value="viewer" ${u.role==='viewer'?'selected':''}>뷰어</option>
+          <option value="director" ${u.role==='director'?'selected':''}>원장</option>
+          <option value="admin" ${u.role==='admin'?'selected':''}>관리자</option>
+        </select>`;
+    const campusBtn=`<button onclick="setCampusPrompt('${u.email}','${u.campus||''}')" style="font-size:10px;padding:3px 8px;background:var(--s3);border:1px solid var(--border);border-radius:4px;cursor:pointer;color:var(--text)">캠퍼스${u.campus?` <span style='color:var(--c26a)'>✓</span>`:''}</button>`;
+    const campusTag=u.campus?`<div style="font-size:10px;color:var(--muted);margin-top:3px">${u.campus.replace(/,/g,' · ')}</div>`:'';
+    return `<tr>
+      <td>${u.name}</td><td style="font-size:11px">${u.email}</td>
+      <td>${roleSelect}</td>
+      <td>${campusTag}${campusBtn}</td>
+      <td><span class="sbadge active">활성</span></td>
+      <td>${u.join_date||'-'}</td>
+      <td>
+        ${isProtected?'':`<button onclick="removeUser('${u.email}')" style="font-size:10px;padding:3px 8px;background:var(--s3);border:1px solid var(--border2);border-radius:4px;cursor:pointer;color:var(--loss)">삭제</button>`}
+      </td>
+    </tr>`;
+  }).join('');
 }
 
 async function renderPendingTable(){
@@ -4739,13 +4750,9 @@ async function renderPendingTable(){
 
 async function approveUser(email,name){await sb.from('users').update({status:'active'}).eq('email',email);renderPendingTable();renderUserTable();}
 async function rejectUser(email){await sb.from('users').delete().eq('email',email);renderPendingTable();}
-async function toggleRole(email){
-  const {data}=await sb.from('users').select('role').eq('email',email).maybeSingle();
-  if(data){
-    const next=data.role==='admin'?'viewer':data.role==='viewer'?'director':'admin';
-    await sb.from('users').update({role:next}).eq('email',email);
-    renderUserTable();
-  }
+async function changeRole(email,role){
+  await sb.from('users').update({role}).eq('email',email);
+  renderUserTable();
 }
 let _campEditEmail='';
 function setCampusPrompt(email,cur){
