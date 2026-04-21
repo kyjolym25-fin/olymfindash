@@ -5524,34 +5524,30 @@ function renderDirList(){
   document.getElementById('dirBackBtn').onclick=goHub;
 
   const s=getSession();
-  const hasData=Object.keys(DIR_PL).length>0;
-  if(!hasData){
-    listEl.innerHTML='<div id="dirListEmpty" style="text-align:center;padding:60px 20px;color:var(--muted);font-size:13px">캠퍼스별_손익.xlsx 파일을 업로드하면 목록이 표시됩니다.</div>';
-    return;
-  }
+  const isDir=s&&s.role==='director';
+  const MN=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
   let html='';
   for(const grp of DIR_GROUPS){
-    const cards=grp.sheets.filter(sh=>DIR_PL[sh]).map(sh=>{
+    const cards=grp.sheets.map(sh=>{
       const info=parseDirSheetName(sh); if(!info) return '';
-      const isDir=s&&s.role==='director';
-      // director는 본인 캠퍼스 수학/영어만 활성
+      const hasData=!!DIR_PL[sh];
       const mySheet=isDir?(s.campus+'수학'===sh||s.campus+'영어'===sh):true;
-      const disabled=isDir&&!mySheet?' disabled':'';
-      const months=DIR_PL[sh].months;
-      const MN=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
-      const mLabel=months.length?MN[months[0]]+'~'+MN[months[months.length-1]]:'';
-      return `<div class="dir-camp-card${disabled?'':''}" ${disabled?'style="opacity:.35;cursor:not-allowed"':''} onclick="${disabled?'':'goToDirDetail(\''+sh+'\')'}" >
+      const blocked=isDir&&!mySheet;
+      const months=hasData?DIR_PL[sh].months:[];
+      const mLabel=months.length?MN[months[0]]+(months.length>1?'~'+MN[months[months.length-1]]:''):'데이터 없음';
+      const style=blocked?'opacity:.35;cursor:not-allowed':!hasData?'opacity:.55;cursor:default':'';
+      const click=(!blocked&&hasData)?`goToDirDetail('${sh}')`:'';
+      return `<div class="dir-camp-card" style="${style}" onclick="${click}">
         <div class="dir-camp-card-name">${info.displayName}</div>
         <div class="dir-camp-card-sub">${mLabel}</div>
       </div>`;
     }).join('');
-    if(!cards) continue;
     html+=`<div class="dir-group">
       <div class="dir-group-hd">${grp.icon} ${grp.name} <span class="dir-group-tag">${grp.tag}</span></div>
       <div class="dir-camp-cards">${cards}</div>
     </div>`;
   }
-  listEl.innerHTML=html||'<div style="text-align:center;padding:40px;color:var(--muted);font-size:13px">표시할 데이터 없음</div>';
+  listEl.innerHTML=html;
 }
 
 // ── 상세 뷰 ──
