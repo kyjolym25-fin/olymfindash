@@ -386,7 +386,7 @@ thead th{font-size:13px}
 </div>
 
 <div class="tabs" id="mainTabs" style="display:none">
-  <div class="tab on"  onclick="goMain('overview',this)">📊 총괄 개요</div>
+  <div class="tab" onclick="goMain('overview',this)">📊 총괄 개요</div>
   <div class="tab"     onclick="goMain('dept',this)">🏢 사업부 분석</div>
   <div class="tab"     onclick="goMain('students',this)">👥 재원생 현황</div>
   <div class="tab admin-only" id="tab-rawdata" onclick="goMain('rawdata',this)">📋 데이터 로우</div>
@@ -417,7 +417,7 @@ thead th{font-size:13px}
 <div class="main">
 
 <!-- ═══════════════════════════ 총괄 개요 ═══════════════════════════ -->
-<div class="page on" id="pg-overview">
+<div class="page" id="pg-overview">
 
   <!-- 월 선택 바 -->
   <div class="month-bar" id="ov-month-bar"></div>
@@ -5041,21 +5041,27 @@ applyAuth();
   applyAuth();
   loadComments();
   loadStu26();
-  // 탭 위치 복원
+  // 탭 위치 복원 (해시 기반)
   const h = location.hash;
+  let restored = false;
   if(h && getSession()){
     const parts = h.replace('#','').split('-');
     if(parts[0]==='dept'){
       const mainEl = document.querySelector('#mainTabs .tab[onclick*="\'dept\'"]');
-      if(mainEl) goMain('dept', mainEl);
+      if(mainEl){ goMain('dept', mainEl); restored = true; }
       const subEl = document.querySelector(`#deptSubtabs .subtab[onclick*="'${parts[1]}'"]`);
       if(subEl) goDept(parts[1], subEl);
     } else if(parts[0]==='main'){
       const mainEl = document.querySelector(`#mainTabs .tab[onclick*="'${parts[1]}'"]`);
-      if(mainEl) goMain(parts[1], mainEl);
+      if(mainEl){ goMain(parts[1], mainEl); restored = true; }
     }
     const sy = sessionStorage.getItem('olymp_scrollY');
     if(sy) setTimeout(()=>window.scrollTo(0, parseInt(sy)), 150);
+  }
+  // 해시 없거나 복원 실패 시 overview 기본 활성화
+  if(!restored){
+    const ovEl = document.querySelector('#mainTabs .tab[onclick*="\'overview\'"]');
+    if(ovEl) goMain('overview', ovEl);
   }
 })();
 window.addEventListener('beforeunload',()=>sessionStorage.setItem('olymp_scrollY', window.scrollY));
