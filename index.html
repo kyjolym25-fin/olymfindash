@@ -315,10 +315,11 @@ tbody td.indent{padding-left:28px;color:var(--muted2)}
 .dir-pl-full-tbl td:first-child{text-align:left;color:var(--text)}
 .dir-pl-full-tbl tr.row-section td{font-weight:700;color:var(--muted);background:var(--s3);font-size:11px;padding:5px 14px;letter-spacing:.05em}
 .dir-pl-full-tbl tr.row-total td{font-weight:700;background:#f0f4ff;border-top:1px solid #c7d2fe}
-.dir-pl-full-tbl tr.row-profit td{font-weight:700;background:#ecfdf5;color:#065f46;border-top:2px solid #6ee7b7}
+.dir-pl-full-tbl tr.row-profit1 td{font-weight:700;background:#ecfdf5;color:#065f46;border-top:2px solid #6ee7b7;border-bottom:2px solid #6ee7b7}
+.dir-pl-full-tbl tr.row-profit td{font-weight:700;background:#ecfdf5;color:#065f46;border-top:2px solid #6ee7b7;border-bottom:2px solid #6ee7b7}
 .dir-pl-full-tbl tr.row-profit2 td{font-weight:700;background:#eff6ff;color:#1d4ed8;border-top:2px solid #93c5fd}
 .dir-pl-full-tbl tr:hover td{background:#f8faff}
-.dir-pl-full-tbl tr.row-section:hover td,.dir-pl-full-tbl tr.row-total:hover td,.dir-pl-full-tbl tr.row-profit:hover td,.dir-pl-full-tbl tr.row-profit2:hover td{background:inherit}
+.dir-pl-full-tbl tr.row-section:hover td,.dir-pl-full-tbl tr.row-total:hover td,.dir-pl-full-tbl tr.row-profit:hover td,.dir-pl-full-tbl tr.row-profit1:hover td,.dir-pl-full-tbl tr.row-profit2:hover td{background:inherit}
 .rbadge.director{background:#f59e0b22;color:#d97706}
 
 /* ═══════════════════════════════════
@@ -5477,7 +5478,6 @@ function renderDirList(){
 function goToDirDetail(sheetName){
   dirSheet=sheetName;
   dirView='detail';
-  const data=DIR_PL[sheetName];
   const listEl=document.getElementById('dir-list-view');
   const detailEl=document.getElementById('dir-detail-view');
   if(!listEl||!detailEl) return;
@@ -5487,16 +5487,9 @@ function goToDirDetail(sheetName){
   document.getElementById('dirCampSub').textContent=sheetName;
   document.getElementById('dirBackBtn').textContent='← 목록';
   document.getElementById('dirBackBtn').onclick=renderDirList;
-  // 월 선택: 해당 시트 가용 월
-  const MN=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
-  if(data&&!data.months.includes(dirMonth)) dirMonth=data.months[data.months.length-1]??0;
-  const bar=document.getElementById('dir-month-bar');
-  if(bar&&data) bar.innerHTML='<span class="month-bar-lbl">월 선택</span>'+
-    data.months.map(mi=>`<button class="atab${mi===dirMonth?' on':''}" onclick="setDirMonth(${mi})">${MN[mi]}</button>`).join('');
+  document.getElementById('dir-month-bar').innerHTML='';
   renderDirDetail();
 }
-
-function setDirMonth(mi){ dirMonth=mi; goToDirDetail(dirSheet); }
 
 function dirNavBack(){
   if(dirView==='detail') renderDirList();
@@ -5508,15 +5501,24 @@ function renderDirDetail(){
   const data=DIR_PL[dirSheet];
   if(!data){ el.innerHTML=''; return; }
   const MN=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
-  const fx=v=>v==null?'':v===0?'-':(v<0?'▲':'')+Math.abs(v).toLocaleString('ko-KR')+'원';
+  const months=data.months;
+  const fx=v=>v==null||v===0?'-':(v<0?'▲':'')+Math.abs(v).toLocaleString('ko-KR');
+
   let html=`<div style="overflow-x:auto"><table class="dir-pl-full-tbl">
-    <thead><tr><th>계정과목</th><th>${MN[dirMonth]}</th></tr></thead><tbody>`;
+    <thead><tr><th>계정과목</th>${months.map(mi=>`<th>${MN[mi]}</th>`).join('')}</tr></thead><tbody>`;
   for(const row of data.rows){
-    const v=row.vals[dirMonth];
     const cls=`row-${row.type}`;
-    const valHtml=row.type==='section'?'':fx(v)??'';
-    const color=(row.type==='profit1'||row.type==='profit2')&&v<0?'color:var(--loss)':'';
-    html+=`<tr class="${cls}"><td>${row.label}</td><td style="${color}">${valHtml}</td></tr>`;
+    let cells='';
+    if(row.type==='section'){
+      cells=`<td colspan="${months.length}"></td>`;
+    } else {
+      cells=months.map(mi=>{
+        const v=row.vals[mi];
+        const isNeg=(row.type==='profit1'||row.type==='profit2')&&v<0;
+        return `<td style="${isNeg?'color:var(--loss)':''}">${fx(v)}</td>`;
+      }).join('');
+    }
+    html+=`<tr class="${cls}"><td>${row.label}</td>${cells}</tr>`;
   }
   html+='</tbody></table></div>';
   el.innerHTML=html;
