@@ -2660,12 +2660,12 @@ function renderOvKpi(mi){
     gradEl.innerHTML=`
       <div class="kpi-grad blue">
         <div class="kpi-grad-lbl">매출액</div>
-        <div class="kpi-grad-val">${fmt억(s26a)??'-'}<span class="kpi-grad-unit">백만원</span></div>
+        <div class="kpi-grad-val">${fmt억(s26a)??'-'}</div>
         <div class="kpi-grad-sub"><span class="kpi-grad-delta">${deltaStr(s26a,s26p)||'데이터 없음'}</span></div>
       </div>
       <div class="kpi-grad green">
         <div class="kpi-grad-lbl">영업이익</div>
-        <div class="kpi-grad-val">${fmt억(p26a)??'-'}<span class="kpi-grad-unit">백만원</span></div>
+        <div class="kpi-grad-val">${fmt억(p26a)??'-'}</div>
         <div class="kpi-grad-sub"><span class="kpi-grad-delta">${deltaStr(p26a,p26p)||'데이터 없음'}</span></div>
       </div>
       <div class="kpi-grad purple">
@@ -2675,7 +2675,7 @@ function renderOvKpi(mi){
       </div>
       <div class="kpi-grad amber">
         <div class="kpi-grad-lbl">판관비</div>
-        <div class="kpi-grad-val">${fmt억(c26a)??'-'}<span class="kpi-grad-unit">백만원</span></div>
+        <div class="kpi-grad-val">${fmt억(c26a)??'-'}</div>
         <div class="kpi-grad-sub"><span class="kpi-grad-delta">${deltaStr(c26a,c26p)||'데이터 없음'}</span></div>
       </div>`;
   }
