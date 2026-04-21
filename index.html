@@ -2245,14 +2245,10 @@ const CAMP_CC_MAP={
 // 배열이면 연간 합계, 스칼라면 그대로
 function _ccRatios(ccs, src){
   const _sum=v=>Array.isArray(v)?v.reduce((a,b)=>a+(b||0),0):(v||0);
-  const ref25s=ccs.reduce((s,cc)=>s+_sum(src[cc]?.yr25?.s),0);
-  const ref25p=ccs.reduce((s,cc)=>s+_sum(src[cc]?.yr25?.p2),0);
   const ref26ps=ccs.reduce((s,cc)=>s+_sum(src[cc]?.yr26p?.s),0);
   const ref26pp=ccs.reduce((s,cc)=>s+_sum(src[cc]?.yr26p?.p2),0);
   return ccs.map(cc=>({
     cc,
-    rs25: ref25s>0?_sum(src[cc]?.yr25?.s)/ref25s:1/ccs.length,
-    rp25: ref25p!==0?_sum(src[cc]?.yr25?.p2)/ref25p:1/ccs.length,
     rs26p:ref26ps>0?_sum(src[cc]?.yr26p?.s)/ref26ps:1/ccs.length,
     rp26p:ref26pp!==0?_sum(src[cc]?.yr26p?.p2)/ref26pp:1/ccs.length,
   }));
@@ -2288,13 +2284,12 @@ function buildCC3YMonth(mi){
   for(const [camp,{ccs,src:srcFn}] of Object.entries(CAMP_CC_MAP)){
     const cd=DEPT_DATA.camps[camp]; if(!cd) continue;
     const src=srcFn();
-    for(const {cc,rs25,rp25,rs26p,rp26p} of _ccRatios(ccs,src)){
+    for(const {cc,rs26p,rp26p} of _ccRatios(ccs,src)){
       const p25=src[cc]?.yr25, p26=src[cc]?.yr26p;
-      // 배열이면 해당 월 직접 사용, 스칼라면 camp × 비율 fallback
-      const s25 =Array.isArray(p25?.s) ?(p25.s[mi]??0) :Math.round((cd.매출.yr25[mi]??0)*M*rs25);
-      const p25v=Array.isArray(p25?.p2)?(p25.p2[mi]??0):Math.round((cd.영업이익.yr25[mi]??0)*M*rp25);
-      const s26p=Array.isArray(p26?.s) ?(p26.s[mi]??0) :Math.round((cd.매출.yr26base[mi]??0)*M*rs26p);
-      const p26p=Array.isArray(p26?.p2)?(p26.p2[mi]??0):Math.round((cd.영업이익.yr26base[mi]??0)*M*rp26p);
+      const s25 = p25?.s?.[mi]  ?? 0;
+      const p25v= p25?.p2?.[mi] ?? 0;
+      const s26p= p26?.s?.[mi]  ?? 0;
+      const p26p= p26?.p2?.[mi] ?? 0;
       result[cc]={
         yr25: {s:s25, p2:p25v},
         yr26p:{s:s26p, p2:p26p},
@@ -2314,12 +2309,10 @@ function buildCC3YYtd(mi){
   for(const [camp,{ccs,src:srcFn}] of Object.entries(CAMP_CC_MAP)){
     const cd=DEPT_DATA.camps[camp]; if(!cd) continue;
     const src=srcFn();
-    const cs25=sumArr(cd.매출.yr25,mi)*M, cp25=sumArr(cd.영업이익.yr25,mi)*M;
-    const cs26p=sumArr(cd.매출.yr26base,mi)*M, cp26p=sumArr(cd.영업이익.yr26base,mi)*M;
-    for(const {cc,rs25,rp25,rs26p,rp26p} of _ccRatios(ccs,src)){
-      const p26=src[cc]?.yr26p;
-      const s26p=Array.isArray(p26?.s)?p26.s.slice(0,mi+1).reduce((a,b)=>a+(b||0),0):Math.round(cs26p*rs26p);
-      const p26p=Array.isArray(p26?.p2)?p26.p2.slice(0,mi+1).reduce((a,b)=>a+(b||0),0):Math.round(cp26p*rp26p);
+    for(const {cc,rs26p,rp26p} of _ccRatios(ccs,src)){
+      const p25=src[cc]?.yr25, p26=src[cc]?.yr26p;
+      const s26p=sumArr(p26?.s??[],mi);
+      const p26p=sumArr(p26?.p2??[],mi);
       let ytdS=0,ytdP=0,hasAny=false;
       if(actCap>=0){
         for(let i=0;i<=actCap;i++){
@@ -2336,9 +2329,8 @@ function buildCC3YYtd(mi){
           }
         }
       }
-      const p25=src[cc]?.yr25;
-      const s25ytd=Array.isArray(p25?.s)?p25.s.slice(0,mi+1).reduce((a,b)=>a+(b||0),0):Math.round(cs25*rs25);
-      const p25ytd=Array.isArray(p25?.p2)?p25.p2.slice(0,mi+1).reduce((a,b)=>a+(b||0),0):Math.round(cp25*rp25);
+      const s25ytd=sumArr(p25?.s??[],mi);
+      const p25ytd=sumArr(p25?.p2??[],mi);
       result[cc]={
         yr25: {s:s25ytd, p2:p25ytd},
         yr26p:{s:s26p, p2:p26p},
