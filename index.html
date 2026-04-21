@@ -746,9 +746,6 @@ thead th{font-size:13px}
       </div>
       <div class="cw" style="height:210px"><canvas id="c_mirae_profit_mtn"></canvas></div>
     </div>
-  <div id="cb-mirae-pft1" class="comment-box" style="display:none"><div class="cb-label"><span>✦</span> COMMENT</div><div class="cb-text" id="cb-text-mirae-pft1"></div><div class="cb-date" id="cb-date-mirae-pft1"></div></div>
-  <div id="ce-mirae-pft1" class="comment-editor"><div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div><textarea id="ce-text-mirae-pft1" placeholder="코멘트를 입력하세요..."></textarea><div class="cb-btns"><button class="cb-del" onclick="deleteComment('mirae-pft1')">삭제</button><button class="cb-save" onclick="saveComment('mirae-pft1')">저장</button></div></div>
-
     <!-- 마운틴 차트: 교재·원격 월별 매출 추이 -->
     <div class="full card">
       <div class="ch">
@@ -760,6 +757,8 @@ thead th{font-size:13px}
       </div>
       <div class="cw" style="height:210px"><canvas id="c_mirae_mountain"></canvas></div>
     </div>
+  <div id="cb-mirae-pft1" class="comment-box" style="display:none"><div class="cb-label"><span>✦</span> COMMENT</div><div class="cb-text" id="cb-text-mirae-pft1"></div><div class="cb-date" id="cb-date-mirae-pft1"></div></div>
+  <div id="ce-mirae-pft1" class="comment-editor"><div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div><textarea id="ce-text-mirae-pft1" placeholder="코멘트를 입력하세요..."></textarea><div class="cb-btns"><button class="cb-del" onclick="deleteComment('mirae-pft1')">삭제</button><button class="cb-save" onclick="saveComment('mirae-pft1')">저장</button></div></div>
 
     <div class="period-section-hd">
       <span class="period-badge monthly" id="mirae-badge-m">📅 당월 (1월)</span>
@@ -770,8 +769,6 @@ thead th{font-size:13px}
       <div class="ch"><div><div class="ct">교재·원격 매출 구성</div><div class="cs">CC별 각각 비교 (백만원)</div></div></div>
       <div class="cw" style="height:240px"><canvas id="c_mirae_bar"></canvas></div>
     </div>
-  <div id="cb-mirae-m1" class="comment-box" style="display:none"><div class="cb-label"><span>✦</span> COMMENT</div><div class="cb-text" id="cb-text-mirae-m1"></div><div class="cb-date" id="cb-date-mirae-m1"></div></div>
-  <div id="ce-mirae-m1" class="comment-editor"><div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div><textarea id="ce-text-mirae-m1" placeholder="코멘트를 입력하세요..."></textarea><div class="cb-btns"><button class="cb-del" onclick="deleteComment('mirae-m1')">삭제</button><button class="cb-save" onclick="saveComment('mirae-m1')">저장</button></div></div>
 
     <!-- 교재·원격 CC별 상세표 -->
     <div class="full card">
@@ -3023,8 +3020,8 @@ function initMirae(mi){
   const months = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
   const mn = months[mi];
   const 미래명 = ['미래교육사업부','미래교육사업본부'];
-  const isBook   = a => a && a.includes('도서');
-  const isOnline = a => a && (a.includes('온라인') || a.includes('컨텐츠'));
+  const isBook   = a => a && (a.includes('도서') || a.includes('교재'));
+  const isOnline = a => a && (a.includes('온라인') || a.includes('컨텐츠') || a.includes('원격'));
   // RAW_DB에서 CC별 교재/원격 26실적 집계
   const sumCC = (cc, acctFn) => RAW_DB
     .filter(r => 미래명.includes(r.d) && r.m===mn && r.cc===cc && r.t==='매출' && acctFn(r.a))
@@ -4665,15 +4662,21 @@ function handleXlsxUpload(event){
       const plWs = wb.Sheets['손익실적분석'];
       if(plWs){
         const plRows = XLSX.utils.sheet_to_json(plWs, {header:1});
-        // Row 268(0-based:267)=신규가맹, Row 269(0-based:268)=재가맹
-        // 컬럼 인덱스 10 = 26년 당월 실적
+        // 신규가맹/재가맹 행을 레이블로 검색 (행 위치 변경에 대응)
+        const findPlRow = (keyword) => plRows.findIndex(row =>
+          row && row.some(c => c != null && String(c).includes(keyword))
+        );
+        const 신규idx = findPlRow('신규가맹');
+        const 재가맹idx = findPlRow('재가맹');
+        // 컬럼 인덱스 10 = 26년 당월 실적 (K열)
         const MMAP = {'1월':0,'2월':1,'3월':2,'4월':3,'5월':4,'6월':5,'7월':6,'8월':7,'9월':8,'10월':9,'11월':10,'12월':11};
         uploadedMonths.forEach(mn=>{
           const mi = MMAP[mn];
           if(mi == null) return;
-          const r268 = plRows[267]; const r269 = plRows[268];
-          if(r268){ const v=r268[10]; if(v!=null&&v!=='') DEPT_DATA.franchise.신규가맹수.yr26actual[mi]=Number(v); }
-          if(r269){ const v=r269[10]; if(v!=null&&v!=='') DEPT_DATA.franchise.재가맹수.yr26actual[mi]=Number(v); }
+          const r신규 = 신규idx >= 0 ? plRows[신규idx] : null;
+          const r재가맹 = 재가맹idx >= 0 ? plRows[재가맹idx] : null;
+          if(r신규){ const v=r신규[10]; if(v!=null&&v!=='') DEPT_DATA.franchise.신규가맹수.yr26actual[mi]=Number(v); }
+          if(r재가맹){ const v=r재가맹[10]; if(v!=null&&v!=='') DEPT_DATA.franchise.재가맹수.yr26actual[mi]=Number(v); }
         });
         await saveDeptActual('franchise','', '신규가맹수', DEPT_DATA.franchise.신규가맹수.yr26actual);
         await saveDeptActual('franchise','', '재가맹수', DEPT_DATA.franchise.재가맹수.yr26actual);
@@ -4726,6 +4729,10 @@ function runDiag(){
     lines.push(`경영기획실 판관비 합계: ${(RAW_DB.filter(r=>r.d==='경영기획실'&&r.t==='판매관리비').reduce((s,r)=>s+r.v,0)/1e6).toFixed(2)}M`);
     const skipped = window._skippedCommon||[];
     lines.push(`공통비 행 파싱 결과(${skipped.length}건): ${skipped.join(' / ')||'(업로드 후 확인)'}`);
+    // FC 가맹비수입 진단
+    const fcRows = RAW_DB.filter(r=>r.a==='가맹비수입');
+    lines.push(`가맹비수입 행(${fcRows.length}건): ${fcRows.slice(0,5).map(r=>`cc=${r.cc}|cp=${r.cp||'(없음)'}|d=${r.d}|m=${r.m}|effCamp=${effC(r)||'null'}|v=${Math.round(r.v/1e4)}만`).join(' / ')||'(없음)'}`);
+    lines.push(`b2b매출 yr26actual: [${DEPT_DATA.mirae.b2b매출.yr26actual.map(v=>v??'null').join(',')}]`);
     // effCamp 결과
     const campMap={};
     RAW_DB.forEach(r=>{const c=effC(r);if(c){campMap[c]=(campMap[c]||0)+1;}});
@@ -4967,7 +4974,7 @@ function applyRawToDashboard(){
   months.forEach((mn,mi)=>{
     const 교재 = sum(r=>미래명.includes(effDept(r)) && r.m===mn && r.t==='매출' && r.a&&(r.a.includes('교재')||r.a.includes('도서')));
     const 원격 = sum(r=>미래명.includes(effDept(r)) && r.m===mn && r.t==='매출' && r.a&&(r.a.includes('원격')||r.a.includes('온라인')));
-    const b2b  = sum(r=>r.m===mn && r.t==='매출' && r.a==='가맹비수입' && effCamp(r)==='FC');
+    const b2b  = sum(r=>미래명.includes(effDept(r)) && r.m===mn && r.t==='매출' && r.a==='가맹비수입');
     const ms   = sum(r=>미래명.includes(effDept(r)) && r.m===mn && r.t==='매출');
     const mc   = sum(r=>미래명.includes(effDept(r)) && r.m===mn && r.t==='판매관리비');
     const hasMirae = RAW_DB.some(r=>미래명.includes(effDept(r)) && r.m===mn);
