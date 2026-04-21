@@ -4732,24 +4732,41 @@ function handleXlsxUpload(event){
       const plWs = wb.Sheets['손익실적분석'];
       if(plWs){
         const plRows = XLSX.utils.sheet_to_json(plWs, {header:1});
-        // 신규가맹/재가맹 행을 레이블로 검색 (행 위치 변경에 대응)
+        const MMAP = {'1월':0,'2월':1,'3월':2,'4월':3,'5월':4,'6월':5,'7월':6,'8월':7,'9월':8,'10월':9,'11월':10,'12월':11};
+        // 신규가맹/재가맹 행을 레이블로 검색
         const findPlRow = (keyword) => plRows.findIndex(row =>
           row && row.some(c => c != null && String(c).includes(keyword))
         );
         const 신규idx = findPlRow('신규가맹');
         const 재가맹idx = findPlRow('재가맹');
-        // 컬럼 인덱스 10 = 26년 당월 실적 (K열)
-        const MMAP = {'1월':0,'2월':1,'3월':2,'4월':3,'5월':4,'6월':5,'7월':6,'8월':7,'9월':8,'10월':9,'11월':10,'12월':11};
-        uploadedMonths.forEach(mn=>{
-          const mi = MMAP[mn];
-          if(mi == null) return;
-          const r신규 = 신규idx >= 0 ? plRows[신규idx] : null;
-          const r재가맹 = 재가맹idx >= 0 ? plRows[재가맹idx] : null;
-          if(r신규){ const v=r신규[10]; if(v!=null&&v!=='') DEPT_DATA.franchise.신규가맹수.yr26actual[mi]=Number(v); }
-          if(r재가맹){ const v=r재가맹[10]; if(v!=null&&v!=='') DEPT_DATA.franchise.재가맹수.yr26actual[mi]=Number(v); }
-        });
-        await saveDeptActual('franchise','', '신규가맹수', DEPT_DATA.franchise.신규가맹수.yr26actual);
-        await saveDeptActual('franchise','', '재가맹수', DEPT_DATA.franchise.재가맹수.yr26actual);
+        if(신규idx < 0 && 재가맹idx < 0) { /* 시트에 데이터 없음 */ }
+        else {
+          // 시트에서 직접 월 탐색 (uploadedMonths 의존 제거)
+          // 컬럼 인덱스 10 = 26년 당월 실적
+          // 시트 헤더에서 'N월' 셀 찾기 → 해당 열 기준
+          let plMi = null;
+          for(const row of plRows){
+            if(!row) continue;
+            for(const cell of row){
+              if(cell && /^\d{1,2}월$/.test(String(cell).trim())){
+                plMi = MMAP[String(cell).trim()];
+                break;
+              }
+            }
+            if(plMi != null) break;
+          }
+          // uploadedMonths도 fallback으로 사용
+          const plMonths = plMi != null ? [plMi]
+            : uploadedMonths.map(mn=>MMAP[mn]).filter(i=>i!=null);
+          plMonths.forEach(mi => {
+            const r신규  = 신규idx  >= 0 ? plRows[신규idx]  : null;
+            const r재가맹 = 재가맹idx >= 0 ? plRows[재가맹idx] : null;
+            if(r신규) { const v=r신규[10];  if(v!=null&&v!=='') DEPT_DATA.franchise.신규가맹수.yr26actual[mi]=Number(v); }
+            if(r재가맹){ const v=r재가맹[10]; if(v!=null&&v!=='') DEPT_DATA.franchise.재가맹수.yr26actual[mi]=Number(v); }
+          });
+          await saveDeptActual('franchise','', '신규가맹수', DEPT_DATA.franchise.신규가맹수.yr26actual);
+          await saveDeptActual('franchise','', '재가맹수', DEPT_DATA.franchise.재가맹수.yr26actual);
+        }
       }
 
       // 대시보드 데이터 갱신
