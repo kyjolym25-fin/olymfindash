@@ -4193,12 +4193,22 @@ function applyAuth(){
   if(loggedIn){
     landing.style.display='none';
     if(authBtn) authBtn.style.display='flex';
-    // 현재 어느 화면이 열려 있지 않으면 허브 표시
+    // 현재 어느 화면이 열려 있지 않으면 → 저장된 뷰 복원 or 허브
     const dashOpen = dash.style.display==='block';
     const dirOpen  = dirWrap.style.display==='block';
     if(!dashOpen && !dirOpen){
-      hub.style.display='flex';
-      tabs.style.display='none';
+      const saved=getDashView();
+      if(saved==='main'&&!isDirector){
+        hub.style.display='none';
+        dash.style.display='block';
+        tabs.style.display='flex';
+      } else if(saved==='director'){
+        hub.style.display='none';
+        dirWrap.style.display='block';
+      } else {
+        hub.style.display='flex';
+        tabs.style.display='none';
+      }
     }
     // 허브 카드 활성/비활성
     const hubCardSoin=document.getElementById('hubCardSoin');
@@ -4246,6 +4256,10 @@ function applyAuth(){
   loadComments();
 }
 
+const DKEY='olymp_dashview'; // 'main' | 'director' | 'hub'
+const saveDashView=v=>{ try{ sessionStorage.setItem(DKEY,v); }catch{} };
+const getDashView=()=>{ try{ return sessionStorage.getItem(DKEY)||''; }catch{ return ''; } };
+
 function goHub(){
   const hub=document.getElementById('hub-screen');
   const dash=document.getElementById('dashboard-wrap');
@@ -4255,6 +4269,7 @@ function goHub(){
   dash.style.display='none';
   dirWrap.style.display='none';
   tabs.style.display='none';
+  saveDashView('hub');
 }
 
 function goSoinDash(){
@@ -4266,7 +4281,7 @@ function goSoinDash(){
   hub.style.display='none';
   dash.style.display='block';
   tabs.style.display='flex';
-  // overview 기본 활성화
+  saveDashView('main');
   const ovEl=document.querySelector('#mainTabs .tab[onclick*="\'overview\'"]');
   if(ovEl) goMain('overview',ovEl);
 }
@@ -4278,7 +4293,7 @@ function goDirectorDash(){
   const dirWrap=document.getElementById('director-wrap');
   hub.style.display='none';
   dirWrap.style.display='block';
-  // 캠퍼스명 표시
+  saveDashView('director');
   const camp=s.campus||'';
   const nameEl=document.getElementById('dirCampName');
   if(nameEl) nameEl.textContent=camp?(camp+' 캠퍼스'):'캠퍼스';
