@@ -106,6 +106,7 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
 /* ── METRIC MINI CARDS ── */
 .mini-cards{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px}
 .mc4{grid-template-columns:repeat(4,1fr)}
+.mc6{grid-template-columns:repeat(6,1fr)}
 .mini-card{background:var(--s1);border-radius:14px;padding:17px 16px;position:relative;overflow:hidden;box-shadow:var(--shadow)}
 .mini-card::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:14px 14px 0 0}
 .mini-card.c25::after{background:linear-gradient(90deg,#4361EE,#738EFF)}
@@ -729,7 +730,7 @@ thead th{font-size:13px}
 
   <!-- ── 미래교육사업본부 ── -->
   <div class="subpage" id="sp-mirae">
-    <div class="mini-cards">
+    <div class="mini-cards mc6">
       <div class="mini-card c26a"><div class="mc-lbl">미래교육 전체 매출</div><div class="mc-val"><span id="mirae-val-s">3.9억</span></div><div class="mc-meta" id="mirae-meta-s" style="color:var(--muted)">26년 1월 실적</div></div>
       <div class="mini-card c26a"><div class="mc-lbl">교재 매출</div><div class="mc-val"><span id="mirae-val-book">1.1억</span></div><div class="mc-meta" id="mirae-meta-book" style="color:var(--c26a)">계획比 +0.18억 (+21.2%)</div></div>
       <div class="mini-card c26a"><div class="mc-lbl">원격 매출</div><div class="mc-val"><span id="mirae-val-remote">2.9억</span></div><div class="mc-meta" id="mirae-meta-remote" style="color:var(--c26a)">계획比 +0.29억 (+11.4%)</div></div>
@@ -759,11 +760,9 @@ thead th{font-size:13px}
       </div>
       <div class="cw" style="height:210px"><canvas id="c_mirae_mountain"></canvas></div>
     </div>
-  <div id="cb-mirae-mtn" class="comment-box" style="display:none"><div class="cb-label"><span>✦</span> COMMENT</div><div class="cb-text" id="cb-text-mirae-mtn"></div><div class="cb-date" id="cb-date-mirae-mtn"></div></div>
-  <div id="ce-mirae-mtn" class="comment-editor"><div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div><textarea id="ce-text-mirae-mtn" placeholder="코멘트를 입력하세요..."></textarea><div class="cb-btns"><button class="cb-del" onclick="deleteComment('mirae-mtn')">삭제</button><button class="cb-save" onclick="saveComment('mirae-mtn')">저장</button></div></div>
 
     <div class="period-section-hd">
-      <span class="period-badge monthly">📅 당월 (1월)</span>
+      <span class="period-badge monthly" id="mirae-badge-m">📅 당월 (1월)</span>
       <div class="period-line"></div>
     </div>
     <!-- 교재·원격 매출 그래프 -->
@@ -1744,8 +1743,8 @@ function buildCcCostRow(cc, mi) {
     adv:     { yr25: yr25c.adv?.[mi]??null,     yr26p: yr26pc.adv?.[mi]??null,     yr26a: act?.c?.adv??null },
     other:   { yr25: yr25c.other?.[mi]??null,   yr26p: yr26pc.other?.[mi]??null,   yr26a: act?.c?.other??null },
     total:   { yr25: t25,  yr26p: t26p,  yr26a: t26a },
-    common:  { yr25: null, yr26p: null,  yr26a: null },
-    total2:  { yr25: t25,  yr26p: t26p,  yr26a: t26a },
+    common:  { yr25: null, yr26p: null,  yr26a: act?.common ?? null },
+    total2:  { yr25: t25,  yr26p: t26p,  yr26a: (t26a != null && act?.common != null) ? t26a + act.common : t26a },
     isCcMode: true,
   };
 }
@@ -1843,20 +1842,24 @@ function renderCostTable(containerId, camps, mi) {
         <td style="padding:4px 10px;font-size:11px;color:var(--muted)">공통비 제외</td>
         ${cells3(tot.yr25,tot.yr26p,tot.yr26a,d.sales.yr25,d.sales.yr26p,d.sales.yr26a,true)}
       </tr>`;
-      if (!d.isCcMode) {
-        // 공통비 + 합계(공통비포함)는 합산 모드(buildCampRow)에서만 표시
+      {
         const com=d.common;
-        rows+=`<tr style="border-bottom:1px solid var(--border)">
-          <td style="padding:4px 10px;font-size:14px;display:flex;align-items:center">${dot(di++)}공통비</td>
-          <td style="padding:4px 10px;font-size:11px;color:var(--muted)">본부 배부 공통비</td>
-          ${cells3(com.yr25,com.yr26p,com.yr26a,d.sales.yr25,d.sales.yr26p,d.sales.yr26a,false)}
-        </tr>`;
-        const tot2=d.total2;
-        rows+=`<tr style="background:var(--s2);border-top:2px solid var(--border2)">
-          <td style="padding:5px 10px;font-size:14px;font-weight:700;display:flex;align-items:center">${dot(di++)}합계(공통비포함)</td>
-          <td></td>
-          ${cells3(tot2.yr25,tot2.yr26p,tot2.yr26a,d.sales.yr25,d.sales.yr26p,d.sales.yr26a,true)}
-        </tr>`;
+        // CC 모드에서는 26실적 공통비가 있을 때만 표시; 합산 모드는 항상 표시
+        const showCommon = !d.isCcMode || com.yr26a != null;
+        if (showCommon) {
+          const comNote = d.isCcMode ? '매출비율 안분' : '본부 배부 공통비';
+          rows+=`<tr style="border-bottom:1px solid var(--border)">
+            <td style="padding:4px 10px;font-size:14px;display:flex;align-items:center">${dot(di++)}공통비</td>
+            <td style="padding:4px 10px;font-size:11px;color:var(--muted)">${comNote}</td>
+            ${cells3(com.yr25,com.yr26p,com.yr26a,d.sales.yr25,d.sales.yr26p,d.sales.yr26a,false)}
+          </tr>`;
+          const tot2=d.total2;
+          rows+=`<tr style="background:var(--s2);border-top:2px solid var(--border2)">
+            <td style="padding:5px 10px;font-size:14px;font-weight:700;display:flex;align-items:center">${dot(di++)}합계(공통비포함)</td>
+            <td></td>
+            ${cells3(tot2.yr25,tot2.yr26p,tot2.yr26a,d.sales.yr25,d.sales.yr26p,d.sales.yr26a,true)}
+          </tr>`;
+        }
       }
 
       // onclick 속성 안에서 큰따옴표 충돌 방지 → 단따옴표 배열 문자열 사용
@@ -2896,6 +2899,8 @@ function renderDeptKpi(mi){
   set('u2m-badge-m',  `📅 당월 (${mn})`);
   set('u2m-badge-ytd',`📊 YTD 누적 (1~${ytdMn})`);
   set('mirae-badge-ytd',`📊 YTD 누적 (1~${ytdMn})`);
+  set('mirae-badge-m',  `📅 당월 (${mn})`);
+  if(inited['dept_mirae']) initMirae(mi);
   if(inited['dept'])     { renderHakwonTree(mi); renderCostTable('hak_cost_table', ['광진','성동','동대문','중랑'], mi); }
   if(inited['dept_u2m']){ renderU2mTree(mi);    renderCostTable('u2m_cost_table', ['중계','송파방이','미사','위례'], mi); }
   if(inited['dept_bghu']) initBgh(mi);
@@ -3013,27 +3018,47 @@ function initU2m(){
 // ============================================================
 // DEPT: 미래교육사업본부
 // ============================================================
-function initMirae(){
-  // ── 매출 데이터 (26년 1월 실적)
-  const MIRAE = {
+function initMirae(mi){
+  if(mi === undefined) mi = deptMonth;
+  const months = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  const mn = months[mi];
+  const 미래명 = ['미래교육사업부','미래교육사업본부'];
+  const isBook   = a => a && a.includes('도서');
+  const isOnline = a => a && (a.includes('온라인') || a.includes('컨텐츠'));
+  // RAW_DB에서 CC별 교재/원격 26실적 집계
+  const sumCC = (cc, acctFn) => RAW_DB
+    .filter(r => 미래명.includes(r.d) && r.m===mn && r.cc===cc && r.t==='매출' && acctFn(r.a))
+    .reduce((s,r)=>s+r.v, 0);
+  const hasAct = RAW_DB.some(r=>미래명.includes(r.d) && r.m===mn);
+
+  // ── 매출 데이터 (25년/26계획은 1월 기준, 26실적은 당월 RAW_DB에서 추출)
+  const MIRAE_1월 = {
     직영수학: {
       yr25: {book:5702200,  online:52977900,  total:58680100},
       yr26p:{book:4525500,  online:27171920,  total:31697420},
-      yr26a:{book:7511600,  online:58672500,  total:66184100},
     },
     직영영어: {
       yr25: {book:1586900,  online:29798100,  total:31385000},
       yr26p:{book:1424160,  online:27341193,  total:28765353},
-      yr26a:{book:886200,   online:26538400,  total:27424600},
     },
     FC수학: {
       yr25: {book:85788980, online:189439600, total:275228580},
       yr26p:{book:80647000, online:202584171, total:283231171},
-      yr26a:{book:96586840, online:201166300, total:297753140},
     },
   };
   const CCS = ['직영수학','직영영어','FC수학'];
   const COLORS = {'직영수학':'#4361EE','직영영어':'#7C5CFC','FC수학':'#0ea872'};
+  // MIRAE: yr25/yr26p는 1월 고정, yr26a는 당월 RAW_DB 추출
+  const MIRAE = {};
+  CCS.forEach(cc => {
+    const book26a   = hasAct ? sumCC(cc, isBook)   : (mi===0 ? (cc==='직영수학'?7511600:cc==='직영영어'?886200:96586840) : 0);
+    const online26a = hasAct ? sumCC(cc, isOnline) : (mi===0 ? (cc==='직영수학'?58672500:cc==='직영영어'?26538400:201166300) : 0);
+    MIRAE[cc] = {
+      yr25: mi===0 ? MIRAE_1월[cc].yr25 : {book:0,online:0,total:0},
+      yr26p:mi===0 ? MIRAE_1월[cc].yr26p: {book:0,online:0,total:0},
+      yr26a:{book:book26a, online:online26a, total:book26a+online26a},
+    };
+  });
 
   const fk = v => Math.round(v/1000).toLocaleString();
   const fm = v => (v/1e6).toFixed(1);
@@ -3061,16 +3086,16 @@ function initMirae(){
           {
             label:'교재 (도서수입)',
             data: CCS.map(c=>MIRAE[c].yr26a.book/1e6),
-            backgroundColor: CCS.map(c=>COLORS[c]+'99'),
-            borderColor:     CCS.map(c=>COLORS[c]),
+            backgroundColor: '#4361EEaa',
+            borderColor:     '#4361EE',
             borderWidth:1,
             borderRadius:4,
           },
           {
             label:'원격 (온라인컨텐츠)',
             data: CCS.map(c=>MIRAE[c].yr26a.online/1e6),
-            backgroundColor: CCS.map(c=>COLORS[c]+'dd'),
-            borderColor:     CCS.map(c=>COLORS[c]),
+            backgroundColor: '#10B981aa',
+            borderColor:     '#10B981',
             borderWidth:1,
             borderRadius:4,
           },
@@ -3103,17 +3128,17 @@ function initMirae(){
 
   const thType = (label) => `<th colspan="5" style="padding:5px 8px;text-align:center;font-size:11px;font-weight:700;color:var(--text)">${label}</th>`;
   const fPct = (a,b) => b>0 ? (a/b*100).toFixed(1)+'%' : '-';
-  const fDiff = v => (v>=0?'+':'')+fm(v);
-  const cellsType = (d25, d26p, d26a, key, first) => {
+  const cellsType = (d25, d26p, d26a, key) => {
     const [v25,v26p,v26a] = [d25[key]||0, d26p[key]||0, d26a[key]||0];
     const hasData = d26a.total > 0;
-    const diff = v26a - v25;
+    const has25 = d25.total > 0;
+    const yoyPct = has25&&hasData&&v25>0 ? (v26a-v25)/v25*100 : null;
     return `
-      <td style="padding:5px 8px;text-align:right;font-size:14px">${d25.total>0?fm(v25):'-'}</td>
+      <td style="padding:5px 8px;text-align:right;font-size:14px">${has25?fm(v25):'-'}</td>
       <td style="padding:5px 8px;text-align:right;font-size:14px">${d26p.total>0?fm(v26p):'-'}</td>
       <td style="padding:5px 8px;text-align:right;font-size:14px">${hasData?fm(v26a):'-'}</td>
       <td style="padding:5px 8px;text-align:right;font-size:12px;color:${hasData&&d26p.total>0?(v26a>=v26p?'var(--c26a)':'var(--loss)'):'var(--muted)'}">${hasData&&d26p.total>0?fPct(v26a,v26p):'-'}</td>
-      <td style="padding:5px 8px;text-align:right;font-size:12px;color:${diff>=0?'var(--c26a)':'var(--loss)'}">${hasData&&d25.total>0?fDiff(diff):'-'}</td>`;
+      <td style="padding:5px 8px;text-align:right;font-size:12px;color:${yoyPct!=null?(yoyPct>=0?'var(--c26a)':'var(--loss)'):'var(--muted)'}">${yoyPct!=null?(yoyPct>=0?'+':'')+yoyPct.toFixed(1)+'%':'-'}</td>`;
   };
 
   let revRows = '';
@@ -3122,8 +3147,8 @@ function initMirae(){
     const d = MIRAE[cc];
     revRows += `<tr style="border-bottom:1px solid var(--border)">
       <td style="padding:5px 10px;font-size:12px;font-weight:600;color:${col}">${cc}</td>
-      ${cellsType(d.yr25,d.yr26p,d.yr26a,'book',true)}
-      ${cellsType(d.yr25,d.yr26p,d.yr26a,'online',true)}
+      ${cellsType(d.yr25,d.yr26p,d.yr26a,'book')}
+      ${cellsType(d.yr25,d.yr26p,d.yr26a,'online')}
     </tr>`;
   }
   const td = totals;
@@ -3142,7 +3167,7 @@ function initMirae(){
           ${thType('원격')}
         </tr>
         <tr style="background:var(--s3)">
-          ${['교재','원격'].map(()=>YRS.map(yr=>`<th style="${thS2};color:${YR_COLORS[yr]}">${YR_LABELS[yr]}</th>`).join('')+`<th style="${thS2}">계획비</th><th style="${thS2}">증감액</th>`).join('')}
+          ${['교재','원격'].map(()=>YRS.map(yr=>`<th style="${thS2};color:${YR_COLORS[yr]}">${YR_LABELS[yr]}</th>`).join('')+`<th style="${thS2}">계획비</th><th style="${thS2}">전년비</th>`).join('')}
         </tr>
       </thead>
       <tbody>${revRows}</tbody>
@@ -3881,7 +3906,7 @@ function goDept(id,el){
   if(!inited['dept_'+id]){
     inited['dept_'+id]=true;
     if(id==='u2m')       initU2m();
-    if(id==='mirae')     initMirae();
+    if(id==='mirae')     initMirae(deptMonth);
     if(id==='bghu')      initBgh(deptMonth);
     if(id==='mgmt')      initMgmt(deptMonth);
     if(id==='franchise') initFranchise();
@@ -4925,10 +4950,14 @@ function applyRawToDashboard(){
           .filter(r=>r.t==='판매관리비' && classifyHakwonCc(camp, r)===`${camp}영어`)
           .reduce((s,r)=>s+r.v,0);
         const ccCat=(cc,cat)=>campRows.filter(r=>r.t==='판매관리비'&&classifyHakwonCc(camp,r)===cc&&costCat(r.a)===cat).reduce((s,r)=>s+r.v,0);
+        // 공통비: RAW_DB cc 필드로 수학/영어 직접 구분 집계
+        const ccCommon = (cc) => campRows.filter(r=>r.t==='공통비'&&classifyHakwonCc(camp,r)===cc).reduce((s,r)=>s+r.v,0);
+        const common수 = ccCommon(`${camp}수학`);
+        const common영 = ccCommon(`${camp}영어`);
         if(s수){ if(!CC_MONTH_ACTUAL[ccs[0]])CC_MONTH_ACTUAL[ccs[0]]=Array(12).fill(null);
-          CC_MONTH_ACTUAL[ccs[0]][mi]={s:s수,p2:s수-c수,c:{staff:ccCat(`${camp}수학`,'staff'),instr:ccCat(`${camp}수학`,'instr'),vehicle:ccCat(`${camp}수학`,'vehicle'),rent:ccCat(`${camp}수학`,'rent'),bldg:ccCat(`${camp}수학`,'bldg'),adv:ccCat(`${camp}수학`,'adv'),other:ccCat(`${camp}수학`,'other')}}; }
+          CC_MONTH_ACTUAL[ccs[0]][mi]={s:s수,p2:s수-c수,common:common수,c:{staff:ccCat(`${camp}수학`,'staff'),instr:ccCat(`${camp}수학`,'instr'),vehicle:ccCat(`${camp}수학`,'vehicle'),rent:ccCat(`${camp}수학`,'rent'),bldg:ccCat(`${camp}수학`,'bldg'),adv:ccCat(`${camp}수학`,'adv'),other:ccCat(`${camp}수학`,'other')}}; }
         if(s영){ if(!CC_MONTH_ACTUAL[ccs[1]])CC_MONTH_ACTUAL[ccs[1]]=Array(12).fill(null);
-          CC_MONTH_ACTUAL[ccs[1]][mi]={s:s영,p2:s영-c영,c:{staff:ccCat(`${camp}영어`,'staff'),instr:ccCat(`${camp}영어`,'instr'),vehicle:ccCat(`${camp}영어`,'vehicle'),rent:ccCat(`${camp}영어`,'rent'),bldg:ccCat(`${camp}영어`,'bldg'),adv:ccCat(`${camp}영어`,'adv'),other:ccCat(`${camp}영어`,'other')}}; }
+          CC_MONTH_ACTUAL[ccs[1]][mi]={s:s영,p2:s영-c영,common:common영,c:{staff:ccCat(`${camp}영어`,'staff'),instr:ccCat(`${camp}영어`,'instr'),vehicle:ccCat(`${camp}영어`,'vehicle'),rent:ccCat(`${camp}영어`,'rent'),bldg:ccCat(`${camp}영어`,'bldg'),adv:ccCat(`${camp}영어`,'adv'),other:ccCat(`${camp}영어`,'other')}}; }
       }
     });
   });
@@ -4938,7 +4967,7 @@ function applyRawToDashboard(){
   months.forEach((mn,mi)=>{
     const 교재 = sum(r=>미래명.includes(effDept(r)) && r.m===mn && r.t==='매출' && r.a&&(r.a.includes('교재')||r.a.includes('도서')));
     const 원격 = sum(r=>미래명.includes(effDept(r)) && r.m===mn && r.t==='매출' && r.a&&(r.a.includes('원격')||r.a.includes('온라인')));
-    const b2b  = sum(r=>미래명.includes(effDept(r)) && r.m===mn && r.t==='매출' && r.a==='가맹비수입' && effCamp(r)==='FC');
+    const b2b  = sum(r=>r.m===mn && r.t==='매출' && r.a==='가맹비수입' && effCamp(r)==='FC');
     const ms   = sum(r=>미래명.includes(effDept(r)) && r.m===mn && r.t==='매출');
     const mc   = sum(r=>미래명.includes(effDept(r)) && r.m===mn && r.t==='판매관리비');
     const hasMirae = RAW_DB.some(r=>미래명.includes(effDept(r)) && r.m===mn);
