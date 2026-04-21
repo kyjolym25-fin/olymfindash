@@ -803,7 +803,7 @@ thead th{font-size:13px}
       <div class="period-line"></div>
     </div>
     <div class="full card">
-      <div class="ch"><div><div class="ct">YTD 교재·원격 매출 누적</div><div class="cs">25년 실적 / 26년 계획 / 26년 실적 누적합계</div></div></div>
+      <div class="ch"><div><div class="ct">YTD 매출·영업이익 누적</div><div class="cs">25년 실적 / 26년 계획 / 26년 실적 누적합계</div></div></div>
       <div id="mirae_rev_ytd"></div>
     </div>
 
@@ -2586,38 +2586,52 @@ function renderMiraeYtd(mi){
   const mr=DEPT_DATA.mirae;
   const MN=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
   const sum=(arr,to)=>arr.slice(0,to+1).reduce((s,v)=>s+(v??0),0);
-  const b25=sum(mr.교재매출.yr25,mi), b26p=sum(mr.교재매출.yr26base,mi);
-  const r25=sum(mr.원격매출.yr25,mi), r26p=sum(mr.원격매출.yr26base,mi);
-  const p25=sum(mr.영업이익.yr25,mi), p26p=sum(mr.영업이익.yr26base,mi);
+  const b25=sum(mr.교재매출.yr25,mi),  b26p=sum(mr.교재매출.yr26base,mi);
+  const r25=sum(mr.원격매출.yr25,mi),  r26p=sum(mr.원격매출.yr26base,mi);
+  const p25=sum(mr.영업이익.yr25,mi),  p26p=sum(mr.영업이익.yr26base,mi);
   const b26a=cap>=0?sum(mr.교재매출.yr26actual,cap):null;
   const r26a=cap>=0?sum(mr.원격매출.yr26actual,cap):null;
   const p26a=cap>=0?sum(mr.영업이익.yr26actual,cap):null;
   const s25=b25+r25, s26p=b26p+r26p, s26a=b26a!=null?(b26a+r26a):null;
   const actLbl=cap>=0&&cap<mi?`실적(1~${MN[cap]})`:`실적(1~${MN[mi]})`;
   const fx=v=>v!=null?fmt억(v):'-';
-  const pct=(a,b)=>a!=null&&b>0?`<span style="color:${a>=b?'var(--c26a)':'var(--loss)'}">${((a-b)/Math.abs(b)*100).toFixed(1)}%</span>`:'-';
-  const row=(lbl,v25,v26p,v26a)=>`<tr>
-    <td style="padding:5px 10px;font-weight:600;font-size:11px;border:1px solid var(--border)">${lbl}</td>
-    <td style="padding:5px 10px;text-align:right;color:var(--c25);border:1px solid var(--border)">${fx(v25)}</td>
-    <td style="padding:5px 10px;text-align:right;color:var(--c26p);border:1px solid var(--border)">${fx(v26p)}</td>
-    <td style="padding:5px 10px;text-align:right;color:var(--c26a);font-weight:700;border:1px solid var(--border)">${fx(v26a)}</td>
-    <td style="padding:5px 10px;text-align:right;font-size:11px;border:1px solid var(--border)">${pct(v26a,v26p)}</td>
-  </tr>`;
-  el.innerHTML=`<table style="width:100%;border-collapse:collapse;font-size:12px">
-    <thead><tr style="background:var(--s3)">
-      <th style="padding:5px 10px;text-align:left;color:var(--muted);border:1px solid var(--border)">항목</th>
-      <th style="padding:5px 10px;text-align:right;color:var(--c25);border:1px solid var(--border)">25년</th>
-      <th style="padding:5px 10px;text-align:right;color:var(--c26p);border:1px solid var(--border)">26년 계획</th>
-      <th style="padding:5px 10px;text-align:right;color:var(--c26a);border:1px solid var(--border)">${actLbl}</th>
-      <th style="padding:5px 10px;text-align:right;color:var(--muted);border:1px solid var(--border)">계획比</th>
-    </tr></thead>
+  const dash='<span style="color:var(--muted)">-</span>';
+  const ac=v=>v==null?'var(--muted)':v>=100?'var(--c26a)':v>=80?'var(--yellow)':'var(--loss)';
+  const pctCell=(a26,b26p)=>{if(a26==null)return dash;const v=b26p?a26/b26p*100:null;return `<span style="color:${ac(v)};font-weight:600">${v!=null?v.toFixed(1)+'%':'-'}</span>`;};
+  const yoyCell=(a26,b25)=>{if(a26==null)return dash;const d=a26-b25,sg=d>=0?'+':'';return `<span style="color:${d>=0?'var(--c26a)':'var(--loss)'};font-weight:600">${sg}${fmt억(d)??'-'}</span>`;};
+  const thS='padding:5px 8px;text-align:right;font-size:10.5px;font-weight:600';
+  const tdS=(c='')=>`padding:8px 10px;text-align:right;border-bottom:1px solid var(--border);${c}`;
+  const row=(lbl,v25,v26p,v26a,isBold=false,isProfit=false)=>{
+    const actColor=v26a==null?'var(--muted)':isProfit?(v26a>=0?'var(--c26a)':'var(--loss)'):'var(--c26a)';
+    return `<tr onmouseover="this.style.background='var(--s3)'" onmouseout="this.style.background=''">
+      <td style="padding:8px 10px;font-weight:${isBold?700:600};font-size:${isBold?'13px':'12px'};border-bottom:1px solid var(--border)">${lbl}</td>
+      <td style="${tdS('color:var(--c25)')}"> ${fx(v25)}</td>
+      <td style="${tdS('color:var(--c26p)')}"> ${fx(v26p)}</td>
+      <td style="${tdS(`color:${actColor};font-weight:${isBold?700:600}`)}"> ${fx(v26a)}</td>
+      <td style="${tdS()}">${pctCell(v26a,v26p)}</td>
+      <td style="${tdS()}">${yoyCell(v26a,v25)}</td>
+    </tr>`;
+  };
+  el.innerHTML=`<div style="overflow-x:auto">
+  <table style="width:100%;border-collapse:collapse;font-size:13px;min-width:560px">
+    <thead>
+      <tr style="background:var(--s3)">
+        <th rowspan="2" style="padding:7px 10px;text-align:left;color:var(--muted);font-weight:600;border-bottom:2px solid var(--border2);min-width:100px">항목</th>
+        <th style="${thS};color:var(--c25);border-bottom:1px solid var(--border)">25년 실적</th>
+        <th style="${thS};color:var(--c26p);border-bottom:1px solid var(--border)">26년 계획</th>
+        <th style="${thS};color:var(--c26a);border-bottom:1px solid var(--border)">${actLbl}</th>
+        <th style="${thS};color:var(--muted);border-bottom:1px solid var(--border)">계획比</th>
+        <th style="${thS};color:var(--muted);border-bottom:1px solid var(--border)">전년比</th>
+      </tr>
+      <tr><td colspan="6" style="padding:0;border-bottom:2px solid var(--border2)"></td></tr>
+    </thead>
     <tbody>
       ${row('교재매출',b25,b26p,b26a)}
       ${row('원격매출',r25,r26p,r26a)}
-      ${row('매출합계',s25,s26p,s26a)}
-      ${row('영업이익',p25,p26p,p26a)}
+      ${row('매출합계',s25,s26p,s26a,true)}
+      ${row('영업이익',p25,p26p,p26a,true,true)}
     </tbody>
-  </table>`;
+  </table></div>`;
 }
 
 function _mkKpiHelpers(mi){
