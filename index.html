@@ -490,7 +490,7 @@ thead th{font-size:13px}
       </div>
       <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
         <div id="dirUploadMsg" style="font-size:11px;color:var(--muted)"></div>
-        <button class="auth-btn-primary" style="width:auto;padding:8px 18px;font-size:12px;white-space:nowrap" onclick="document.getElementById('dirXlsxFile').click()">📂 파일 업로드</button>
+        <button id="dirUploadBtn" class="auth-btn-primary" style="width:auto;padding:8px 18px;font-size:12px;white-space:nowrap;display:none" onclick="document.getElementById('dirXlsxFile').click()">📂 파일 업로드</button>
         <input type="file" id="dirXlsxFile" accept=".xlsx" style="display:none" onchange="handleDirXlsxUpload(this)">
       </div>
     </div>
@@ -4251,6 +4251,8 @@ function applyAuth(){
       } else if(saved==='director'){
         hub.style.display='none';
         dirWrap.style.display='block';
+        const uploadBtn=document.getElementById('dirUploadBtn');
+        if(uploadBtn) uploadBtn.style.display=(s&&s.role==='admin')?'':'none';
         loadCampusPl().then(()=>renderDirList());
       } else {
         hub.style.display='flex';
@@ -4343,6 +4345,9 @@ async function goDirectorDash(){
   saveDashView('director');
   const nameEl=document.getElementById('dirCampName');
   if(nameEl) nameEl.textContent='불러오는 중...';
+  // 업로드 버튼: 관리자만
+  const uploadBtn=document.getElementById('dirUploadBtn');
+  if(uploadBtn) uploadBtn.style.display=(s.role==='admin')?'':'none';
   await loadCampusPl();
   if(nameEl) nameEl.textContent='직영캠퍼스 손익';
   renderDirList();
