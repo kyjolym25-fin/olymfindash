@@ -2478,7 +2478,7 @@ const CC_COSTS = {
 // ── U2M사업부 렌더 ──
 function renderU2mTree(mi=0){
   const MN=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
-  const u2mDef=[{name:'U2M사업부', color:'#6a28d9', emoji:'🏢', ccs:['중계수학','송파방이수학','위례수학','미사수학']}];
+  const u2mDef=[{name:'U2M사업부', color:'#6a28d9', emoji:'🏢', ccs:['중계수학','송파방이수학','미사수학','위례수학']}];
   renderCC3YTree('u2m_tree', u2mDef, buildCC3YMonth(mi));
   const ytdCap=latestActMi>=0?Math.min(mi,latestActMi):mi;
   const ytdLbl=ytdCap<mi?`YTD (1~${MN[ytdCap]}, 실적기준)`:`YTD (1~${MN[mi]})`;
