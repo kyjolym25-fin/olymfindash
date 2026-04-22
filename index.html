@@ -5650,7 +5650,7 @@ function renderDirDetail(){
   if(!data){ el.innerHTML=''; return; }
   const MN=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
   const months=data.months;
-  const fx=v=>v==null||v===0?'-':(v<0?'▲':'')+Math.abs(v).toLocaleString('ko-KR');
+  const fx=v=>v==null||v===0?'-':v.toLocaleString('ko-KR');
 
   let html=`<div style="overflow-x:auto"><table class="dir-pl-full-tbl">
     <thead><tr><th>계정과목</th>${months.map(mi=>`<th>${MN[mi]}</th>`).join('')}</tr></thead><tbody>`;
