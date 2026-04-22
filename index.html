@@ -1406,6 +1406,43 @@ thead th{font-size:13px}
     </div>
   </div>
   <div class="admin-sec">
+    <h3>🤝 가맹사업 건수 입력</h3>
+    <p style="font-size:12px;color:var(--muted);margin:0 0 14px">신규가맹·재가맹 수는 손익계산서에 없으므로 직접 입력합니다.</p>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px">
+      <div>
+        <div style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:6px">월</div>
+        <div style="display:flex;gap:4px;flex-wrap:wrap" id="fr_month_btns">
+          <button class="atab on" onclick="setFrMonth(1,this)">1월</button>
+          <button class="atab" onclick="setFrMonth(2,this)">2월</button>
+          <button class="atab" onclick="setFrMonth(3,this)">3월</button>
+          <button class="atab" onclick="setFrMonth(4,this)">4월</button>
+          <button class="atab" onclick="setFrMonth(5,this)">5월</button>
+          <button class="atab" onclick="setFrMonth(6,this)">6월</button>
+          <button class="atab" onclick="setFrMonth(7,this)">7월</button>
+          <button class="atab" onclick="setFrMonth(8,this)">8월</button>
+          <button class="atab" onclick="setFrMonth(9,this)">9월</button>
+          <button class="atab" onclick="setFrMonth(10,this)">10월</button>
+          <button class="atab" onclick="setFrMonth(11,this)">11월</button>
+          <button class="atab" onclick="setFrMonth(12,this)">12월</button>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;gap:20px;align-items:flex-end;flex-wrap:wrap">
+      <div>
+        <div style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:4px">신규가맹 수</div>
+        <input type="number" id="frInputNew" min="0" style="width:100px;background:var(--s2);border:1px solid var(--c26a);border-radius:6px;padding:7px 10px;font-size:14px;font-weight:700;color:var(--c26a);text-align:center">
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:4px">재가맹 수</div>
+        <input type="number" id="frInputRenew" min="0" style="width:100px;background:var(--s2);border:1px solid var(--c26p);border-radius:6px;padding:7px 10px;font-size:14px;font-weight:700;color:var(--c26p);text-align:center">
+      </div>
+      <button class="auth-btn-primary" style="width:auto;padding:9px 22px" onclick="saveFrCount()">💾 저장</button>
+      <span id="frInputMsg" style="font-size:11px;color:var(--muted)"></span>
+    </div>
+    <div id="frCountSummary" style="margin-top:14px;font-size:11px;color:var(--muted)"></div>
+  </div>
+
+  <div class="admin-sec">
     <h3>📊 계획/실적 데이터 편집</h3>
     <p style="font-size:12px;color:var(--muted);margin:0 0 12px">25년 실적·26년 계획 데이터를 DB에서 관리합니다. 최초 1회 <strong style="color:var(--text)">초기 데이터 업로드</strong>로 현재 내장값을 DB에 저장하세요.</p>
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:16px">
@@ -4587,6 +4624,56 @@ function saveAdminStuData(){
   setTimeout(() => msg.textContent = '', 3000);
 }
 
+// ── 가맹수 직접 입력 ──
+let frAdminMonth = 0; // 0-indexed
+
+function setFrMonth(month, btn){
+  frAdminMonth = month - 1;
+  document.querySelectorAll('#fr_month_btns .atab').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  renderFrCountInputs();
+}
+
+function renderFrCountInputs(){
+  const mi = frAdminMonth;
+  const fr = DEPT_DATA.franchise;
+  const nv = fr.신규가맹수.yr26actual[mi];
+  const rv = fr.재가맹수.yr26actual[mi];
+  const inp1 = document.getElementById('frInputNew');
+  const inp2 = document.getElementById('frInputRenew');
+  if(inp1) inp1.value = nv != null ? nv : '';
+  if(inp2) inp2.value = rv != null ? rv : '';
+  // 전체 요약
+  const MN=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  const summary = MN.map((m,i)=>{
+    const n=fr.신규가맹수.yr26actual[i]; const r=fr.재가맹수.yr26actual[i];
+    if(n==null&&r==null) return '';
+    return `<span style="margin-right:12px">${m} 신규<b style="color:var(--c26a)">${n??'-'}</b> 재가맹<b style="color:var(--c26p)">${r??'-'}</b></span>`;
+  }).filter(Boolean).join('');
+  const el=document.getElementById('frCountSummary');
+  if(el) el.innerHTML=summary||'저장된 데이터 없음';
+}
+
+async function saveFrCount(){
+  const mi = frAdminMonth;
+  const msg = document.getElementById('frInputMsg');
+  const nv = document.getElementById('frInputNew').value;
+  const rv = document.getElementById('frInputRenew').value;
+  DEPT_DATA.franchise.신규가맹수.yr26actual[mi] = nv===''?null:Number(nv);
+  DEPT_DATA.franchise.재가맹수.yr26actual[mi]   = rv===''?null:Number(rv);
+  try{
+    await saveDeptActual('franchise','','신규가맹수', DEPT_DATA.franchise.신규가맹수.yr26actual);
+    await saveDeptActual('franchise','','재가맹수',   DEPT_DATA.franchise.재가맹수.yr26actual);
+    msg.style.color='var(--c26a)';
+    msg.textContent=`✓ ${frAdminMonth+1}월 저장 완료`;
+    renderFrCountInputs();
+    renderFranchiseKpi(); // 가맹사업 KPI 즉시 갱신
+  }catch(e){
+    msg.style.color='var(--loss)'; msg.textContent='저장 실패: '+e.message;
+  }
+  setTimeout(()=>msg.textContent='',3000);
+}
+
 function handleStuXlsxUpload(event){
   const file = event.target.files[0]; if(!file) return;
   const msg = document.getElementById('stuUploadMsg');
@@ -4722,6 +4809,7 @@ function renderAdminPage(){
   renderCommentStatus();
   renderAdminStuInput();
   renderUploadSummary();
+  renderFrCountInputs();
 }
 
 function roleLabel(role){ return role==='admin'?'관리자':role==='director'?'원장':'뷰어'; }
