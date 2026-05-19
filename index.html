@@ -3604,17 +3604,31 @@ function initBgh(mi){
       options:{...CO,elements:{line:{tension:.35},point:{radius:3,hoverRadius:6}}},
       plugins:[bghLblPlugin]});
   })();
+  const mn방 = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'][mi];
+  const bghCostRows = RAW_DB.filter(r=>['방과후사업본부','방과후사업부'].includes(r.d||'')&&r.m===mn방&&r.t==='판매관리비');
+  let dnut인건비=428.0, dnut임대료=120.0, dnut소모품비=40.0;
+  if(bghCostRows.length){
+    dnut인건비   = bghCostRows.filter(r=>['staff','instr'].includes(costCat(r.a))).reduce((s,r)=>s+r.v,0)/1e6;
+    dnut임대료   = bghCostRows.filter(r=>costCat(r.a)==='rent').reduce((s,r)=>s+r.v,0)/1e6;
+    dnut소모품비 = bghCostRows.filter(r=>['bldg'].includes(costCat(r.a))).reduce((s,r)=>s+r.v,0)/1e6;
+  }
   mkDoughnut('c_bgh_cost',
     ['인건비','임대료','소모품비','기타'],
-    [428.0,120.0,40.0,(b26Cost_M-428.0-120.0-40.0)].map(v=>Math.max(v,0)),
+    [dnut인건비, dnut임대료, dnut소모품비, Math.max(b26Cost_M-dnut인건비-dnut임대료-dnut소모품비,0)],
     ['#4361EE','#6a28d9','#F59E0B','#6b7280']);
+  const bghK = (filter) => bghCostRows.filter(filter).reduce((s,r)=>s+r.v,0)/1000; // 원→천원
+  const bgh26직원 = bghCostRows.length ? Math.round(bghK(r=>costCat(r.a)==='staff'))  : 40076;
+  const bgh26강사 = bghCostRows.length ? Math.round(bghK(r=>costCat(r.a)==='instr'))  : 404874;
+  const bgh26소모 = bghCostRows.length ? Math.round(bghK(r=>r.a&&(r.a.includes('소모품')||r.a.includes('교구')))) : 73478;
+  const bgh26도서 = bghCostRows.length ? Math.round(bghK(r=>r.a&&(r.a.includes('도서')||r.a.includes('인쇄')))) : 31629;
+  const bgh26그외 = bghCostRows.length ? Math.round(bghK(r=>true) - bgh26직원 - bgh26강사 - bgh26소모 - bgh26도서) : 28118;
   renderDeptCostTable('bgh_cost_table', [
-    {label:'인건비 (직원)', desc:'직원급여·상여·퇴직금·복리후생비', yr25:40076,  yr26p:45433,  yr26a:41884},
-    {label:'인건비 (강사)', desc:'강사비(일반)·보조교사',           yr25:404874, yr26p:502014, yr26a:523217},
-    {label:'소모품비',      desc:'소모품비(일반)·교구재비',         yr25:73478,  yr26p:81019,  yr26a:85029},
-    {label:'도서인쇄비',   desc:'교재구입·교재제작',               yr25:31629,  yr26p:54013,  yr26a:34980},
-    {label:'그외',         desc:'임차료·수수료·광고·운반비 등',    yr25:28118,  yr26p:29886,  yr26a:21644},
-  ], Math.round(b26Sales_M * 1e3)); // 백만원 → 천원
+    {label:'인건비 (직원)', desc:'직원급여·상여·퇴직금·복리후생비', yr25:40076,  yr26p:45433,  yr26a:bgh26직원},
+    {label:'인건비 (강사)', desc:'강사비(일반)·보조교사',           yr25:404874, yr26p:502014, yr26a:bgh26강사},
+    {label:'소모품비',      desc:'소모품비(일반)·교구재비',         yr25:73478,  yr26p:81019,  yr26a:bgh26소모},
+    {label:'도서인쇄비',   desc:'교재구입·교재제작',               yr25:31629,  yr26p:54013,  yr26a:bgh26도서},
+    {label:'그외',         desc:'임차료·수수료·광고·운반비 등',    yr25:28118,  yr26p:29886,  yr26a:bgh26그외},
+  ], Math.round(b26Sales_M * 1e3));
 
   renderCampMountain('방과후_수업료', 'c_bghu_mountain', 'bghu');
 
@@ -4619,7 +4633,10 @@ function saveAdminStuData(){
   // 재원생 탭 강제 리렌더
   const stuInited = inited['students'];
   if(stuInited){
-    inited['students'] = false; // 리셋해서 다음 방문시 재초기화
+    inited['students'] = false;
+    renderStuKpi(stuMonth);
+    renderStuCards(stuMonth);
+    renderStuBar(stuMonth);
     renderStuTable(stuMonth);
   }
 
