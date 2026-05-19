@@ -6109,10 +6109,11 @@ function dirToggleRemain(btn){
 
 async function saveCampusPl(){
   const rows=[];
-  Object.entries(DIR_PL).forEach(([k,d])=>rows.push({sheet_name:k, data:d, updated_at:new Date().toISOString()}));
-  Object.entries(DIR_PL25).forEach(([k,d])=>rows.push({sheet_name:k+'_25', data:d, updated_at:new Date().toISOString()}));
-  if(!rows.length) return;
-  await sb.from('campus_pl').upsert(rows, {onConflict:'sheet_name'});
+  Object.entries(DIR_PL).forEach(([k,d])=>rows.push({sheet_name:k, data:d, uploaded_at:new Date().toISOString()}));
+  Object.entries(DIR_PL25).forEach(([k,d])=>rows.push({sheet_name:k+'_25', data:d, uploaded_at:new Date().toISOString()}));
+  if(!rows.length) return null;
+  const {error}=await sb.from('campus_pl').upsert(rows, {onConflict:'sheet_name'});
+  return error||null;
 }
 
 async function loadCampusPl(){
@@ -6148,7 +6149,12 @@ async function handleDirXlsxUpload(input){
       targetPL[shName]=parsed;
       cnt++;
     }
-    await saveCampusPl();
+    const saveErr=await saveCampusPl();
+    if(saveErr){
+      msg.textContent='DB 저장 오류: '+saveErr.message;
+      msg.style.color='var(--loss)';
+      return;
+    }
     const allM=dirAllMonths();
     if(allM.length) dirMonth=allM[allM.length-1];
     const MN=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
