@@ -5336,9 +5336,21 @@ function handleXlsxUpload(event){
       // 대시보드 데이터 갱신
       applyRawToDashboard();
 
+      // 진단: 업로드 후 RAW_DB 상태 확인
+      const _dbg = uploadedMonths.map(m=>{
+        const cnt = RAW_DB.filter(r=>r.m===m).length;
+        const tCnt = [...new Set(RAW_DB.filter(r=>r.m===m).map(r=>r.t))].join('/');
+        return `${m}:${cnt}건(${tCnt})`;
+      }).join(', ');
+      const _gj = DEPT_DATA.camps['광진']?.매출?.yr26actual?.[3];
+      const _lmi = latestActMi;
+      console.log('[upload] RAW_DB:', _dbg, '| 광진4월:', _gj, '| latestActMi:', _lmi);
+
       msg.style.color='var(--c26a)';
-      msg.textContent=`✓ ${uploadedMonths.join(', ')} 데이터 ${newRows}건 적용 완료`;
+      msg.textContent=`✓ ${uploadedMonths.join(', ')} 데이터 ${newRows}건 | 광진4월=${_gj??'null'} | latestAct=${_lmi+1}월`;
       renderAdminPage();
+      // 진단 패널 자동 표시
+      runDiag();
 
     }catch(err){ msg.style.color='var(--loss)'; msg.textContent='오류: '+err.message; console.error(err); }
   };
@@ -5412,11 +5424,13 @@ function runDiag(){
     });
   }
   lines.push('');
-  lines.push(`latestActMi: ${latestActMi}`);
-  lines.push('camp yr26actual(매출) [0]:');
+  lines.push(`latestActMi: ${latestActMi} → ${latestActMi>=0?`${latestActMi+1}월`:'없음'}`);
+  lines.push('camp yr26actual(매출) [1월/3월/4월]:');
   for(const c of campPfx){
-    const v=DEPT_DATA.camps[c]?.매출?.yr26actual?.[0];
-    lines.push(`  ${c}: ${fmtM(v)}`);
+    const v0=DEPT_DATA.camps[c]?.매출?.yr26actual?.[0];
+    const v2=DEPT_DATA.camps[c]?.매출?.yr26actual?.[2];
+    const v3=DEPT_DATA.camps[c]?.매출?.yr26actual?.[3];
+    lines.push(`  ${c}: 1월=${fmtM(v0)} | 3월=${fmtM(v2)} | 4월=${fmtM(v3)}`);
   }
   lines.push('');
   const ccKeys=Object.keys(CC_MONTH_ACTUAL);
