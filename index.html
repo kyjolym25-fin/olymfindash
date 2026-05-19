@@ -5239,32 +5239,30 @@ function handleXlsxUpload(event){
       // 로우 시트 찾기
       const sheetName = wb.SheetNames.find(s=>s==='로우') || wb.SheetNames[wb.SheetNames.length-1];
       const ws = wb.Sheets[sheetName];
+      if(!ws) throw new Error(`'로우' 시트를 찾을 수 없습니다. 시트목록: ${wb.SheetNames.join(',')}`);
       const rows = XLSX.utils.sheet_to_json(ws, {header:1});
 
-      // 헤더 행에서 컬럼 위치 동적 탐지 (고정 인덱스 의존 제거)
-      const hdr = (rows[0]||[]).map(h=>String(h??'').trim());
+      // 헤더 행에서 컬럼 위치 동적 탐지
+      const rawHdr = Array.isArray(rows[0]) ? rows[0] : [];
+      const hdr = rawHdr.map(h => (h != null ? String(h) : '').trim());
+      const fh = (fn) => hdr.findIndex(h => { try{ return fn(h); }catch(e){ return false; } });
+      const inc = (h,k) => typeof h==='string' && h.includes(k);
       const CI = {
-        type: hdr.findIndex(h=>h.includes('구분')&&h.includes('매출')||h==='구분'),
-        acct: hdr.findIndex(h=>h.includes('계정과목')||h.includes('원장')),
-        cc:   hdr.findIndex(h=>h==='C/C'||h==='cc'||h==='CC'),
-        mon:  hdr.findIndex(h=>h==='월'),
-        dept: hdr.findIndex(h=>h.includes('본부')),
-        camp: hdr.findIndex(h=>h.includes('캠퍼스')),
-        subj: hdr.findIndex(h=>h.includes('과목')),
-        grade:hdr.findIndex(h=>h.includes('학년')),
-        amt:  hdr.findIndex(h=>h==='금액'),
+        type: fh(h=>inc(h,'매출')&&inc(h,'구분')),
+        acct: fh(h=>inc(h,'계정과목')||inc(h,'원장')),
+        cc:   fh(h=>h==='C/C'||h==='CC'),
+        mon:  fh(h=>h==='월'),
+        dept: fh(h=>inc(h,'본부')),
+        camp: fh(h=>inc(h,'캠퍼스')),
+        subj: fh(h=>inc(h,'과목')),
+        grade:fh(h=>inc(h,'학년')),
+        amt:  fh(h=>h==='금액'),
       };
       // fallback: 헤더 미탐지 시 기존 고정 인덱스
-      if(CI.mon<0)  CI.mon=3;
-      if(CI.amt<0)  CI.amt=8;
-      if(CI.type<0) CI.type=0;
-      if(CI.acct<0) CI.acct=1;
-      if(CI.cc<0)   CI.cc=2;
-      if(CI.dept<0) CI.dept=4;
-      if(CI.camp<0) CI.camp=5;
-      if(CI.subj<0) CI.subj=6;
-      if(CI.grade<0)CI.grade=7;
-      console.log('[upload] 시트:', sheetName, '| 컬럼맵:', CI);
+      if(CI.type<0)CI.type=0; if(CI.acct<0)CI.acct=1; if(CI.cc<0)CI.cc=2;
+      if(CI.mon<0) CI.mon=3;  if(CI.dept<0)CI.dept=4; if(CI.camp<0)CI.camp=5;
+      if(CI.subj<0)CI.subj=6; if(CI.grade<0)CI.grade=7; if(CI.amt<0)CI.amt=8;
+      console.log('[upload] 시트:', sheetName, '| 헤더:', hdr.slice(0,10), '| CI:', CI);
 
       let newRows = 0;
       const newMonths = new Set();
