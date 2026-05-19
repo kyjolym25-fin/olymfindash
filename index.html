@@ -5240,17 +5240,40 @@ function handleXlsxUpload(event){
       const sheetName = wb.SheetNames.find(s=>s==='로우') || wb.SheetNames[wb.SheetNames.length-1];
       const ws = wb.Sheets[sheetName];
       const rows = XLSX.utils.sheet_to_json(ws, {header:1});
-      const header = rows[0];  // [구분, 계정과목, C/C, 월, 본부, 캠퍼스, 과목, 학년, 금액]
+
+      // 헤더 행에서 컬럼 위치 동적 탐지 (고정 인덱스 의존 제거)
+      const hdr = (rows[0]||[]).map(h=>String(h??'').trim());
+      const CI = {
+        type: hdr.findIndex(h=>h.includes('구분')&&h.includes('매출')||h==='구분'),
+        acct: hdr.findIndex(h=>h.includes('계정과목')||h.includes('원장')),
+        cc:   hdr.findIndex(h=>h==='C/C'||h==='cc'||h==='CC'),
+        mon:  hdr.findIndex(h=>h==='월'),
+        dept: hdr.findIndex(h=>h.includes('본부')),
+        camp: hdr.findIndex(h=>h.includes('캠퍼스')),
+        subj: hdr.findIndex(h=>h.includes('과목')),
+        grade:hdr.findIndex(h=>h.includes('학년')),
+        amt:  hdr.findIndex(h=>h==='금액'),
+      };
+      // fallback: 헤더 미탐지 시 기존 고정 인덱스
+      if(CI.mon<0)  CI.mon=3;
+      if(CI.amt<0)  CI.amt=8;
+      if(CI.type<0) CI.type=0;
+      if(CI.acct<0) CI.acct=1;
+      if(CI.cc<0)   CI.cc=2;
+      if(CI.dept<0) CI.dept=4;
+      if(CI.camp<0) CI.camp=5;
+      if(CI.subj<0) CI.subj=6;
+      if(CI.grade<0)CI.grade=7;
+      console.log('[upload] 시트:', sheetName, '| 컬럼맵:', CI);
 
       let newRows = 0;
       const newMonths = new Set();
 
       rows.slice(1).forEach(r=>{
-        if(!r[8] && r[8]!==0) return;
-        const month = normalizeMonthLabel(r[3]);
+        const amt=r[CI.amt]; if(!amt && amt!==0) return;
+        const month = normalizeMonthLabel(r[CI.mon]);
         if(!month) return;
         newMonths.add(month);
-        // 같은 월 기존 데이터 제거 후 교체
         newRows++;
       });
 
@@ -5261,13 +5284,12 @@ function handleXlsxUpload(event){
       // 새 데이터 추가
       window._skippedCommon = [];
       rows.slice(1).forEach(r=>{
-        // 공통비 행 진단 (스킵 여부 무관하게 캡처)
-        if(r[1]&&String(r[1]).includes('공통비')&&!String(r[1]).includes('강사비'))
-          window._skippedCommon.push(`a=${r[1]}|t=${r[0]}|m=${r[3]}|d=${r[4]}|r[8]=${r[8]}|r[9]=${r[9]}|r[10]=${r[10]}`);
-        if(!r[8] && r[8]!==0) return;
-        const month = normalizeMonthLabel(r[3]);
+        const amt=r[CI.amt]; if(!amt && amt!==0) return;
+        const month = normalizeMonthLabel(r[CI.mon]);
         if(!month) return;
-        RAW_DB.push({t:r[0],a:r[1],cc:r[2],m:month,d:r[4],cp:r[5],s:r[6],gr:r[7],v:Number(r[8])});
+        if(r[CI.acct]&&String(r[CI.acct]).includes('공통비')&&!String(r[CI.acct]).includes('강사비'))
+          window._skippedCommon.push(`a=${r[CI.acct]}|t=${r[CI.type]}|m=${month}`);
+        RAW_DB.push({t:r[CI.type],a:r[CI.acct],cc:r[CI.cc],m:month,d:r[CI.dept],cp:r[CI.camp],s:r[CI.subj],gr:r[CI.grade],v:Number(amt)});
       });
 
       await saveRawDB(uploadedMonths);
