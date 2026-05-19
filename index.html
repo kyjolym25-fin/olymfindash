@@ -6109,8 +6109,8 @@ function dirToggleRemain(btn){
 
 async function saveCampusPl(){
   const rows=[];
-  Object.entries(DIR_PL).forEach(([k,d])=>rows.push({sheet_name:k, data:d, uploaded_at:new Date().toISOString()}));
-  Object.entries(DIR_PL25).forEach(([k,d])=>rows.push({sheet_name:k+'_25', data:d, uploaded_at:new Date().toISOString()}));
+  Object.entries(DIR_PL).forEach(([k,d])=>rows.push({sheet_name:k, data:d}));
+  Object.entries(DIR_PL25).forEach(([k,d])=>rows.push({sheet_name:k+'_25', data:d}));
   if(!rows.length) return null;
   const {error}=await sb.from('campus_pl').upsert(rows, {onConflict:'sheet_name'});
   return error||null;
