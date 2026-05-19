@@ -6138,16 +6138,27 @@ async function handleDirXlsxUpload(input){
   try{
     const buf=await file.arrayBuffer();
     const wb=XLSX.read(buf,{type:'array'});
+    const MN=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
     let cnt=0;
+    const sheetLog=[];
     for(const shName of wb.SheetNames){
       const info=parseDirSheetName(shName); if(!info) continue;
       if(s.role==='director'){
         if(shName!==s.campus+'수학'&&shName!==s.campus+'영어') continue;
       }
       const parsed=parseFullDirSheet(wb.Sheets[shName]);
+      const mStr=parsed.months.map(m=>MN[m]).join(',');
+      sheetLog.push(`${shName}(${mStr||'월없음'})`);
       if(!parsed.months.length) continue;
       targetPL[shName]=parsed;
       cnt++;
+    }
+    console.log('[dirUpload] 시트목록:', wb.SheetNames);
+    console.log('[dirUpload] 파싱결과:', sheetLog);
+    if(cnt===0){
+      msg.textContent=`⚠ 인식된 시트 없음. 파일확인필요. (시트: ${wb.SheetNames.slice(0,5).join(',')})`;
+      msg.style.color='var(--loss)';
+      return;
     }
     const saveErr=await saveCampusPl();
     if(saveErr){
@@ -6157,9 +6168,9 @@ async function handleDirXlsxUpload(input){
     }
     const allM=dirAllMonths();
     if(allM.length) dirMonth=allM[allM.length-1];
-    const MN=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
     const yearTag=isYr25?'25년 ':'';
-    msg.textContent=`✓ ${yearTag}${cnt}개 시트 저장 완료 · ${new Date().toLocaleTimeString('ko-KR')}`;
+    const allMonths=[...new Set(Object.values(targetPL).flatMap(d=>d.months))].sort((a,b)=>a-b).map(m=>MN[m]).join(',');
+    msg.textContent=`✓ ${yearTag}${cnt}개 시트 · ${allMonths} 저장 완료`;
     msg.style.color='var(--c26a)';
     renderDirList();
   }catch(e){
