@@ -1704,7 +1704,7 @@ const DEPT_DATA = {
 
   // ── 미래교육사업본부 ──
   mirae: {
-    교재매출: { yr25:[100,498,166,70,260,229,190,304,97,66,341,180],             yr26base:[93,426,161,71,227,203,177,268,96,68,296,158],  yr26actual:N12() },
+    교재매출: { yr25:[100,498,166,70,260,229,190,304,97,66,341,180],             yr26base:[91,405,153,63,210,189,167,249,87,59,274,148],  yr26actual:N12() },
     원격매출: { yr25:[296,323,308,292,309,285,287,309,276,304,278,274],          yr26base:[273,270,283,279,278,275,278,278,282,281,271,269], yr26actual:N12() },
     b2b매출:  { yr25:N12(),                                                      yr26base:N12(),                                            yr26actual:N12() },
     영업이익: { yr25:[79,266,16,19,107,-108,92,206,-166,3,81,-214],              yr26base:[13,165,28,-84,-15,-29,35,116,32,-9,97,75],       yr26actual:N12() },
@@ -3327,44 +3327,38 @@ function initMirae(mi){
     .reduce((s,r)=>s+r.v, 0);
   const hasAct = RAW_DB.some(r=>미래명.includes(r.d) && r.m===mn);
 
-  // ── 매출 데이터 (25년/26계획은 1월 기준, 26실적은 당월 RAW_DB에서 추출)
+  // ── 매출 데이터
+  // 교재 26년 계획: CC별 월별 실계획 (단위: 천원) — 홀림=직영수학, GLEC=직영영어, 가맹U2M=FC수학
+  const BOOK_PLAN_26 = {
+    직영수학: [4526,123533,13214,1335,47659,58211,21411,57205,2824,835,86163,14933],
+    직영영어: [1424,45144,6259,1804,16260,22755,6738,16447,1956,177,28645,5521],
+    FC수학:   [80647,181274,121916,57352,123936,91342,118526,145455,77952,55514,126832,112482],
+  };
   const MIRAE_1월 = {
-    직영수학: {
-      yr25: {book:5702200,  online:52977900,  total:58680100},
-      yr26p:{book:4525500,  online:27171920,  total:31697420},
-    },
-    직영영어: {
-      yr25: {book:1586900,  online:29798100,  total:31385000},
-      yr26p:{book:1424160,  online:27341193,  total:28765353},
-    },
-    FC수학: {
-      yr25: {book:85788980, online:189439600, total:275228580},
-      yr26p:{book:80647000, online:202584171, total:283231171},
-    },
+    직영수학: { yr25:{book:5702200,  online:52977900,  total:58680100},  yr26p:{book:4525500,  online:27171920,  total:31697420} },
+    직영영어: { yr25:{book:1586900,  online:29798100,  total:31385000},  yr26p:{book:1424160,  online:27341193,  total:28765353} },
+    FC수학:   { yr25:{book:85788980, online:189439600, total:275228580}, yr26p:{book:80647000, online:202584171, total:283231171} },
   };
   const CCS = ['직영수학','직영영어','FC수학'];
   const COLORS = {'직영수학':'#4361EE','직영영어':'#7C5CFC','FC수학':'#0ea872'};
-  // yr25/yr26p: DEPT_DATA.mirae 월별 합계를 1월 CC 비율로 배분
   const mr = DEPT_DATA.mirae;
   const tot1b25 = CCS.reduce((s,c)=>s+(MIRAE_1월[c].yr25.book||0),0);
   const tot1o25 = CCS.reduce((s,c)=>s+(MIRAE_1월[c].yr25.online||0),0);
-  const tot1b26p= CCS.reduce((s,c)=>s+(MIRAE_1월[c].yr26p.book||0),0);
   const tot1o26p= CCS.reduce((s,c)=>s+(MIRAE_1월[c].yr26p.online||0),0);
   const totB25  = (mr.교재매출.yr25[mi]   ??0)*1e6;
   const totO25  = (mr.원격매출.yr25[mi]   ??0)*1e6;
-  const totB26p = (mr.교재매출.yr26base[mi]??0)*1e6;
   const totO26p = (mr.원격매출.yr26base[mi]??0)*1e6;
-  // MIRAE: yr25/yr26p는 1월 비율로 배분, yr26a는 당월 RAW_DB 추출
+  // MIRAE: 교재 26계획은 CC별 실계획 직접 사용, 원격은 비율 배분, yr26a는 RAW_DB 추출
   const MIRAE = {};
   CCS.forEach(cc => {
     const book26a   = hasAct ? sumCC(cc, isBook)   : (mi===0 ? (cc==='직영수학'?7511600:cc==='직영영어'?886200:96586840) : 0);
     const online26a = hasAct ? sumCC(cc, isOnline) : (mi===0 ? (cc==='직영수학'?58672500:cc==='직영영어'?26538400:201166300) : 0);
     const rb25 = tot1b25>0 ? MIRAE_1월[cc].yr25.book/tot1b25 : 1/CCS.length;
     const ro25 = tot1o25>0 ? MIRAE_1월[cc].yr25.online/tot1o25 : 1/CCS.length;
-    const rb26p= tot1b26p>0? MIRAE_1월[cc].yr26p.book/tot1b26p: 1/CCS.length;
     const ro26p= tot1o26p>0? MIRAE_1월[cc].yr26p.online/tot1o26p:1/CCS.length;
     const b25=Math.round(totB25*rb25), o25=Math.round(totO25*ro25);
-    const b26p=Math.round(totB26p*rb26p), o26p=Math.round(totO26p*ro26p);
+    const b26p=(BOOK_PLAN_26[cc]?.[mi]??0)*1000;  // 천원 → 원
+    const o26p=Math.round(totO26p*ro26p);
     MIRAE[cc] = {
       yr25: {book:b25, online:o25, total:b25+o25},
       yr26p:{book:b26p,online:o26p,total:b26p+o26p},
