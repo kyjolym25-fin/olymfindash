@@ -6399,6 +6399,16 @@ applyAuth();
       if(mainEl){ goMain(parts[1], mainEl); restored = true; }
     } else if(parts[0]==='dir'){
       restored = true; // applyAuth().then()에서 처리
+    } else if(parts[0]==='chairman'){
+      const s2=getSession();
+      const canPl2=s2&&(s2.role==='admin'||(!( s2.role==='director')&&!!s2.can_pl));
+      if(canPl2){
+        document.getElementById('hub-screen').style.display='none';
+        document.getElementById('chairman-wrap').style.display='block';
+        saveDashView('chairman');
+        initChmDash();
+        restored=true;
+      }
     }
     const sy = sessionStorage.getItem('olymp_scrollY');
     if(sy) setTimeout(()=>window.scrollTo(0, parseInt(sy)), 150);
@@ -6441,11 +6451,13 @@ function goChairmanDash(){
   document.getElementById('hub-screen').style.display='none';
   document.getElementById('chairman-wrap').style.display='block';
   saveDashView('chairman');
+  location.hash='chairman';
   initChmDash();
 }
 
 function chairmanNavBack(){
   document.getElementById('chairman-wrap').style.display='none';
+  history.replaceState(null,'',location.pathname);
   goHub();
 }
 
