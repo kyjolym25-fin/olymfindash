@@ -4397,7 +4397,7 @@ async function doChangePw(){
   err.style.color='var(--c26a)'; err.textContent='비밀번호가 변경됐습니다.';
 }
 
-function doLogout(){ clearSession(); closeAuth(); applyAuth(); }
+function doLogout(){ clearSession(); saveDashView('hub'); closeAuth(); applyAuth(); }
 
 function applyAuth(){
   const s=getSession();
@@ -4515,9 +4515,9 @@ function applyAuth(){
   loadComments();
 }
 
-const DKEY='olymp_dashview'; // 'main' | 'director' | 'hub'
-const saveDashView=v=>{ try{ sessionStorage.setItem(DKEY,v); }catch{} };
-const getDashView=()=>{ try{ return sessionStorage.getItem(DKEY)||''; }catch{ return ''; } };
+const DKEY='olymp_dashview'; // 'main' | 'director' | 'hub' | 'chairman'
+const saveDashView=v=>{ try{ localStorage.setItem(DKEY,v); }catch{} };
+const getDashView=()=>{ try{ return localStorage.getItem(DKEY)||''; }catch{ return ''; } };
 
 async function goHub(){
   const hub=document.getElementById('hub-screen');
@@ -6366,6 +6366,60 @@ goMain=function(id,el){
 };
 
 // ============================================================
+// 뷰 복원 (데이터·권한 로드 완료 후 호출)
+// ============================================================
+function _restoreView(){
+  const s=getSession();
+  if(!s) return;
+
+  const isAdmin=s.role==='admin';
+  const isDirector=s.role==='director';
+  const canPl=isAdmin||(!isDirector&&!!s.can_pl);
+
+  // hash 우선, 없으면 localStorage saved view
+  const h=location.hash.replace('#','');
+  const hPart=h.split('-')[0];
+  const saved=getDashView();
+  const view=hPart||saved;
+
+  const hub=document.getElementById('hub-screen');
+  const dash=document.getElementById('dashboard-wrap');
+  const dirWrap=document.getElementById('director-wrap');
+  const chmWrap=document.getElementById('chairman-wrap');
+  const tabs=document.getElementById('mainTabs');
+
+  if(view==='chairman'&&canPl){
+    hub.style.display='none';
+    dash.style.display='none';
+    dirWrap.style.display='none';
+    tabs.style.display='none';
+    chmWrap.style.display='block';
+    saveDashView('chairman');
+    initChmDash();
+  } else if(view==='director'||view==='dir'){
+    // applyAuth()가 이미 처리, 여기서는 hash 기반 상세 복원만
+    if(h.startsWith('dir-')&&h!=='dir-list'){
+      const sh=decodeURIComponent(h.slice(4));
+      if(DIR_PL[sh]||DIR_PL25[sh]) goToDirDetail(sh);
+    }
+    const sy=sessionStorage.getItem('olymp_scrollY');
+    if(sy) setTimeout(()=>window.scrollTo(0,parseInt(sy)),150);
+  } else if(view==='dept'||view==='main'){
+    const key=(view==='dept')?'dept':(h.split('-')[1]||'overview');
+    const el=document.querySelector(`#mainTabs .tab[onclick*="'${key}'"]`)
+             ||document.querySelector('#mainTabs .tab[onclick*="\'overview\'"]');
+    if(el) goMain(key,el);
+    if(view==='dept'){
+      const sub=h.split('-')[1];
+      if(sub){ const sEl=document.querySelector(`#deptSubtabs .subtab[onclick*="'${sub}'"]`); if(sEl) goDept(sub,sEl); }
+    }
+    const sy=sessionStorage.getItem('olymp_scrollY');
+    if(sy) setTimeout(()=>window.scrollTo(0,parseInt(sy)),150);
+  }
+  // hub 또는 미매칭 → applyAuth()가 이미 처리
+}
+
+// ============================================================
 // STARTUP
 // ============================================================
 applyAuth();
@@ -6378,59 +6432,8 @@ applyAuth();
   applyAuth();
   loadComments();
   loadStu26();
-  // 탭 위치 복원 (해시 기반)
-  const h = location.hash;
-  let restored = false;
-  if(h && getSession()){
-    const parts = h.replace('#','').split('-');
-    if(parts[0]==='dept'){
-      const mainEl = document.querySelector('#mainTabs .tab[onclick*="\'dept\'"]');
-      if(mainEl){ goMain('dept', mainEl); restored = true; }
-      const subEl = document.querySelector(`#deptSubtabs .subtab[onclick*="'${parts[1]}'"]`);
-      if(subEl) goDept(parts[1], subEl);
-    } else if(parts[0]==='main'){
-      const mainEl = document.querySelector(`#mainTabs .tab[onclick*="'${parts[1]}'"]`);
-      if(mainEl){ goMain(parts[1], mainEl); restored = true; }
-    } else if(parts[0]==='dir'){
-      restored = true; // applyAuth().then()에서 처리
-    } else if(parts[0]==='chairman'){
-      const s2=getSession();
-      const canPl2=s2&&(s2.role==='admin'||(!( s2.role==='director')&&!!s2.can_pl));
-      if(canPl2){
-        document.getElementById('hub-screen').style.display='none';
-        document.getElementById('chairman-wrap').style.display='block';
-        saveDashView('chairman');
-        initChmDash();
-        restored=true;
-      }
-    }
-    const sy = sessionStorage.getItem('olymp_scrollY');
-    if(sy) setTimeout(()=>window.scrollTo(0, parseInt(sy)), 150);
-  }
-  // 해시 없거나 복원 실패 시
-  if(!restored){
-    const s2=getSession();
-    const _chmNow=document.getElementById('chairman-wrap');
-    const chmShowing=_chmNow&&_chmNow.style.display==='block';
-    if(chmShowing){
-      // 손익계산서 복원 중 — goMain 호출 안 함
-    } else if(s2&&s2.role==='director'){
-      // director는 허브만 — 손익 대시보드 자동 진입 안 함
-    } else {
-      const ovEl = document.querySelector('#mainTabs .tab[onclick*="\'overview\'"]');
-      if(ovEl) goMain('overview', ovEl);
-    }
-  }
-  // 모든 복원 완료 후 손익계산서 강제 복원 (새로고침 시 display 상태와 무관하게 보장)
-  {
-    const _s3=getSession();
-    const _canPl3=_s3&&(_s3.role==='admin'||(!(_s3.role==='director')&&!!_s3.can_pl));
-    if(getDashView()==='chairman'&&_canPl3){
-      const _chmEl=document.getElementById('chairman-wrap');
-      const _hubEl=document.getElementById('hub-screen');
-      if(_chmEl){ _chmEl.style.display='block'; if(_hubEl) _hubEl.style.display='none'; initChmDash(); }
-    }
-  }
+  // ── 뷰 복원 (데이터·권한 로드 완료 후 단일 실행) ──
+  _restoreView();
 })();
 window.addEventListener('beforeunload',()=>sessionStorage.setItem('olymp_scrollY', window.scrollY));
 
