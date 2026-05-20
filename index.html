@@ -248,6 +248,10 @@ tbody td.indent{padding-left:28px;color:var(--muted2)}
 #pg-admin{padding:0}
 .admin-sec{background:#fff;border-radius:16px;padding:20px;margin-bottom:14px;box-shadow:var(--shadow)}
 .admin-sec h3{font-size:14px;font-weight:700;margin:0 0 14px;display:flex;align-items:center;gap:8px}
+.adp-tabs{display:flex;gap:0;margin-bottom:16px;border-bottom:2px solid var(--border)}
+.adp-tab{padding:10px 22px;font-size:13px;font-weight:700;border:none;background:transparent;cursor:pointer;color:var(--muted);border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .15s;border-radius:6px 6px 0 0}
+.adp-tab.on{color:#4361EE;border-bottom-color:#4361EE;background:#f0f3ff}
+.adp-tab:hover:not(.on){background:var(--s2);color:var(--fg)}
 .atab-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
 .atab{padding:5px 14px;font-size:11px;font-weight:600;border-radius:20px;cursor:pointer;color:var(--muted);border:1px solid var(--border);background:#fff}
 .atab.on{background:#4361EE;color:#fff;border-color:#4361EE}
@@ -1365,8 +1369,15 @@ thead th{font-size:13px}
 
 <!-- ══ 관리자 페이지 ══ -->
 <div class="page" id="pg-admin" style="padding:16px">
+  <!-- 채널 탭 -->
+  <div class="adp-tabs">
+    <button class="adp-tab on" id="adp-data"  onclick="showAdminPanel('data')">📊 데이터 관리</button>
+    <button class="adp-tab"    id="adp-users" onclick="showAdminPanel('users')">👥 회원 관리</button>
+  </div>
+
+  <!-- ── 회원 관리 패널 ── -->
+  <div id="adp-c-users" style="display:none">
   <div class="admin-sec">
-    <h3>👥 회원 관리</h3>
     <div class="atab-row">
       <button class="atab on" id="atab-users"   onclick="showATab('users')">사용자 목록</button>
       <button class="atab"    id="atab-pending" onclick="showATab('pending')">가입 승인 대기</button>
@@ -1428,6 +1439,10 @@ thead th{font-size:13px}
       <div class="auth-err" id="rtMsg"></div>
     </div>
   </div>
+  </div><!-- /adp-c-users -->
+
+  <!-- ── 데이터 관리 패널 ── -->
+  <div id="adp-c-data">
   <div class="admin-sec">
     <h3>📤 손익계산서 로우 업로드</h3>
     <p style="font-size:12px;color:var(--muted);margin:0 0 14px">매월 손익계산서 엑셀의 <strong style="color:var(--fg)">로우</strong> 시트를 업로드하면 모든 수치가 자동으로 갱신됩니다. 여러 달치를 누적 업로드할 수 있습니다.</p>
@@ -1564,6 +1579,7 @@ thead th{font-size:13px}
     <h3>💬 코멘트 현황</h3>
     <div id="commentStatusList"></div>
   </div>
+  </div><!-- /adp-c-data -->
 </div><!-- /pg-admin -->
 </div><!-- /dashboard-wrap -->
 
@@ -4680,6 +4696,14 @@ async function deleteComment(sid){
 // ============================================================
 // ADMIN PAGE
 // ============================================================
+function showAdminPanel(panel){
+  ['data','users'].forEach(p=>{
+    document.getElementById('adp-c-'+p).style.display=p===panel?'':'none';
+    document.getElementById('adp-'+p).classList.toggle('on',p===panel);
+  });
+  if(panel==='users'){ renderUserTable(); renderPendingTable(); }
+}
+
 function showATab(tab){
   ['users','pending','adduser','pwreset'].forEach(t=>{
     document.getElementById('atab-c-'+t).style.display=t===tab?'':'none';
@@ -4990,7 +5014,7 @@ async function loadStu26(){
 }
 
 function renderAdminPage(){
-  renderUserTable();
+  showAdminPanel('data'); // 데이터 관리 탭 기본 선택
   renderCommentStatus();
   renderAdminStuInput();
   renderUploadSummary();
