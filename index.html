@@ -5897,7 +5897,7 @@ const DIR_GROUPS = [
   { name:'U2M',        icon:'🎯', tag:'수학', sheets:['중계수학','송파방이수학','미사수학'] },
 ];
 
-const DIR_SKIP_SHEETS = new Set(['학원본부','U2M본부','교육넷수학','위례수학']);
+const DIR_SKIP_SHEETS = new Set(['학원본부','U2M본부','교육넷수학']);
 function parseDirSheetName(name){
   if(name.includes('고등')||name.includes('영재')) return null;
   if(DIR_SKIP_SHEETS.has(name)) return null;
