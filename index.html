@@ -623,7 +623,7 @@ thead th{font-size:13px}
       <div id="chmScrollTop" style="overflow-x:auto;overflow-y:hidden;height:10px" onscroll="document.getElementById('chmScrollMain').scrollLeft=this.scrollLeft">
         <div id="chmScrollTopInner" style="height:1px;min-width:100%"></div>
       </div>
-      <div id="chmScrollMain" style="overflow-x:auto" onscroll="document.getElementById('chmScrollTop').scrollLeft=this.scrollLeft">
+      <div id="chmScrollMain" style="overflow:auto;max-height:calc(100vh - 280px)" onscroll="document.getElementById('chmScrollTop').scrollLeft=this.scrollLeft">
         <table id="chmTable" style="width:max-content;min-width:100%;border-collapse:collapse;font-size:12px"></table>
       </div>
     </div>
