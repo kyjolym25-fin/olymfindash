@@ -6547,9 +6547,8 @@ const _CHM_TREE = [
   {id:'bghu-c',  label:'방과후학교',      level:2, dept:'bghu', parent:'bghu',    children:[], cc:'방과후학교'},
   {id:'mirae',   label:'미래교육사업부',  level:1, dept:'mirae',parent:'company', children:['mirae-c'], groupCCs:['미래교육사업본부']},
   {id:'mirae-c', label:'미래교육사업본부',level:2, dept:'mirae',parent:'mirae',   children:[], cc:'미래교육사업본부'},
-  {id:'mgmt',    label:'경영기획실',      level:1, dept:'mgmt', parent:'company', children:['mgmt-c','strat'], groupCCs:['경영기획실','전략기획실']},
-  {id:'mgmt-c',  label:'경영기획실',      level:2, dept:'mgmt', parent:'mgmt',    children:[], cc:'경영기획실'},
-  {id:'strat',   label:'전략기획실',      level:2, dept:'mgmt', parent:'mgmt',    children:[], cc:'전략기획실'},
+  {id:'mgmt',    label:'경영+전략기획실',  level:1, dept:'mgmt', parent:'company', children:['mgmt-c'], groupCCs:['경영기획실','전략기획실']},
+  {id:'mgmt-c',  label:'경영+전략기획실',  level:2, dept:'mgmt', parent:'mgmt',    children:[], groupCCs:['경영기획실','전략기획실'], data25ids:['mgmt-c','strat']},
 ];
 
 // ── CC 통합 매핑: 부서통합 CC명 → RAW_DB cc 목록 ─────────────
@@ -6700,7 +6699,15 @@ function _buildChmNodes25(mi){
     return acc;
   }
   function _sumNode25(nd,mi,ytd){
-    if(nd.cc){ return _chmCalcTotals({...(ytd?_ytd25(nd.id,mi):_get25(nd.id,mi))}); }
+    if(!nd.children||nd.children.length===0){
+      const ids=nd.data25ids||[nd.id];
+      const acc={};
+      for(const id of ids){
+        const d=ytd?_ytd25(id,mi):_get25(id,mi);
+        for(const[k,v] of Object.entries(d)) acc[k]=(acc[k]||0)+v;
+      }
+      return _chmCalcTotals(acc);
+    }
     const acc={};
     for(const cid of (nd.children||[])){
       const cnd=_CHM_TREE.find(n=>n.id===cid); if(!cnd) continue;
