@@ -5939,20 +5939,20 @@ function renderDirList(){
   document.getElementById('dirBackBtn').onclick=goHub;
 
   const s=getSession();
-  const isDir=s&&s.role==='director';
+  const isAdmin=s&&s.role==='admin';
   const MN=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  const myCampuses=(!isAdmin&&s&&s.campus)?(s.campus||'').split(',').map(c=>c.trim()):null;
   let html='';
   for(const grp of DIR_GROUPS){
     const cards=grp.sheets.map(sh=>{
       const info=parseDirSheetName(sh); if(!info) return '';
       const hasData=!!DIR_PL[sh];
-      const myCampuses=isDir?(s.campus||'').split(',').map(c=>c.trim()):null;
-      const mySheet=isDir?myCampuses.includes(sh):true;
-      const blocked=isDir&&!mySheet;
+      // 관리자가 아니고 campus 목록이 있으면 → 해당 캠퍼스만 표시
+      if(myCampuses&&!myCampuses.includes(sh)) return '';
       const months=hasData?DIR_PL[sh].months:[];
       const mLabel=months.length?MN[months[0]]+(months.length>1?'~'+MN[months[months.length-1]]:''):'데이터 없음';
-      const style=blocked?'opacity:.35;cursor:not-allowed':(!hasData&&!DIR_PL25[sh])?'opacity:.55;cursor:default':'';
-      const canClick=!blocked&&(hasData||!!DIR_PL25[sh]);
+      const style=(!hasData&&!DIR_PL25[sh])?'opacity:.55;cursor:default':'';
+      const canClick=hasData||!!DIR_PL25[sh];
       const click=canClick?`goToDirDetail('${sh}')`:'';
       const d25=DIR_PL25[sh];
       let yr25html='';
