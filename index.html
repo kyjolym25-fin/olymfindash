@@ -620,7 +620,10 @@ thead th{font-size:13px}
       </div>
     </div>
     <div class="card" style="overflow:hidden;padding:0;margin-top:0">
-      <div style="overflow-x:auto">
+      <div id="chmScrollTop" style="overflow-x:auto;overflow-y:hidden;height:10px" onscroll="document.getElementById('chmScrollMain').scrollLeft=this.scrollLeft">
+        <div id="chmScrollTopInner" style="height:1px;min-width:100%"></div>
+      </div>
+      <div id="chmScrollMain" style="overflow-x:auto" onscroll="document.getElementById('chmScrollTop').scrollLeft=this.scrollLeft">
         <table id="chmTable" style="width:max-content;min-width:100%;border-collapse:collapse;font-size:12px"></table>
       </div>
     </div>
@@ -6798,7 +6801,7 @@ function _renderChmTable(){
 
   // ── 헤더 1행 ──
   let h1=`<tr>`;
-  h1+=`<th rowspan="2" style="position:sticky;left:0;z-index:20;background:#F1F5F9;text-align:left;min-width:140px;padding:10px 14px;font-size:10px;font-weight:700;color:#64748B;letter-spacing:.05em;border-right:2px solid #CBD5E1;border-bottom:2px solid #E2E8F0;white-space:nowrap">계정 항목<br><span style="font-size:9px;font-weight:400;color:#94A3B8">${mLabel} · 천원</span></th>`;
+  h1+=`<th rowspan="2" style="position:sticky;top:0;left:0;z-index:40;background:#F1F5F9;text-align:left;min-width:140px;padding:10px 14px;font-size:10px;font-weight:700;color:#64748B;letter-spacing:.05em;border-right:2px solid #CBD5E1;border-bottom:2px solid #E2E8F0;white-space:nowrap">계정 항목<br><span style="font-size:9px;font-weight:400;color:#94A3B8">${mLabel} · 천원</span></th>`;
   for(const id of visIds){
     const nd=CHM_NODES[id];
     const hasChild=nd.children&&nd.children.length>0;
@@ -6811,7 +6814,7 @@ function _renderChmTable(){
     const minW=[140,128,108,92][nd.level]||92;
     const tog=hasChild
       ?`<button onclick="chmToggle('${id}')" style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:4px;border:1.5px solid currentColor;background:transparent;font-size:11px;font-weight:800;cursor:pointer;vertical-align:middle;margin-left:4px;color:inherit;opacity:.7">${isExp?'−':'+'}</button>`:'';
-    h1+=`<th colspan="2" style="${thSt};min-width:${minW}px;font-size:11px;font-weight:700;padding:8px 10px;height:44px;vertical-align:middle;text-align:center;white-space:nowrap;border-bottom:1px solid rgba(0,0,0,.06)">${nd.label}${tog}</th>`;
+    h1+=`<th colspan="2" style="position:sticky;top:0;z-index:30;${thSt};min-width:${minW}px;font-size:11px;font-weight:700;padding:8px 10px;height:44px;vertical-align:middle;text-align:center;white-space:nowrap;border-bottom:1px solid rgba(0,0,0,.06)">${nd.label}${tog}</th>`;
   }
   h1+=`</tr>`;
 
@@ -6820,10 +6823,12 @@ function _renderChmTable(){
   for(const id of visIds){
     const nd=CHM_NODES[id];
     const is0=nd.level===0;
-    const yr26st=is0?`background:rgba(255,255,255,.08);color:#93C5FD`:`background:rgba(219,234,254,.4);color:#1D4ED8`;
-    const yr25st=is0?`background:rgba(255,255,255,.04);color:rgba(255,255,255,.4)`:`background:rgba(243,244,246,.6);color:#6B7280`;
-    h2+=`<th style="${yr26st};font-size:10px;font-weight:700;padding:4px 8px;height:24px;text-align:center;border-bottom:2px solid #E2E8F0;border-left:1px solid rgba(0,0,0,.06);white-space:nowrap;letter-spacing:.04em;min-width:${is0?68:58}px">26년</th>`;
-    h2+=`<th style="${yr25st};font-size:10px;font-weight:700;padding:4px 8px;height:24px;text-align:center;border-bottom:2px solid #E2E8F0;border-right:1px solid rgba(0,0,0,.08);white-space:nowrap;letter-spacing:.04em;min-width:${is0?68:58}px">25년</th>`;
+    const yr26bg=is0?`rgba(20,30,60,1)`:`rgba(219,234,254,.95)`;
+    const yr25bg=is0?`rgba(20,30,60,.85)`:`rgba(243,244,246,.95)`;
+    const yr26st=is0?`background:${yr26bg};color:#93C5FD`:`background:${yr26bg};color:#1D4ED8`;
+    const yr25st=is0?`background:${yr25bg};color:rgba(255,255,255,.4)`:`background:${yr25bg};color:#6B7280`;
+    h2+=`<th style="position:sticky;top:44px;z-index:30;${yr26st};font-size:10px;font-weight:700;padding:4px 8px;height:24px;text-align:center;border-bottom:2px solid #E2E8F0;border-left:1px solid rgba(0,0,0,.06);white-space:nowrap;letter-spacing:.04em;min-width:${is0?68:58}px">26년</th>`;
+    h2+=`<th style="position:sticky;top:44px;z-index:30;${yr25st};font-size:10px;font-weight:700;padding:4px 8px;height:24px;text-align:center;border-bottom:2px solid #E2E8F0;border-right:1px solid rgba(0,0,0,.08);white-space:nowrap;letter-spacing:.04em;min-width:${is0?68:58}px">25년</th>`;
   }
   h2+=`</tr>`;
 
@@ -6859,6 +6864,11 @@ function _renderChmTable(){
   }
   body+=`</tbody>`;
   table.innerHTML=`<thead>${h1}${h2}</thead>${body}`;
+  // 상단 미러 스크롤바 너비 동기화
+  requestAnimationFrame(()=>{
+    const inner=document.getElementById('chmScrollTopInner');
+    if(inner) inner.style.width=table.scrollWidth+'px';
+  });
 }
 
 function chmToggle(id){
