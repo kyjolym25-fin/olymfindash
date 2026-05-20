@@ -214,6 +214,10 @@ data['u2m-b'] = u2m_b_monthly
 # strat (전략기획실): 별도 시트 없음 → 0
 data['strat'] = [{} for _ in range(12)]
 
+# mgmt-c: 기타공통비(com_other) 제외
+for mi in range(12):
+    data['mgmt-c'][mi].pop('com_other', None)
+
 # ── JS 출력 ──────────────────────────────────────────────────
 
 # 0값 제거하여 용량 절감
