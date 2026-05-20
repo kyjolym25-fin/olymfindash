@@ -492,6 +492,7 @@ thead th{font-size:13px}
   <div style="display:flex;align-items:center;gap:10px">
     <div class="pill" id="lastModPill">최종수정일 : -</div>
     <div class="dot-live"><div class="dot"></div>Live</div>
+    <button onclick="goAdminPanel()" id="adminHdrBtn" style="display:none;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:5px 14px;font-size:11px;color:var(--muted);cursor:pointer;align-items:center;gap:6px">⚙️ 관리</button>
     <button onclick="openAuth()" id="authBtn" style="display:none;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:5px 14px;font-size:11px;color:var(--muted);cursor:pointer;align-items:center;gap:6px">
       🔑 <span id="authBtnLabel">로그인</span>
     </button>
@@ -504,7 +505,6 @@ thead th{font-size:13px}
   <div class="tab"     onclick="goMain('dept',this)">🏢 사업부 분석</div>
   <div class="tab"     onclick="goMain('students',this)">👥 재원생 현황</div>
   <div class="tab admin-only" id="tab-rawdata" onclick="goMain('rawdata',this)">📋 데이터 로우</div>
-  <div class="tab admin-only" id="tab-admin" onclick="goMain('admin',this)">⚙️ 관리</div>
   <div style="display:flex;align-items:center;gap:8px;margin-left:auto;padding:0 8px;flex-shrink:0;font-size:10px">
     <span style="color:var(--muted);font-size:10px">범례</span>
     <div class="leg"><div class="leg-dot" style="background:var(--c25)"></div>25년 실적</div>
@@ -4393,9 +4393,11 @@ function applyAuth(){
   const tabs=document.getElementById('mainTabs');
   const authBtn=document.getElementById('authBtn');
 
+  const adminHdrBtn=document.getElementById('adminHdrBtn');
   if(loggedIn){
     landing.style.display='none';
     if(authBtn) authBtn.style.display='flex';
+    if(adminHdrBtn) adminHdrBtn.style.display=isAdmin?'flex':'none';
     // 현재 어느 화면이 열려 있지 않으면 → 저장된 뷰 복원 or 허브
     const dashOpen = dash.style.display==='block';
     const dirOpen  = dirWrap.style.display==='block';
@@ -4436,25 +4438,21 @@ function applyAuth(){
     const hubCardSoin=document.getElementById('hubCardSoin');
     const canSoin=isAdmin||(!isDirector&&!!(s&&s.can_soin));
     if(hubCardSoin){
-      if(!canSoin){
-        hubCardSoin.classList.add('hub-card-disabled');
-        hubCardSoin.onclick=null;
-      } else {
-        hubCardSoin.classList.remove('hub-card-disabled');
-        hubCardSoin.onclick=goSoinDash;
-      }
+      hubCardSoin.style.display=canSoin?'':'none';
+      if(canSoin) hubCardSoin.onclick=goSoinDash;
+    }
+    const hubCardDir=document.getElementById('hubCardDir');
+    const canDir=isAdmin||!!(s&&s.campus);
+    if(hubCardDir){
+      hubCardDir.style.display=canDir?'':'none';
+      if(canDir) hubCardDir.onclick=goDirectorDash;
     }
     // 허브 카드: 손익계산서 (admin 또는 can_pl 권한 보유자)
     const hubCardChairman=document.getElementById('hubCardChairman');
-    const canPl=isAdmin||!!(s&&s.can_pl);
+    const canPl=isAdmin||(!isDirector&&!!(s&&s.can_pl));
     if(hubCardChairman){
-      if(!canPl||isDirector){
-        hubCardChairman.classList.add('hub-card-disabled');
-        hubCardChairman.onclick=null;
-      } else {
-        hubCardChairman.classList.remove('hub-card-disabled');
-        hubCardChairman.onclick=goChairmanDash;
-      }
+      hubCardChairman.style.display=canPl?'':'none';
+      if(canPl) hubCardChairman.onclick=goChairmanDash;
     }
     // 허브 환영 메시지
     const wt=document.getElementById('hubWelcomeTitle');
@@ -4467,6 +4465,7 @@ function applyAuth(){
     if(chmWrap) chmWrap.style.display='none';
     tabs.style.display='none';
     if(authBtn) authBtn.style.display='none';
+    if(adminHdrBtn) adminHdrBtn.style.display='none';
   }
 
   // 코멘트 에디터: 관리자만 표시
@@ -4508,6 +4507,31 @@ function goHub(){
   if(chmWrap) chmWrap.style.display='none';
   tabs.style.display='none';
   saveDashView('hub');
+}
+
+function goAdminPanel(){
+  const s=getSession();
+  if(!s||s.role!=='admin') return;
+  const hub=document.getElementById('hub-screen');
+  const dash=document.getElementById('dashboard-wrap');
+  const dirWrap=document.getElementById('director-wrap');
+  const chmWrap=document.getElementById('chairman-wrap');
+  const tabs=document.getElementById('mainTabs');
+  hub.style.display='none';
+  if(dirWrap) dirWrap.style.display='none';
+  if(chmWrap) chmWrap.style.display='none';
+  dash.style.display='block';
+  tabs.style.display='flex';
+  saveDashView('main');
+  const adminTab=document.getElementById('tab-admin-page');
+  if(adminTab) goMain('admin', adminTab);
+  else {
+    // admin 페이지 직접 활성화
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+    const pg=document.getElementById('pg-admin');
+    if(pg){ pg.classList.add('on'); renderAdminPage(); }
+  }
 }
 
 function goSoinDash(){
