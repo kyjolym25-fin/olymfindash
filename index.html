@@ -4434,7 +4434,8 @@ function applyAuth(){
     const chmOpen  = chmWrap&&chmWrap.style.display==='block';
     if(!dashOpen && !dirOpen && !chmOpen){
       const saved=getDashView();
-      if(saved==='chairman'&&isAdmin){
+      const canPl2=isAdmin||(!isDirector&&!!(s&&s.can_pl));
+      if(saved==='chairman'&&canPl2){
         hub.style.display='none';
         chmWrap.style.display='block';
         initChmDash();
@@ -6379,9 +6380,6 @@ applyAuth();
   await loadRawDB();
   if(RAW_DB.length) applyRawToDashboard();
   autoSelectLatestMonth();
-  // RAW_DB 로드 후 손익계산서가 이미 열려있으면 재렌더 (새로고침 시 빈 테이블 방지)
-  const _chmEl=document.getElementById('chairman-wrap');
-  if(_chmEl&&_chmEl.style.display==='block') initChmDash();
   await _refreshSessionPerms();
   applyAuth();
   loadComments();
@@ -6408,13 +6406,20 @@ applyAuth();
   // 해시 없거나 복원 실패 시
   if(!restored){
     const s2=getSession();
-    if(s2&&s2.role==='director'){
+    const _chmNow=document.getElementById('chairman-wrap');
+    const chmShowing=_chmNow&&_chmNow.style.display==='block';
+    if(chmShowing){
+      // 손익계산서 복원 중 — goMain 호출 안 함
+    } else if(s2&&s2.role==='director'){
       // director는 허브만 — 손익 대시보드 자동 진입 안 함
     } else {
       const ovEl = document.querySelector('#mainTabs .tab[onclick*="\'overview\'"]');
       if(ovEl) goMain('overview', ovEl);
     }
   }
+  // 모든 복원 완료 후 손익계산서 재렌더 (데이터 로드 후 최종 보장)
+  const _chmEl=document.getElementById('chairman-wrap');
+  if(_chmEl&&_chmEl.style.display==='block') initChmDash();
 })();
 window.addEventListener('beforeunload',()=>sessionStorage.setItem('olymp_scrollY', window.scrollY));
 
