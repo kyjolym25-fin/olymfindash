@@ -6921,16 +6921,25 @@ const _NOTICE_DEFAULTS = {
   ]
 };
 
-function _renderNotice(elId, storageKey){
+async function _renderNotice(elId, storageKey){
   const el=document.getElementById(elId);
   if(!el) return;
   const s=getSession();
   const isAdmin=s&&s.role==='admin';
-  let lines;
-  try{ lines=JSON.parse(localStorage.getItem(storageKey)||'null'); }catch{}
+
+  // DB에서 로드, 실패 시 기본값 사용
+  let lines=null;
+  try{
+    const {data}=await sb.from('notices').select('lines').eq('key',storageKey).maybeSingle();
+    if(data?.lines) lines=data.lines;
+  }catch{}
   lines=lines||_NOTICE_DEFAULTS[storageKey]||[];
+
   if(!lines.length){ el.style.display='none'; return; }
   el.style.display='';
+  // 편집 시 재사용할 수 있도록 현재 lines 캐시
+  el.dataset.lines=JSON.stringify(lines);
+
   const editBtn=isAdmin
     ?`<button onclick="_editNotice('${elId}','${storageKey}')" style="font-size:11px;padding:2px 10px;border-radius:4px;border:1px solid #fde68a;background:#fef3c7;color:#92400e;cursor:pointer;font-weight:600">✏️ 편집</button>`
     :'';
@@ -6945,31 +6954,35 @@ function _renderNotice(elId, storageKey){
 function _editNotice(elId, storageKey){
   const el=document.getElementById(elId);
   if(!el) return;
+  // dataset에 캐시된 lines 사용 (이미 로드됨)
   let lines;
-  try{ lines=JSON.parse(localStorage.getItem(storageKey)||'null'); }catch{}
+  try{ lines=JSON.parse(el.dataset.lines||'null'); }catch{}
   lines=lines||_NOTICE_DEFAULTS[storageKey]||[];
   el.innerHTML=`<div style="font-size:12px;font-weight:700;color:#92400e;margin-bottom:4px">📌 안내사항 편집</div>
     <div style="font-size:11px;color:#a16207;margin-bottom:6px">한 줄에 항목 하나씩 입력 · 빈 줄은 무시됩니다.</div>
     <textarea id="${elId}-ta" style="width:100%;box-sizing:border-box;min-height:110px;font-size:12px;line-height:1.8;border:1px solid #fde68a;border-radius:6px;padding:8px 10px;background:#fffef7;color:#78350f;resize:vertical;font-family:inherit">${lines.join('\n')}</textarea>
     <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
-      <button onclick="_saveNotice('${elId}','${storageKey}')" style="font-size:12px;font-weight:700;padding:5px 16px;border-radius:6px;border:none;background:#f59e0b;color:#fff;cursor:pointer">저장</button>
+      <button id="${elId}-save-btn" onclick="_saveNotice('${elId}','${storageKey}')" style="font-size:12px;font-weight:700;padding:5px 16px;border-radius:6px;border:none;background:#f59e0b;color:#fff;cursor:pointer">저장</button>
       <button onclick="_renderNotice('${elId}','${storageKey}')" style="font-size:12px;font-weight:600;padding:5px 14px;border-radius:6px;border:1px solid #fde68a;background:#fff;color:#92400e;cursor:pointer">취소</button>
       <button onclick="_resetNotice('${elId}','${storageKey}')" style="font-size:11px;font-weight:600;padding:5px 10px;border-radius:6px;border:1px solid #e5e7eb;background:transparent;color:#9ca3af;cursor:pointer;margin-left:auto">기본값 복원</button>
     </div>`;
 }
 
-function _saveNotice(elId, storageKey){
+async function _saveNotice(elId, storageKey){
   const ta=document.getElementById(elId+'-ta');
+  const btn=document.getElementById(elId+'-save-btn');
   if(!ta) return;
   const lines=ta.value.split('\n').map(l=>l.trim()).filter(Boolean);
-  localStorage.setItem(storageKey,JSON.stringify(lines));
-  _renderNotice(elId,storageKey);
+  if(btn){ btn.textContent='저장 중...'; btn.disabled=true; }
+  const {error}=await sb.from('notices').upsert({key:storageKey,lines,updated_at:new Date().toISOString()});
+  if(error){ alert('저장 실패: '+error.message); if(btn){btn.textContent='저장';btn.disabled=false;} return; }
+  await _renderNotice(elId,storageKey);
 }
 
-function _resetNotice(elId, storageKey){
+async function _resetNotice(elId, storageKey){
   if(!confirm('기본값으로 복원하시겠습니까?')) return;
-  localStorage.removeItem(storageKey);
-  _renderNotice(elId,storageKey);
+  await sb.from('notices').delete().eq('key',storageKey);
+  await _renderNotice(elId,storageKey);
 }
 
 function initChmDash(){
