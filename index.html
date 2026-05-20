@@ -6790,9 +6790,11 @@ const _CHM_DEPT_CLR = {
 
 // ── 테이블 렌더 ────────────────────────────────────────────────
 function _renderChmTable(){
+  try{
   const table=document.getElementById('chmTable');
   if(!table) return;
   const visIds=CHM_ALL_IDS.filter(_chmIsVisible);
+  console.log('[CHM] render: visIds='+visIds.length+' chmMi='+chmMi+' expanded='+[...chmExpanded].join(','));
   const p26=chmPeriod, p25=chmPeriod+'25';
   const mLabel=chmPeriod==='cur'?`당월 (${chmMi+1}월)`:`YTD (1~${chmMi+1}월)`;
 
@@ -6866,6 +6868,7 @@ function _renderChmTable(){
     const inner=document.getElementById('chmScrollTopInner');
     if(inner) inner.style.width=table.scrollWidth+'px';
   });
+  }catch(e){ console.error('[CHM] _renderChmTable error:',e); }
 }
 
 function chmToggle(id){
@@ -6882,6 +6885,8 @@ function chmToggle(id){
 
 function initChmDash(){
   chmMi = typeof latestActMi==='number'&&latestActMi>=0 ? latestActMi : 3;
+  // company 노드는 항상 펼쳐서 사업부 행이 기본으로 표시되게
+  if(!chmExpanded.has('company')) chmExpanded.add('company');
   _buildChmNodes26(chmMi);
   _buildChmNodes25(chmMi);
   _buildChmMonthBar();
