@@ -6856,7 +6856,8 @@ function _renderChmTable(){
   let body=`<tbody>`;
   let prevSec=null;
   for(const acc of CHM_ACCOUNTS){
-    if((acc.sec==='common'||acc.sec==='op2')&&!showCommon) continue;
+    if(acc.sec==='common'&&!showCommon) continue;
+    if(acc.sec==='op1'&&!showCommon) continue;
     if(CHM_SEC_LABELS[acc.sec]&&acc.sec!==prevSec){
       prevSec=acc.sec;
       body+=`<tr><td style="position:sticky;left:0;z-index:10;background:#F1F5F9;color:#64748B;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;height:26px;padding:0 14px;border-top:1px solid #E4E8F4;border-right:1px solid #E4E8F4;white-space:nowrap">${CHM_SEC_LABELS[acc.sec]}</td><td colspan="${visIds.length*2}" style="background:#F8FAFC;border-top:1px solid #E4E8F4"></td></tr>`;
@@ -6868,12 +6869,18 @@ function _renderChmTable(){
     const lblSt=acc.sub?'padding-left:26px;color:#64748B;font-size:11.5px':'';
     const lblFw=isOp?'font-weight:800':'';
     const lblClr=acc.sec==='op1'?'color:#0369A1':acc.sec==='op2'?'color:#065F46':acc.sec==='common'?'color:#7C3AED':'';
+    const dispLabel=(!showCommon&&acc.sec==='op2')?'영업이익':acc.label;
     body+=`<tr style="${rowBg};${rowBt};border-bottom:1px solid rgba(228,232,244,.3)">`;
-    body+=`<td style="position:sticky;left:0;z-index:10;background:inherit;text-align:left;padding:0 14px;height:36px;font-size:12px;border-right:1px solid #E4E8F4;white-space:nowrap;${lblSt};${lblFw};${lblClr}">${acc.label}</td>`;
+    body+=`<td style="position:sticky;left:0;z-index:10;background:inherit;text-align:left;padding:0 14px;height:36px;font-size:12px;border-right:1px solid #E4E8F4;white-space:nowrap;${lblSt};${lblFw};${lblClr}">${dispLabel}</td>`;
     for(const id of visIds){
       const nd=CHM_NODES[id];
       const row26=nd[p26]||{}, row25=nd[p25]||{};
-      const v26=row26[acc.key], v25=row25[acc.key];
+      let v26=row26[acc.key], v25=row25[acc.key];
+      // 최상위 뷰: 비용 소계에 공통비 합산
+      if(!showCommon&&acc.key==='exp_total'){
+        v26=(v26||0)+(row26.com_total||0);
+        v25=(v25||0)+(row25.com_total||0);
+      }
       const bg25=rowBg?rowBg:'background:#F8FAFF';
       const bg26=rowBg?rowBg:'background:#fff';
       body+=`<td style="text-align:right;padding:0 12px;height:36px;font-size:12px;font-variant-numeric:tabular-nums;font-weight:${isTotal?600:400};border-left:1px solid rgba(228,232,244,.4);${bg25}">${isOp?_chmFmtOp(v25):_chmFmt(v25)}</td>`;
