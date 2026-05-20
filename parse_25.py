@@ -31,6 +31,7 @@ EXP_MAP = {
     '기업업무추진비': 'exp_entertain',
     '통신비': 'exp_comm',
     '수도광열비': 'exp_utility',
+    '경상연구개발비': 'exp_rd',
     '세금과공과금': 'exp_tax',
     '감가상각비': 'exp_deprec',
     '지급임차료': 'exp_lease',
@@ -55,7 +56,7 @@ EXP_MAP = {
     '포인트충당금전입': 'exp_provision',
 }
 
-EXP_SKIP = {'인건비', '강사료', '기타비용', '소계', '합계', '대손상각비', '경상연구개발비'}
+EXP_SKIP = {'인건비', '강사료', '기타비용', '소계', '합계', '대손상각비'}
 
 COM_MAP = {
     '직원급여': 'com_salary', '직원급여(학원안분)': 'com_salary',
