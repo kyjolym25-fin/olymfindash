@@ -6360,6 +6360,7 @@ applyAuth();
   await loadRawDB();
   if(RAW_DB.length) applyRawToDashboard();
   autoSelectLatestMonth();
+  await _refreshSessionPerms();
   applyAuth();
   loadComments();
   loadStu26();
