@@ -1059,7 +1059,7 @@ thead th{font-size:13px}
       <div class="mini-card c26a"><div class="mc-lbl">수업료</div><div class="mc-val"><span id="bghu-val-suup">5.8억</span></div><div class="mc-meta" id="bghu-meta-suup" style="color:var(--muted)">계정: 방과후학교</div></div>
       <div class="mini-card c26a"><div class="mc-lbl">재료비 매출</div><div class="mc-val"><span id="bghu-val-jae">0.8억</span></div><div class="mc-meta" id="bghu-meta-jae" style="color:var(--muted)">계정: 재료비수입</div></div>
       <div class="mini-card cr"><div class="mc-lbl">판매관리비</div><div class="mc-val"><span id="bghu-val-c">7.1억</span></div><div class="mc-meta" id="bghu-meta-c" style="color:var(--loss)">매출비 107.2%</div></div>
-      <div class="mini-card cr"><div class="mc-lbl">영업손실</div><div class="mc-val"><span id="bghu-val-p">-0.47억</span></div><div class="mc-meta" id="bghu-meta-p" style="color:var(--loss)">이익률 -7.2%</div></div>
+      <div class="mini-card cr" id="bghu-card-p"><div class="mc-lbl">영업이익</div><div class="mc-val"><span id="bghu-val-p">-0.47억</span></div><div class="mc-meta" id="bghu-meta-p" style="color:var(--loss)">이익률 -7.2%</div></div>
     </div>
     <!-- RAW_DB 기반 영업이익 추이 -->
     <div class="full card" id="bghu_profit_mtn_card">
@@ -3237,6 +3237,8 @@ function renderDeptKpi(mi){
   const bgC=bgTotal!=null&&bgProfit!=null?bgTotal-bgProfit:null;
   set('bghu-val-total',fmt억(bgTotal)); set('bghu-val-suup',fmt억(bgSuup)); set('bghu-val-jae',fmt억(bgJae));
   set('bghu-val-c',fmt억(bgC)); set('bghu-val-p',fmt억(bgProfit));
+  const bghuCardP=document.getElementById('bghu-card-p');
+  if(bghuCardP) bghuCardP.className='mini-card '+(bgProfit!=null&&bgProfit>=0?'c26a':'cr');
   setH('bghu-meta-suup',bgSuup!=null&&bg.수업료매출.yr25[mi]>0?`<span style="color:${bgSuup>=(bg.수업료매출.yr25[mi]??0)?'var(--c26a)':'var(--loss)'}">25년비 ${((bgSuup-(bg.수업료매출.yr25[mi]??0))/(bg.수업료매출.yr25[mi]??1)*100).toFixed(1)}%</span>`:'계정: 방과후학교');
   setH('bghu-meta-jae',bgJae!=null&&bg.재료비매출.yr25[mi]>0?`<span style="color:${bgJae>=(bg.재료비매출.yr25[mi]??0)?'var(--c26a)':'var(--loss)'}">25년비 ${((bgJae-(bg.재료비매출.yr25[mi]??0))/(bg.재료비매출.yr25[mi]??1)*100).toFixed(1)}%</span>`:'계정: 재료비수입');
   set('bghu-meta-c',bgTotal>0&&bgC!=null?`매출비 ${(bgC/bgTotal*100).toFixed(1)}%`:'');
