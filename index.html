@@ -6823,17 +6823,15 @@ function _renderChmTable(){
   }
   h1+=`</tr>`;
 
-  // ── 헤더 2행 (26년/25년) ──
+  // ── 헤더 2행 (25년/26년) — 원장단과 동일 순서·색상 ──
   let h2=`<tr>`;
   for(const id of visIds){
     const nd=CHM_NODES[id];
     const is0=nd.level===0;
-    const yr26bg=is0?`rgba(20,30,60,1)`:`rgba(219,234,254,.95)`;
-    const yr25bg=is0?`rgba(20,30,60,.85)`:`rgba(243,244,246,.95)`;
-    const yr26st=is0?`background:${yr26bg};color:#93C5FD`:`background:${yr26bg};color:#1D4ED8`;
-    const yr25st=is0?`background:${yr25bg};color:rgba(255,255,255,.4)`:`background:${yr25bg};color:#6B7280`;
-    h2+=`<th style="position:sticky;top:44px;z-index:30;${yr26st};font-size:10px;font-weight:700;padding:4px 8px;height:24px;text-align:center;border-bottom:2px solid #E2E8F0;border-left:1px solid rgba(0,0,0,.06);white-space:nowrap;letter-spacing:.04em;min-width:${is0?68:58}px">26년</th>`;
-    h2+=`<th style="position:sticky;top:44px;z-index:30;${yr25st};font-size:10px;font-weight:700;padding:4px 8px;height:24px;text-align:center;border-bottom:2px solid #E2E8F0;border-right:1px solid rgba(0,0,0,.08);white-space:nowrap;letter-spacing:.04em;min-width:${is0?68:58}px">25년</th>`;
+    const yr25st=is0?`background:rgba(67,97,238,.25);color:#93C5FD`:`background:#EEF2FF;color:#4361EE`;
+    const yr26st=is0?`background:rgba(16,185,129,.2);color:#6EE7B7`:`background:#ECFDF5;color:#059669`;
+    h2+=`<th style="position:sticky;top:44px;z-index:30;${yr25st};font-size:10px;font-weight:700;padding:4px 8px;height:24px;text-align:center;border-bottom:2px solid #E2E8F0;border-left:1px solid rgba(0,0,0,.06);white-space:nowrap;letter-spacing:.04em;min-width:${is0?68:58}px">25년</th>`;
+    h2+=`<th style="position:sticky;top:44px;z-index:30;${yr26st};font-size:10px;font-weight:700;padding:4px 8px;height:24px;text-align:center;border-bottom:2px solid #E2E8F0;border-right:1px solid rgba(0,0,0,.08);white-space:nowrap;letter-spacing:.04em;min-width:${is0?68:58}px">26년</th>`;
   }
   h2+=`</tr>`;
 
@@ -6860,10 +6858,12 @@ function _renderChmTable(){
       const v26=row26[acc.key], v25=row25[acc.key];
       const is0=nd.level===0;
       const clr=is0?null:_CHM_DEPT_CLR[nd.dept]||_CHM_DEPT_CLR.mgmt;
-      const bl26=is0?'border-left:3px solid #4361EE':'border-left:1px solid '+(clr?clr.border:'#E2E8F0');
-      const br25=is0?'':'border-right:1px solid '+(clr?clr.border+'88':'#E2E8F066');
-      body+=`<td style="text-align:right;padding:0 12px;height:36px;font-size:12px;font-variant-numeric:tabular-nums;font-weight:${isTotal?600:400};${bl26};${rowBg}">${isOp?_chmFmtOp(v26):_chmFmt(v26)}</td>`;
-      body+=`<td style="text-align:right;padding:0 12px;height:36px;font-size:11px;font-variant-numeric:tabular-nums;color:#6B7280;${br25};${rowBg}">${isOp?_chmFmtOp(v25):_chmFmt(v25)}</td>`;
+      const bl25=is0?'border-left:3px solid #4361EE':'border-left:1px solid '+(clr?clr.border:'#E2E8F0');
+      const br26=is0?'':'border-right:1px solid '+(clr?clr.border+'88':'#E2E8F066');
+      const bg25=rowBg?rowBg:'background:#F8FAFF';
+      const bg26=rowBg?rowBg:'background:#fff';
+      body+=`<td style="text-align:right;padding:0 12px;height:36px;font-size:12px;font-variant-numeric:tabular-nums;font-weight:${isTotal?600:400};${bl25};${bg25}">${isOp?_chmFmtOp(v25):_chmFmt(v25)}</td>`;
+      body+=`<td style="text-align:right;padding:0 12px;height:36px;font-size:12px;font-variant-numeric:tabular-nums;font-weight:${isTotal?600:400};${br26};${bg26}">${isOp?_chmFmtOp(v26):_chmFmt(v26)}</td>`;
     }
     body+=`</tr>`;
   }
