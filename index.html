@@ -4495,7 +4495,7 @@ const DKEY='olymp_dashview'; // 'main' | 'director' | 'hub'
 const saveDashView=v=>{ try{ sessionStorage.setItem(DKEY,v); }catch{} };
 const getDashView=()=>{ try{ return sessionStorage.getItem(DKEY)||''; }catch{ return ''; } };
 
-function goHub(){
+async function goHub(){
   const hub=document.getElementById('hub-screen');
   const dash=document.getElementById('dashboard-wrap');
   const dirWrap=document.getElementById('director-wrap');
@@ -4507,6 +4507,16 @@ function goHub(){
   if(chmWrap) chmWrap.style.display='none';
   tabs.style.display='none';
   saveDashView('hub');
+  // 허브 진입 시 항상 DB에서 최신 권한 갱신
+  await _refreshSessionPerms();
+  applyAuth();
+}
+
+async function _refreshSessionPerms(){
+  const s=getSession();
+  if(!s) return;
+  const {data:fresh}=await sb.from('users').select('role,campus,can_soin,can_pl').eq('email',s.email).maybeSingle();
+  if(fresh) saveSession({...s, role:fresh.role||s.role, campus:fresh.campus||'', can_soin:!!fresh.can_soin, can_pl:!!fresh.can_pl});
 }
 
 function goAdminPanel(){
