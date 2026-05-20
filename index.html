@@ -5982,20 +5982,9 @@ function renderDirList(){
       const style=(!hasData&&!DIR_PL25[sh])?'opacity:.55;cursor:default':'';
       const canClick=hasData||!!DIR_PL25[sh];
       const click=canClick?`goToDirDetail('${sh}')`:'';
-      const d25=DIR_PL25[sh];
-      let yr25html='';
-      if(d25){
-        const pRow=d25.rows.find(r=>r.type==='profit1');
-        if(pRow){
-          const tot=Object.values(pRow.vals).reduce((s,v)=>s+v,0);
-          const totStr=(tot/1000).toLocaleString('ko-KR',{maximumFractionDigits:0});
-          yr25html=`<div class="dir-camp-card-yr25">25년 영업이익 ${totStr}천</div>`;
-        }
-      }
       return `<div class="dir-camp-card" style="${style}" onclick="${click}">
         <div class="dir-camp-card-name">${info.displayName}</div>
         <div class="dir-camp-card-sub">${mLabel}</div>
-        ${yr25html}
       </div>`;
     }).join('');
     html+=`<div class="dir-group">
