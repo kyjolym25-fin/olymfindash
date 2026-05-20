@@ -1359,7 +1359,7 @@ thead th{font-size:13px}
     </div>
     <div id="atab-c-users">
       <table class="utbl"><thead><tr>
-        <th>이름</th><th>이메일</th><th>역할</th><th>캠퍼스</th><th>상태</th><th>가입일</th><th>최근접속</th><th>작업</th>
+        <th>이름</th><th>이메일</th><th>역할</th><th>열람 권한</th><th>상태</th><th>가입일</th><th>최근접속</th><th>작업</th>
       </tr></thead><tbody id="adminUserBody"></tbody></table>
     </div>
     <div id="atab-c-pending" style="display:none">
@@ -4315,7 +4315,7 @@ async function doLogin(){
   if(error||!u){err.textContent='이메일 또는 비밀번호가 올바르지 않습니다.';return;}
   if(u.status!=='active'){err.textContent='승인 대기 중인 계정입니다.';return;}
   await sb.from('users').update({last_login:new Date().toISOString().slice(0,10)}).eq('email',email);
-  saveSession({email:u.email,name:u.name,role:u.role,campus:u.campus||'',can_pl:!!u.can_pl});
+  saveSession({email:u.email,name:u.name,role:u.role,campus:u.campus||'',can_pl:!!u.can_pl,can_soin:!!u.can_soin});
   closeAuth();
   applyAuth();
 }
@@ -4417,7 +4417,7 @@ function applyAuth(){
         if(uploadBtn) uploadBtn.style.display=(s&&s.role==='admin')?'':'none';
         // 세션 campus 최신화 후 렌더
         sb.from('users').select('campus,role').eq('email',s.email).maybeSingle().then(({data:fresh})=>{
-          if(fresh){ saveSession({...s,campus:fresh.campus||'',role:fresh.role||s.role,can_pl:!!fresh.can_pl}); }
+          if(fresh){ saveSession({...s,campus:fresh.campus||'',role:fresh.role||s.role,can_pl:!!fresh.can_pl,can_soin:!!fresh.can_soin}); }
           loadCampusPl().then(()=>{
             const h=location.hash;
             if(h.startsWith('#dir-')&&h!=='#dir-list'){
@@ -4434,8 +4434,9 @@ function applyAuth(){
     }
     // 허브 카드 활성/비활성
     const hubCardSoin=document.getElementById('hubCardSoin');
+    const canSoin=isAdmin||(!isDirector&&!!(s&&s.can_soin));
     if(hubCardSoin){
-      if(isDirector){
+      if(!canSoin){
         hubCardSoin.classList.add('hub-card-disabled');
         hubCardSoin.onclick=null;
       } else {
@@ -4529,7 +4530,7 @@ async function goDirectorDash(){
   // 세션 campus가 변경됐을 수 있으므로 DB에서 최신값 갱신
   const {data:fresh}=await sb.from('users').select('campus,role').eq('email',s.email).maybeSingle();
   if(fresh){
-    s={...s, campus:fresh.campus||'', role:fresh.role||s.role, can_pl:!!fresh.can_pl};
+    s={...s, campus:fresh.campus||'', role:fresh.role||s.role, can_pl:!!fresh.can_pl, can_soin:!!fresh.can_soin};
     saveSession(s);
   }
   const hub=document.getElementById('hub-screen');
@@ -4952,21 +4953,49 @@ async function renderUserTable(){
           <option value="director" ${u.role==='director'?'selected':''}>원장</option>
           <option value="admin" ${u.role==='admin'?'selected':''}>관리자</option>
         </select>`;
-    const campusText=u.campus?`<span style="font-size:10px;color:var(--muted);margin-right:6px">${u.campus.replace(/,/g,' · ')}</span>`:'';
-    const campusBtn=`<button onclick="setCampusPrompt('${u.email}','${u.campus||''}')" style="font-size:10px;padding:3px 8px;background:var(--s3);border:1px solid var(--border);border-radius:4px;cursor:pointer;color:var(--text)">캠퍼스${u.campus?` <span style='color:var(--c26a)'>✓</span>`:''}</button>`;
-    const plOn=!!u.can_pl;
-    const plBtn=isProtected
-      ?`<span style="font-size:10px;color:var(--muted);margin-left:8px">손익계산서: 항상허용</span>`
-      :`<label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer;margin-left:8px;vertical-align:middle" title="손익계산서 접근 권한 ${plOn?'해제':'허용'}">
-          <div onclick="toggleCanPl('${u.email}',${plOn})" style="width:34px;height:18px;border-radius:9px;background:${plOn?'#4361EE':'#D1D5DB'};position:relative;cursor:pointer;transition:background .2s;flex-shrink:0">
-            <div style="width:14px;height:14px;border-radius:7px;background:#fff;position:absolute;top:2px;left:${plOn?'18px':'2px'};transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.25)"></div>
-          </div>
-          <span style="font-size:10px;font-weight:600;color:${plOn?'#4361EE':'#9CA3AF'}">손익계산서</span>
-        </label>`;
+    const soinOn = isProtected || !!u.can_soin;
+    const campOn = !!u.campus;
+    const plOn   = isProtected || !!u.can_pl;
+
+    const mkToggle = (on, handler, label, alwaysOn) => {
+      if(alwaysOn) return `<div style="display:inline-flex;align-items:center;gap:4px;opacity:.45;cursor:default">
+        <div style="width:30px;height:16px;border-radius:8px;background:#4361EE;position:relative;flex-shrink:0">
+          <div style="width:12px;height:12px;border-radius:6px;background:#fff;position:absolute;top:2px;left:16px;box-shadow:0 1px 2px rgba(0,0,0,.2)"></div>
+        </div>
+        <span style="font-size:10px;font-weight:600;color:#4361EE">${label}</span>
+      </div>`;
+      return `<div onclick="${handler}" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer" title="${label} 접근 ${on?'해제':'허용'}">
+        <div style="width:30px;height:16px;border-radius:8px;background:${on?'#4361EE':'#D1D5DB'};position:relative;flex-shrink:0;transition:background .2s">
+          <div style="width:12px;height:12px;border-radius:6px;background:#fff;position:absolute;top:2px;left:${on?'16px':'2px'};transition:left .2s;box-shadow:0 1px 2px rgba(0,0,0,.2)"></div>
+        </div>
+        <span style="font-size:10px;font-weight:600;color:${on?'#4361EE':'#9CA3AF'}">${label}</span>
+      </div>`;
+    };
+
+    const campCell = `<div onclick="setCampusPrompt('${u.email}','${u.campus||''}')"
+        style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;padding:1px 0" title="캠퍼스 선택">
+        <div style="width:30px;height:16px;border-radius:8px;background:${campOn?'#4361EE':'#D1D5DB'};position:relative;flex-shrink:0;transition:background .2s">
+          <div style="width:12px;height:12px;border-radius:6px;background:#fff;position:absolute;top:2px;left:${campOn?'16px':'2px'};transition:left .2s;box-shadow:0 1px 2px rgba(0,0,0,.2)"></div>
+        </div>
+        <span style="font-size:10px;font-weight:600;color:${campOn?'#4361EE':'#9CA3AF'}">캠퍼스 ▾</span>
+      </div>`;
+
+    const permCell = isProtected
+      ? `<div style="display:flex;flex-direction:column;gap:5px">
+           ${mkToggle(true,  '', '손익 대시보드', true)}
+           ${mkToggle(true,  '', '캠퍼스', true)}
+           ${mkToggle(true,  '', '손익계산서', true)}
+         </div>`
+      : `<div style="display:flex;flex-direction:column;gap:5px">
+           ${mkToggle(soinOn, `toggleCanSoin('${u.email}',${soinOn})`, '손익 대시보드', false)}
+           ${campCell}
+           ${mkToggle(plOn,   `toggleCanPl('${u.email}',${plOn})`,   '손익계산서', false)}
+         </div>`;
+
     return `<tr>
       <td>${u.name}</td><td style="font-size:11px">${u.email}</td>
       <td>${roleSelect}</td>
-      <td style="white-space:nowrap">${campusText}${campusBtn}${plBtn}</td>
+      <td style="padding:8px 14px">${permCell}</td>
       <td><span class="sbadge active">활성</span></td>
       <td>${u.join_date||'-'}</td>
       <td style="font-size:11px;color:var(--muted)">${u.last_login||'-'}</td>
@@ -5000,6 +5029,10 @@ async function changeRole(email,role){
 }
 async function toggleCanPl(email,current){
   await sb.from('users').update({can_pl:!current}).eq('email',email);
+  renderUserTable();
+}
+async function toggleCanSoin(email,current){
+  await sb.from('users').update({can_soin:!current}).eq('email',email);
   renderUserTable();
 }
 let _campEditEmail='';
