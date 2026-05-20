@@ -6876,10 +6876,9 @@ function _renderChmTable(){
       const nd=CHM_NODES[id];
       const row26=nd[p26]||{}, row25=nd[p25]||{};
       let v26=row26[acc.key], v25=row25[acc.key];
-      // 최상위 뷰: 비용 소계에 공통비 합산
+      // 최상위 뷰: 26년 비용 소계에만 공통비 합산 (25년은 그대로)
       if(!showCommon&&acc.key==='exp_total'){
         v26=(v26||0)+(row26.com_total||0);
-        v25=(v25||0)+(row25.com_total||0);
       }
       const bg25=rowBg?rowBg:'background:#F8FAFF';
       const bg26=rowBg?rowBg:'background:#fff';
