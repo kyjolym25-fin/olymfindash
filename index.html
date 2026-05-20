@@ -6417,38 +6417,81 @@ function chairmanNavBack(){
 
 // ── P&L 계정 행 정의 ──────────────────────────────────────────
 const CHM_ACCOUNTS = [
-  { key:'rev_tuition', label:'교습비수입',  sec:'rev', sub:true },
-  { key:'rev_other',   label:'기타수입',    sec:'rev', sub:true },
-  { key:'rev_total',   label:'매출 합계',   sec:'rev', total:true },
-  { key:'exp_salary',  label:'급여',        sec:'exp', sub:true },
-  { key:'exp_retire',  label:'퇴직급여',    sec:'exp', sub:true },
-  { key:'exp_welfare', label:'복리후생비',  sec:'exp', sub:true },
-  { key:'exp_rent',    label:'임차료',      sec:'exp', sub:true },
-  { key:'exp_fee',     label:'지급수수료',  sec:'exp', sub:true },
-  { key:'exp_book',    label:'교재비',      sec:'exp', sub:true },
-  { key:'exp_ad',      label:'광고선전비',  sec:'exp', sub:true },
-  { key:'exp_deprec',  label:'감가상각비',  sec:'exp', sub:true },
-  { key:'exp_other',   label:'기타경비',    sec:'exp', sub:true },
-  { key:'exp_total',   label:'판관비 합계', sec:'exp', total:true },
-  { key:'op1',         label:'영업이익 1',  sec:'op1' },
-  { key:'common',      label:'공통비 배부', sec:'common', sub:true },
-  { key:'op2',         label:'영업이익 2',  sec:'op2' },
+  // ── 매출 ──
+  { key:'rev_tuition',    label:'교습비수입',       sec:'rev', sub:true },
+  { key:'rev_franchise',  label:'가맹비수입',        sec:'rev', sub:true },
+  { key:'rev_book',       label:'도서수입',          sec:'rev', sub:true },
+  { key:'rev_online',     label:'온라인컨텐츠수입',  sec:'rev', sub:true },
+  { key:'rev_material',   label:'재료비수입',        sec:'rev', sub:true },
+  { key:'rev_afterschool',label:'방과후학교',        sec:'rev', sub:true },
+  { key:'rev_rent',       label:'임대료수입',        sec:'rev', sub:true },
+  { key:'rev_total',      label:'매출 합계',         sec:'rev', total:true },
+  // ── 판관비 ──
+  { key:'exp_salary',     label:'직원급여',          sec:'exp', sub:true },
+  { key:'exp_bonus',      label:'상여금',            sec:'exp', sub:true },
+  { key:'exp_retire',     label:'퇴직급여',          sec:'exp', sub:true },
+  { key:'exp_welfare',    label:'복리후생비',        sec:'exp', sub:true },
+  { key:'exp_instructor', label:'강사비',            sec:'exp', sub:true },
+  { key:'exp_inst_retire',label:'강사퇴직연금',      sec:'exp', sub:true },
+  { key:'exp_travel',     label:'여비교통비',        sec:'exp', sub:true },
+  { key:'exp_entertain',  label:'기업업무추진비',    sec:'exp', sub:true },
+  { key:'exp_comm',       label:'통신비',            sec:'exp', sub:true },
+  { key:'exp_utility',    label:'수도광열비',        sec:'exp', sub:true },
+  { key:'exp_tax',        label:'세금과공과금',      sec:'exp', sub:true },
+  { key:'exp_deprec',     label:'감가상각비',        sec:'exp', sub:true },
+  { key:'exp_lease',      label:'지급임차료',        sec:'exp', sub:true },
+  { key:'exp_repair',     label:'수선비',            sec:'exp', sub:true },
+  { key:'exp_insure',     label:'보험료',            sec:'exp', sub:true },
+  { key:'exp_ship',       label:'운반비',            sec:'exp', sub:true },
+  { key:'exp_training',   label:'교육훈련비',        sec:'exp', sub:true },
+  { key:'exp_print',      label:'도서인쇄비',        sec:'exp', sub:true },
+  { key:'exp_vehicle',    label:'차량유지비',        sec:'exp', sub:true },
+  { key:'exp_supplies',   label:'소모품비',          sec:'exp', sub:true },
+  { key:'exp_fee',        label:'지급수수료',        sec:'exp', sub:true },
+  { key:'exp_ad',         label:'광고선전비',        sec:'exp', sub:true },
+  { key:'exp_facility',   label:'건물관리비',        sec:'exp', sub:true },
+  { key:'exp_intangible', label:'무형고정자산상각',  sec:'exp', sub:true },
+  { key:'exp_car_op',     label:'차량운행비',        sec:'exp', sub:true },
+  { key:'exp_program',    label:'프로그램사용료',    sec:'exp', sub:true },
+  { key:'exp_clean',      label:'청소용역비',        sec:'exp', sub:true },
+  { key:'exp_event',      label:'행사비',            sec:'exp', sub:true },
+  { key:'exp_incentive',  label:'판매장려금',        sec:'exp', sub:true },
+  { key:'exp_misc',       label:'잡비',              sec:'exp', sub:true },
+  { key:'exp_outsource',  label:'외주용역비',        sec:'exp', sub:true },
+  { key:'exp_provision',  label:'포인트충당금전입',  sec:'exp', sub:true },
+  { key:'exp_total',      label:'비용 소계',         sec:'exp', total:true },
+  // ── 영업이익 1 ──
+  { key:'op1',            label:'영업이익 1 (공통비 제외)', sec:'op1' },
+  // ── 공통비 ──
+  { key:'com_salary',     label:'직원급여(공통비)',  sec:'common', sub:true },
+  { key:'com_bonus',      label:'상여금(공통비)',    sec:'common', sub:true },
+  { key:'com_retire',     label:'퇴직급여(공통비)',  sec:'common', sub:true },
+  { key:'com_welfare',    label:'복리후생비(공통비)',sec:'common', sub:true },
+  { key:'com_total',      label:'공통비 합계',       sec:'common', total:true },
+  // ── 영업이익 2 ──
+  { key:'op2',            label:'영업이익 2 (공통비 포함)', sec:'op2' },
 ];
-const CHM_SEC_LABELS = { rev:'▌ 매출', exp:'▌ 판관비 (판매관리비)' };
+const CHM_SEC_LABELS = { rev:'▌ 매출', exp:'▌ 판관비', common:'▌ 공통비' };
 
 // ── 25년 자동 생성 (목업용, 실 데이터 연동 전) ──────────────────
 function _chmGen25(d, rM=0.921, eM=0.948){
-  const rnd=(v,m)=>Math.round(v*m/1000)*1000;
-  const rev_tuition=rnd(d.rev_tuition,rM), rev_other=rnd(d.rev_other,rM);
-  const rev_total=rev_tuition+rev_other;
-  const exp_salary=rnd(d.exp_salary,eM), exp_retire=rnd(d.exp_retire,eM),
-        exp_welfare=rnd(d.exp_welfare,eM), exp_rent=rnd(d.exp_rent,eM),
-        exp_fee=rnd(d.exp_fee,eM), exp_book=rnd(d.exp_book,eM),
-        exp_ad=rnd(d.exp_ad,eM), exp_deprec=rnd(d.exp_deprec,eM),
-        exp_other=rnd(d.exp_other,eM);
-  const exp_total=exp_salary+exp_retire+exp_welfare+exp_rent+exp_fee+exp_book+exp_ad+exp_deprec+exp_other;
-  const op1=rev_total-exp_total;
-  return {rev_tuition,rev_other,rev_total,exp_salary,exp_retire,exp_welfare,exp_rent,exp_fee,exp_book,exp_ad,exp_deprec,exp_other,exp_total,op1,common:0,op2:op1};
+  const rnd=(v,m)=>v!=null?Math.round(v*m/1000)*1000:undefined;
+  const out={};
+  // 매출: rev_* (total 제외) → rM 배율
+  for(const k of Object.keys(d)){
+    if(k.startsWith('rev_')&&k!=='rev_total') out[k]=rnd(d[k],rM);
+    else if((k.startsWith('exp_')||k.startsWith('com_'))&&!k.endsWith('_total')) out[k]=rnd(d[k],eM);
+  }
+  // 합계/이익은 새로 계산
+  const revKeys=CHM_ACCOUNTS.filter(a=>a.sec==='rev'&&a.sub).map(a=>a.key);
+  const expKeys=CHM_ACCOUNTS.filter(a=>a.sec==='exp'&&a.sub).map(a=>a.key);
+  const comKeys=CHM_ACCOUNTS.filter(a=>a.sec==='common'&&a.sub).map(a=>a.key);
+  out.rev_total=revKeys.reduce((s,k)=>s+(out[k]||0),0);
+  out.exp_total=expKeys.reduce((s,k)=>s+(out[k]||0),0);
+  out.com_total=comKeys.reduce((s,k)=>s+(out[k]||0),0);
+  out.op1=out.rev_total-out.exp_total;
+  out.op2=out.op1-out.com_total;
+  return out;
 }
 
 // ── 목업 데이터 (실 데이터 연동 전 임시) ──────────────────────
