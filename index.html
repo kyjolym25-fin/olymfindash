@@ -6802,7 +6802,7 @@ function _renderChmTable(){
 
   // ── 헤더 1행 ──
   let h1=`<tr>`;
-  h1+=`<th rowspan="2" style="position:sticky;top:0;left:0;z-index:40;background:#F1F5F9;text-align:left;min-width:140px;padding:10px 14px;font-size:10px;font-weight:700;color:#64748B;letter-spacing:.05em;border-right:2px solid #CBD5E1;border-bottom:2px solid #E2E8F0;white-space:nowrap">계정 항목<br><span style="font-size:9px;font-weight:400;color:#94A3B8">${mLabel} · 천원</span></th>`;
+  h1+=`<th rowspan="2" style="position:sticky;top:0;left:0;z-index:40;background:#F1F5F9;text-align:left;min-width:140px;padding:10px 14px;font-size:10px;font-weight:700;color:#64748B;letter-spacing:.05em;border-right:1px solid #E4E8F4;border-bottom:1px solid #E4E8F4;white-space:nowrap">계정 항목<br><span style="font-size:9px;font-weight:400;color:#94A3B8">${mLabel} · 천원</span></th>`;
   for(const id of visIds){
     const nd=CHM_NODES[id];
     const hasChild=nd.children&&nd.children.length>0;
@@ -6810,12 +6810,12 @@ function _renderChmTable(){
     const is0=nd.level===0;
     const clr=is0?null:_CHM_DEPT_CLR[nd.dept]||_CHM_DEPT_CLR.mgmt;
     const thSt=is0
-      ?`background:#141E3C;color:#fff;border-left:3px solid #4361EE`
-      :`background:${clr.thBg};color:${clr.thFg};border-left:2px solid ${clr.border}`;
+      ?`background:#141E3C;color:#fff;border-left:1px solid #E4E8F4`
+      :`background:${clr.thBg};color:${clr.thFg};border-left:1px solid #E4E8F4`;
     const minW=[140,128,108,92][nd.level]||92;
     const tog=hasChild
       ?`<button onclick="chmToggle('${id}')" style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:4px;border:1.5px solid currentColor;background:transparent;font-size:11px;font-weight:800;cursor:pointer;vertical-align:middle;margin-left:4px;color:inherit;opacity:.7">${isExp?'−':'+'}</button>`:'';
-    h1+=`<th colspan="2" style="position:sticky;top:0;z-index:30;${thSt};min-width:${minW}px;font-size:11px;font-weight:700;padding:8px 10px;height:44px;vertical-align:middle;text-align:center;white-space:nowrap;border-bottom:1px solid rgba(0,0,0,.06)">${nd.label}${tog}</th>`;
+    h1+=`<th colspan="2" style="position:sticky;top:0;z-index:30;${thSt};min-width:${minW}px;font-size:11px;font-weight:700;padding:8px 10px;height:44px;vertical-align:middle;text-align:center;white-space:nowrap;border-bottom:1px solid #E4E8F4">${nd.label}${tog}</th>`;
   }
   h1+=`</tr>`;
 
@@ -6823,11 +6823,9 @@ function _renderChmTable(){
   let h2=`<tr>`;
   for(const id of visIds){
     const nd=CHM_NODES[id];
-    const is0=nd.level===0;
-    const yr25st=is0?`background:rgba(67,97,238,.25);color:#93C5FD`:`background:#EEF2FF;color:#4361EE`;
-    const yr26st=is0?`background:rgba(16,185,129,.2);color:#6EE7B7`:`background:#ECFDF5;color:#059669`;
-    h2+=`<th style="position:sticky;top:44px;z-index:30;${yr25st};font-size:10px;font-weight:700;padding:4px 8px;height:24px;text-align:center;border-bottom:2px solid #E2E8F0;border-left:1px solid rgba(0,0,0,.06);white-space:nowrap;letter-spacing:.04em;min-width:${is0?68:58}px">25년</th>`;
-    h2+=`<th style="position:sticky;top:44px;z-index:30;${yr26st};font-size:10px;font-weight:700;padding:4px 8px;height:24px;text-align:center;border-bottom:2px solid #E2E8F0;border-right:1px solid rgba(0,0,0,.08);white-space:nowrap;letter-spacing:.04em;min-width:${is0?68:58}px">26년</th>`;
+    const minW=nd.level===0?68:58;
+    h2+=`<th style="position:sticky;top:44px;z-index:30;background:#EAEcf5;color:var(--muted);font-size:10px;font-weight:600;padding:4px 8px;height:24px;text-align:center;border-bottom:1px solid #E4E8F4;border-left:1px solid rgba(228,232,244,.4);white-space:nowrap;letter-spacing:.04em;min-width:${minW}px">25년</th>`;
+    h2+=`<th style="position:sticky;top:44px;z-index:30;background:#fff;color:var(--muted);font-size:10px;font-weight:600;padding:4px 8px;height:24px;text-align:center;border-bottom:1px solid #E4E8F4;white-space:nowrap;letter-spacing:.04em;min-width:${minW}px">26년</th>`;
   }
   h2+=`</tr>`;
 
@@ -6837,29 +6835,25 @@ function _renderChmTable(){
   for(const acc of CHM_ACCOUNTS){
     if(CHM_SEC_LABELS[acc.sec]&&acc.sec!==prevSec){
       prevSec=acc.sec;
-      body+=`<tr><td style="position:sticky;left:0;z-index:10;background:#EEF2FF;color:#4338CA;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;height:26px;padding:0 14px;border-top:2px solid #E2E8F0;border-right:2px solid #CBD5E1;white-space:nowrap">${CHM_SEC_LABELS[acc.sec]}</td><td colspan="${visIds.length*2}" style="background:#F8FAFC;border-top:2px solid #E2E8F0"></td></tr>`;
+      body+=`<tr><td style="position:sticky;left:0;z-index:10;background:#F1F5F9;color:#64748B;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;height:26px;padding:0 14px;border-top:1px solid #E4E8F4;border-right:1px solid #E4E8F4;white-space:nowrap">${CHM_SEC_LABELS[acc.sec]}</td><td colspan="${visIds.length*2}" style="background:#F8FAFC;border-top:1px solid #E4E8F4"></td></tr>`;
     }
     const isOp=acc.sec==='op1'||acc.sec==='op2';
     const isTotal=acc.total||isOp;
     const rowBg=acc.sec==='op2'?'background:#ECFDF5':(isTotal?'background:#F8FAFC':'');
-    const rowBt=acc.sec==='op2'?'border-top:2px solid #34D399':'';
+    const rowBt=acc.sec==='op2'?'border-top:1px solid #E4E8F4':'';
     const lblSt=acc.sub?'padding-left:26px;color:#64748B;font-size:11.5px':'';
     const lblFw=isOp?'font-weight:800':'';
     const lblClr=acc.sec==='op1'?'color:#0369A1':acc.sec==='op2'?'color:#065F46':acc.sec==='common'?'color:#7C3AED':'';
-    body+=`<tr style="${rowBg};${rowBt};border-bottom:1px solid #F1F5F9">`;
-    body+=`<td style="position:sticky;left:0;z-index:10;background:inherit;text-align:left;padding:0 14px;height:36px;font-size:12px;border-right:2px solid #CBD5E1;white-space:nowrap;${lblSt};${lblFw};${lblClr}">${acc.label}</td>`;
+    body+=`<tr style="${rowBg};${rowBt};border-bottom:1px solid rgba(228,232,244,.3)">`;
+    body+=`<td style="position:sticky;left:0;z-index:10;background:inherit;text-align:left;padding:0 14px;height:36px;font-size:12px;border-right:1px solid #E4E8F4;white-space:nowrap;${lblSt};${lblFw};${lblClr}">${acc.label}</td>`;
     for(const id of visIds){
       const nd=CHM_NODES[id];
       const row26=nd[p26]||{}, row25=nd[p25]||{};
       const v26=row26[acc.key], v25=row25[acc.key];
-      const is0=nd.level===0;
-      const clr=is0?null:_CHM_DEPT_CLR[nd.dept]||_CHM_DEPT_CLR.mgmt;
-      const bl25=is0?'border-left:3px solid #4361EE':'border-left:1px solid '+(clr?clr.border:'#E2E8F0');
-      const br26=is0?'':'border-right:1px solid '+(clr?clr.border+'88':'#E2E8F066');
       const bg25=rowBg?rowBg:'background:#F8FAFF';
       const bg26=rowBg?rowBg:'background:#fff';
-      body+=`<td style="text-align:right;padding:0 12px;height:36px;font-size:12px;font-variant-numeric:tabular-nums;font-weight:${isTotal?600:400};${bl25};${bg25}">${isOp?_chmFmtOp(v25):_chmFmt(v25)}</td>`;
-      body+=`<td style="text-align:right;padding:0 12px;height:36px;font-size:12px;font-variant-numeric:tabular-nums;font-weight:${isTotal?600:400};${br26};${bg26}">${isOp?_chmFmtOp(v26):_chmFmt(v26)}</td>`;
+      body+=`<td style="text-align:right;padding:0 12px;height:36px;font-size:12px;font-variant-numeric:tabular-nums;font-weight:${isTotal?600:400};border-left:1px solid rgba(228,232,244,.4);${bg25}">${isOp?_chmFmtOp(v25):_chmFmt(v25)}</td>`;
+      body+=`<td style="text-align:right;padding:0 12px;height:36px;font-size:12px;font-variant-numeric:tabular-nums;font-weight:${isTotal?600:400};${bg26}">${isOp?_chmFmtOp(v26):_chmFmt(v26)}</td>`;
     }
     body+=`</tr>`;
   }
