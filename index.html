@@ -531,6 +531,11 @@ thead th{font-size:13px}
       <div class="hub-card-title">직영캠퍼스<br>원장단 대시보드</div>
       <div class="hub-card-desc">소속 캠퍼스 수학·영어<br>손익을 월별로 확인합니다</div>
     </div>
+    <div class="hub-card" id="hubCardChairman" onclick="goChairmanDash()">
+      <div class="hub-card-icon">📈</div>
+      <div class="hub-card-title">올림피아드교육<br>손익계산서</div>
+      <div class="hub-card-desc">회사 전체 · 사업부 · 캠퍼스<br>계층별 손익을 종합합니다</div>
+    </div>
   </div>
 </div>
 
@@ -573,6 +578,31 @@ thead th{font-size:13px}
     <div id="dir-detail-view" style="display:none">
       <div class="month-bar" id="dir-month-bar" style="margin-bottom:16px"></div>
       <div id="dir-detail-content"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 회장님 손익계산서 ══ -->
+<div id="chairman-wrap" style="display:none">
+  <div class="main">
+    <div class="dir-header">
+      <button class="dir-back-btn" onclick="chairmanNavBack()">← 홈</button>
+      <div>
+        <div class="dir-camp-name">올림피아드교육 손익계산서</div>
+        <div class="dir-camp-sub">회사 전체 → 사업부 → 캠퍼스 계층별 손익 &nbsp;│&nbsp; + 버튼으로 우측 펼침 &nbsp;│&nbsp; 단위: 천원</div>
+      </div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
+        <div style="display:flex;gap:4px;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:3px">
+          <button id="chmTabCur" onclick="setChmPeriod('cur')" style="padding:5px 16px;border-radius:6px;border:none;font-size:12px;font-weight:700;cursor:pointer;background:#4361EE;color:#fff;transition:all .15s">당 월</button>
+          <button id="chmTabYtd" onclick="setChmPeriod('ytd')" style="padding:5px 16px;border-radius:6px;border:none;font-size:12px;font-weight:700;cursor:pointer;background:transparent;color:var(--muted);transition:all .15s">Y T D</button>
+        </div>
+        <div id="chm-month-bar" class="month-bar" style="padding:0;border:none;margin:0"></div>
+      </div>
+    </div>
+    <div class="card" style="overflow:hidden;padding:0;margin-top:0">
+      <div style="overflow-x:auto">
+        <table id="chmTable" style="width:max-content;min-width:100%;border-collapse:collapse;font-size:12px"></table>
+      </div>
     </div>
   </div>
 </div>
@@ -4285,7 +4315,7 @@ async function doLogin(){
   if(error||!u){err.textContent='이메일 또는 비밀번호가 올바르지 않습니다.';return;}
   if(u.status!=='active'){err.textContent='승인 대기 중인 계정입니다.';return;}
   await sb.from('users').update({last_login:new Date().toISOString().slice(0,10)}).eq('email',email);
-  saveSession({email:u.email,name:u.name,role:u.role,campus:u.campus||''});
+  saveSession({email:u.email,name:u.name,role:u.role,campus:u.campus||'',can_pl:!!u.can_pl});
   closeAuth();
   applyAuth();
 }
@@ -4359,6 +4389,7 @@ function applyAuth(){
   const hub=document.getElementById('hub-screen');
   const dash=document.getElementById('dashboard-wrap');
   const dirWrap=document.getElementById('director-wrap');
+  const chmWrap=document.getElementById('chairman-wrap');
   const tabs=document.getElementById('mainTabs');
   const authBtn=document.getElementById('authBtn');
 
@@ -4368,9 +4399,14 @@ function applyAuth(){
     // 현재 어느 화면이 열려 있지 않으면 → 저장된 뷰 복원 or 허브
     const dashOpen = dash.style.display==='block';
     const dirOpen  = dirWrap.style.display==='block';
-    if(!dashOpen && !dirOpen){
+    const chmOpen  = chmWrap&&chmWrap.style.display==='block';
+    if(!dashOpen && !dirOpen && !chmOpen){
       const saved=getDashView();
-      if(saved==='main'&&!isDirector){
+      if(saved==='chairman'&&isAdmin){
+        hub.style.display='none';
+        chmWrap.style.display='block';
+        initChmDash();
+      } else if(saved==='main'&&!isDirector){
         hub.style.display='none';
         dash.style.display='block';
         tabs.style.display='flex';
@@ -4381,7 +4417,7 @@ function applyAuth(){
         if(uploadBtn) uploadBtn.style.display=(s&&s.role==='admin')?'':'none';
         // 세션 campus 최신화 후 렌더
         sb.from('users').select('campus,role').eq('email',s.email).maybeSingle().then(({data:fresh})=>{
-          if(fresh){ saveSession({...s,campus:fresh.campus||'',role:fresh.role||s.role}); }
+          if(fresh){ saveSession({...s,campus:fresh.campus||'',role:fresh.role||s.role,can_pl:!!fresh.can_pl}); }
           loadCampusPl().then(()=>{
             const h=location.hash;
             if(h.startsWith('#dir-')&&h!=='#dir-list'){
@@ -4407,6 +4443,18 @@ function applyAuth(){
         hubCardSoin.onclick=goSoinDash;
       }
     }
+    // 허브 카드: 손익계산서 (admin 또는 can_pl 권한 보유자)
+    const hubCardChairman=document.getElementById('hubCardChairman');
+    const canPl=isAdmin||!!(s&&s.can_pl);
+    if(hubCardChairman){
+      if(!canPl||isDirector){
+        hubCardChairman.classList.add('hub-card-disabled');
+        hubCardChairman.onclick=null;
+      } else {
+        hubCardChairman.classList.remove('hub-card-disabled');
+        hubCardChairman.onclick=goChairmanDash;
+      }
+    }
     // 허브 환영 메시지
     const wt=document.getElementById('hubWelcomeTitle');
     if(wt) wt.textContent=`안녕하세요, ${s.name}님`;
@@ -4415,6 +4463,7 @@ function applyAuth(){
     hub.style.display='none';
     dash.style.display='none';
     dirWrap.style.display='none';
+    if(chmWrap) chmWrap.style.display='none';
     tabs.style.display='none';
     if(authBtn) authBtn.style.display='none';
   }
@@ -4450,10 +4499,12 @@ function goHub(){
   const hub=document.getElementById('hub-screen');
   const dash=document.getElementById('dashboard-wrap');
   const dirWrap=document.getElementById('director-wrap');
+  const chmWrap=document.getElementById('chairman-wrap');
   const tabs=document.getElementById('mainTabs');
   hub.style.display='flex';
   dash.style.display='none';
   dirWrap.style.display='none';
+  if(chmWrap) chmWrap.style.display='none';
   tabs.style.display='none';
   saveDashView('hub');
 }
@@ -4478,7 +4529,7 @@ async function goDirectorDash(){
   // 세션 campus가 변경됐을 수 있으므로 DB에서 최신값 갱신
   const {data:fresh}=await sb.from('users').select('campus,role').eq('email',s.email).maybeSingle();
   if(fresh){
-    s={...s, campus:fresh.campus||'', role:fresh.role||s.role};
+    s={...s, campus:fresh.campus||'', role:fresh.role||s.role, can_pl:!!fresh.can_pl};
     saveSession(s);
   }
   const hub=document.getElementById('hub-screen');
@@ -4903,10 +4954,16 @@ async function renderUserTable(){
         </select>`;
     const campusText=u.campus?`<span style="font-size:10px;color:var(--muted);margin-right:6px">${u.campus.replace(/,/g,' · ')}</span>`:'';
     const campusBtn=`<button onclick="setCampusPrompt('${u.email}','${u.campus||''}')" style="font-size:10px;padding:3px 8px;background:var(--s3);border:1px solid var(--border);border-radius:4px;cursor:pointer;color:var(--text)">캠퍼스${u.campus?` <span style='color:var(--c26a)'>✓</span>`:''}</button>`;
+    const plOn=!!u.can_pl;
+    const plBtn=isProtected?''
+      :`<button onclick="toggleCanPl('${u.email}',${plOn})" title="손익계산서 접근 ${plOn?'해제':'허용'}"
+          style="font-size:10px;padding:3px 8px;border-radius:4px;cursor:pointer;margin-left:4px;border:1px solid ${plOn?'var(--c26a)':'var(--border)'};background:${plOn?'var(--c26a)22':'var(--s3)'};color:${plOn?'var(--c26a)':'var(--muted)'}">
+          📈 손익계산서${plOn?' ✓':''}
+        </button>`;
     return `<tr>
       <td>${u.name}</td><td style="font-size:11px">${u.email}</td>
       <td>${roleSelect}</td>
-      <td style="white-space:nowrap">${campusText}${campusBtn}</td>
+      <td style="white-space:nowrap">${campusText}${campusBtn}${plBtn}</td>
       <td><span class="sbadge active">활성</span></td>
       <td>${u.join_date||'-'}</td>
       <td style="font-size:11px;color:var(--muted)">${u.last_login||'-'}</td>
@@ -4936,6 +4993,10 @@ async function approveUser(email,name){await sb.from('users').update({status:'ac
 async function rejectUser(email){await sb.from('users').delete().eq('email',email);renderPendingTable();}
 async function changeRole(email,role){
   await sb.from('users').update({role}).eq('email',email);
+  renderUserTable();
+}
+async function toggleCanPl(email,current){
+  await sb.from('users').update({can_pl:!current}).eq('email',email);
   renderUserTable();
 }
 let _campEditEmail='';
@@ -6263,6 +6324,321 @@ applyAuth();
   }
 })();
 window.addEventListener('beforeunload',()=>sessionStorage.setItem('olymp_scrollY', window.scrollY));
+
+// ════════════════════════════════════════════════════════════════
+//  회장님 손익계산서 (Chairman P&L Dashboard)
+// ════════════════════════════════════════════════════════════════
+
+function goChairmanDash(){
+  const s=getSession();
+  if(!s||s.role==='director') return;
+  if(s.role!=='admin'&&!s.can_pl) return;
+  document.getElementById('hub-screen').style.display='none';
+  document.getElementById('chairman-wrap').style.display='block';
+  saveDashView('chairman');
+  initChmDash();
+}
+
+function chairmanNavBack(){
+  document.getElementById('chairman-wrap').style.display='none';
+  goHub();
+}
+
+// ── P&L 계정 행 정의 ──────────────────────────────────────────
+const CHM_ACCOUNTS = [
+  { key:'rev_tuition', label:'교습비수입',  sec:'rev', sub:true },
+  { key:'rev_other',   label:'기타수입',    sec:'rev', sub:true },
+  { key:'rev_total',   label:'매출 합계',   sec:'rev', total:true },
+  { key:'exp_salary',  label:'급여',        sec:'exp', sub:true },
+  { key:'exp_retire',  label:'퇴직급여',    sec:'exp', sub:true },
+  { key:'exp_welfare', label:'복리후생비',  sec:'exp', sub:true },
+  { key:'exp_rent',    label:'임차료',      sec:'exp', sub:true },
+  { key:'exp_fee',     label:'지급수수료',  sec:'exp', sub:true },
+  { key:'exp_book',    label:'교재비',      sec:'exp', sub:true },
+  { key:'exp_ad',      label:'광고선전비',  sec:'exp', sub:true },
+  { key:'exp_deprec',  label:'감가상각비',  sec:'exp', sub:true },
+  { key:'exp_other',   label:'기타경비',    sec:'exp', sub:true },
+  { key:'exp_total',   label:'판관비 합계', sec:'exp', total:true },
+  { key:'op1',         label:'영업이익 1',  sec:'op1' },
+  { key:'common',      label:'공통비 배부', sec:'common', sub:true },
+  { key:'op2',         label:'영업이익 2',  sec:'op2' },
+];
+const CHM_SEC_LABELS = { rev:'▌ 매출', exp:'▌ 판관비 (판매관리비)' };
+
+// ── 25년 자동 생성 (목업용, 실 데이터 연동 전) ──────────────────
+function _chmGen25(d, rM=0.921, eM=0.948){
+  const rnd=(v,m)=>Math.round(v*m/1000)*1000;
+  const rev_tuition=rnd(d.rev_tuition,rM), rev_other=rnd(d.rev_other,rM);
+  const rev_total=rev_tuition+rev_other;
+  const exp_salary=rnd(d.exp_salary,eM), exp_retire=rnd(d.exp_retire,eM),
+        exp_welfare=rnd(d.exp_welfare,eM), exp_rent=rnd(d.exp_rent,eM),
+        exp_fee=rnd(d.exp_fee,eM), exp_book=rnd(d.exp_book,eM),
+        exp_ad=rnd(d.exp_ad,eM), exp_deprec=rnd(d.exp_deprec,eM),
+        exp_other=rnd(d.exp_other,eM);
+  const exp_total=exp_salary+exp_retire+exp_welfare+exp_rent+exp_fee+exp_book+exp_ad+exp_deprec+exp_other;
+  const op1=rev_total-exp_total;
+  return {rev_tuition,rev_other,rev_total,exp_salary,exp_retire,exp_welfare,exp_rent,exp_fee,exp_book,exp_ad,exp_deprec,exp_other,exp_total,op1,common:0,op2:op1};
+}
+
+// ── 목업 데이터 (실 데이터 연동 전 임시) ──────────────────────
+const _CHM_RAW = {
+  company:{id:'company',label:'🏢 회사 전체',level:0,dept:null,parent:null,children:['hak','u2m','mirae','bghu','mgmt'],
+    cur:{rev_tuition:4650000,rev_other:171000,rev_total:4821000,exp_salary:1800000,exp_retire:180000,exp_welfare:120000,exp_rent:650000,exp_fee:480000,exp_book:200000,exp_ad:150000,exp_deprec:200000,exp_other:167000,exp_total:3947000,op1:874000,common:0,op2:874000},
+    ytd:{rev_tuition:18600000,rev_other:684000,rev_total:19284000,exp_salary:7200000,exp_retire:720000,exp_welfare:480000,exp_rent:2600000,exp_fee:1920000,exp_book:800000,exp_ad:600000,exp_deprec:800000,exp_other:512000,exp_total:15632000,op1:3652000,common:0,op2:3652000}},
+  hak:{id:'hak',label:'학원사업본부',level:1,dept:'hak',parent:'company',children:['gwj','sdg','ddm','jrl'],
+    cur:{rev_tuition:2060000,rev_other:83000,rev_total:2143000,exp_salary:620000,exp_retire:62000,exp_welfare:41000,exp_rent:280000,exp_fee:200000,exp_book:80000,exp_ad:60000,exp_deprec:80000,exp_other:198000,exp_total:1621000,op1:522000,common:0,op2:522000},
+    ytd:{rev_tuition:8240000,rev_other:332000,rev_total:8572000,exp_salary:2480000,exp_retire:248000,exp_welfare:164000,exp_rent:1120000,exp_fee:800000,exp_book:320000,exp_ad:240000,exp_deprec:320000,exp_other:792000,exp_total:6484000,op1:2088000,common:0,op2:2088000}},
+  gwj:{id:'gwj',label:'광진',level:2,dept:'hak',parent:'hak',children:['gwj-m','gwj-e'],
+    cur:{rev_tuition:590000,rev_other:22000,rev_total:612000,exp_salary:176000,exp_retire:18000,exp_welfare:12000,exp_rent:80000,exp_fee:58000,exp_book:23000,exp_ad:17000,exp_deprec:23000,exp_other:51000,exp_total:458000,op1:154000,common:0,op2:154000},
+    ytd:{rev_tuition:2360000,rev_other:88000,rev_total:2448000,exp_salary:704000,exp_retire:72000,exp_welfare:48000,exp_rent:320000,exp_fee:232000,exp_book:92000,exp_ad:68000,exp_deprec:92000,exp_other:204000,exp_total:1832000,op1:616000,common:0,op2:616000}},
+  'gwj-m':{id:'gwj-m',label:'수학',level:3,dept:'hak',parent:'gwj',children:[],
+    cur:{rev_tuition:380000,rev_other:9000,rev_total:389000,exp_salary:113000,exp_retire:11000,exp_welfare:7000,exp_rent:51000,exp_fee:37000,exp_book:15000,exp_ad:11000,exp_deprec:15000,exp_other:30000,exp_total:290000,op1:99000,common:0,op2:99000},
+    ytd:{rev_tuition:1520000,rev_other:36000,rev_total:1556000,exp_salary:452000,exp_retire:44000,exp_welfare:28000,exp_rent:204000,exp_fee:148000,exp_book:60000,exp_ad:44000,exp_deprec:60000,exp_other:120000,exp_total:1160000,op1:396000,common:0,op2:396000}},
+  'gwj-e':{id:'gwj-e',label:'영어',level:3,dept:'hak',parent:'gwj',children:[],
+    cur:{rev_tuition:210000,rev_other:13000,rev_total:223000,exp_salary:63000,exp_retire:7000,exp_welfare:5000,exp_rent:29000,exp_fee:21000,exp_book:8000,exp_ad:6000,exp_deprec:8000,exp_other:21000,exp_total:168000,op1:55000,common:0,op2:55000},
+    ytd:{rev_tuition:840000,rev_other:52000,rev_total:892000,exp_salary:252000,exp_retire:28000,exp_welfare:20000,exp_rent:116000,exp_fee:84000,exp_book:32000,exp_ad:24000,exp_deprec:32000,exp_other:84000,exp_total:672000,op1:220000,common:0,op2:220000}},
+  sdg:{id:'sdg',label:'성동',level:2,dept:'hak',parent:'hak',children:['sdg-m','sdg-e'],
+    cur:{rev_tuition:505000,rev_other:18000,rev_total:523000,exp_salary:150000,exp_retire:15000,exp_welfare:10000,exp_rent:68000,exp_fee:49000,exp_book:19000,exp_ad:15000,exp_deprec:19000,exp_other:45000,exp_total:390000,op1:133000,common:0,op2:133000},
+    ytd:{rev_tuition:2020000,rev_other:72000,rev_total:2092000,exp_salary:600000,exp_retire:60000,exp_welfare:40000,exp_rent:272000,exp_fee:196000,exp_book:76000,exp_ad:60000,exp_deprec:76000,exp_other:180000,exp_total:1560000,op1:532000,common:0,op2:532000}},
+  'sdg-m':{id:'sdg-m',label:'수학',level:3,dept:'hak',parent:'sdg',children:[],
+    cur:{rev_tuition:300000,rev_other:12000,rev_total:312000,exp_salary:89000,exp_retire:9000,exp_welfare:6000,exp_rent:41000,exp_fee:29000,exp_book:11000,exp_ad:9000,exp_deprec:11000,exp_other:28000,exp_total:233000,op1:79000,common:0,op2:79000},
+    ytd:{rev_tuition:1200000,rev_other:48000,rev_total:1248000,exp_salary:356000,exp_retire:36000,exp_welfare:24000,exp_rent:164000,exp_fee:116000,exp_book:44000,exp_ad:36000,exp_deprec:44000,exp_other:112000,exp_total:932000,op1:316000,common:0,op2:316000}},
+  'sdg-e':{id:'sdg-e',label:'영어',level:3,dept:'hak',parent:'sdg',children:[],
+    cur:{rev_tuition:205000,rev_other:6000,rev_total:211000,exp_salary:61000,exp_retire:6000,exp_welfare:4000,exp_rent:27000,exp_fee:20000,exp_book:8000,exp_ad:6000,exp_deprec:8000,exp_other:17000,exp_total:157000,op1:54000,common:0,op2:54000},
+    ytd:{rev_tuition:820000,rev_other:24000,rev_total:844000,exp_salary:244000,exp_retire:24000,exp_welfare:16000,exp_rent:108000,exp_fee:80000,exp_book:32000,exp_ad:24000,exp_deprec:32000,exp_other:68000,exp_total:628000,op1:216000,common:0,op2:216000}},
+  ddm:{id:'ddm',label:'동대문',level:2,dept:'hak',parent:'hak',children:['ddm-m','ddm-e'],
+    cur:{rev_tuition:383000,rev_other:15000,rev_total:398000,exp_salary:115000,exp_retire:11000,exp_welfare:8000,exp_rent:52000,exp_fee:37000,exp_book:15000,exp_ad:11000,exp_deprec:15000,exp_other:37000,exp_total:301000,op1:97000,common:0,op2:97000},
+    ytd:{rev_tuition:1532000,rev_other:60000,rev_total:1592000,exp_salary:460000,exp_retire:44000,exp_welfare:32000,exp_rent:208000,exp_fee:148000,exp_book:60000,exp_ad:44000,exp_deprec:60000,exp_other:148000,exp_total:1204000,op1:388000,common:0,op2:388000}},
+  'ddm-m':{id:'ddm-m',label:'수학',level:3,dept:'hak',parent:'ddm',children:[],
+    cur:{rev_tuition:236000,rev_other:9000,rev_total:245000,exp_salary:71000,exp_retire:7000,exp_welfare:5000,exp_rent:32000,exp_fee:23000,exp_book:9000,exp_ad:7000,exp_deprec:9000,exp_other:22000,exp_total:185000,op1:60000,common:0,op2:60000},
+    ytd:{rev_tuition:944000,rev_other:36000,rev_total:980000,exp_salary:284000,exp_retire:28000,exp_welfare:20000,exp_rent:128000,exp_fee:92000,exp_book:36000,exp_ad:28000,exp_deprec:36000,exp_other:88000,exp_total:740000,op1:240000,common:0,op2:240000}},
+  'ddm-e':{id:'ddm-e',label:'영어',level:3,dept:'hak',parent:'ddm',children:[],
+    cur:{rev_tuition:147000,rev_other:6000,rev_total:153000,exp_salary:44000,exp_retire:4000,exp_welfare:3000,exp_rent:20000,exp_fee:14000,exp_book:6000,exp_ad:4000,exp_deprec:6000,exp_other:15000,exp_total:116000,op1:37000,common:0,op2:37000},
+    ytd:{rev_tuition:588000,rev_other:24000,rev_total:612000,exp_salary:176000,exp_retire:16000,exp_welfare:12000,exp_rent:80000,exp_fee:56000,exp_book:24000,exp_ad:16000,exp_deprec:24000,exp_other:60000,exp_total:464000,op1:148000,common:0,op2:148000}},
+  jrl:{id:'jrl',label:'중랑',level:2,dept:'hak',parent:'hak',children:['jrl-m','jrl-e'],
+    cur:{rev_tuition:582000,rev_other:28000,rev_total:610000,exp_salary:179000,exp_retire:18000,exp_welfare:11000,exp_rent:80000,exp_fee:56000,exp_book:23000,exp_ad:17000,exp_deprec:23000,exp_other:65000,exp_total:472000,op1:138000,common:0,op2:138000},
+    ytd:{rev_tuition:2328000,rev_other:112000,rev_total:2440000,exp_salary:716000,exp_retire:72000,exp_welfare:44000,exp_rent:320000,exp_fee:224000,exp_book:92000,exp_ad:68000,exp_deprec:92000,exp_other:260000,exp_total:1888000,op1:552000,common:0,op2:552000}},
+  'jrl-m':{id:'jrl-m',label:'수학',level:3,dept:'hak',parent:'jrl',children:[],
+    cur:{rev_tuition:362000,rev_other:16000,rev_total:378000,exp_salary:111000,exp_retire:11000,exp_welfare:7000,exp_rent:49000,exp_fee:35000,exp_book:14000,exp_ad:11000,exp_deprec:14000,exp_other:40000,exp_total:292000,op1:86000,common:0,op2:86000},
+    ytd:{rev_tuition:1448000,rev_other:64000,rev_total:1512000,exp_salary:444000,exp_retire:44000,exp_welfare:28000,exp_rent:196000,exp_fee:140000,exp_book:56000,exp_ad:44000,exp_deprec:56000,exp_other:160000,exp_total:1168000,op1:344000,common:0,op2:344000}},
+  'jrl-e':{id:'jrl-e',label:'영어',level:3,dept:'hak',parent:'jrl',children:[],
+    cur:{rev_tuition:220000,rev_other:12000,rev_total:232000,exp_salary:68000,exp_retire:7000,exp_welfare:4000,exp_rent:31000,exp_fee:21000,exp_book:9000,exp_ad:6000,exp_deprec:9000,exp_other:25000,exp_total:180000,op1:52000,common:0,op2:52000},
+    ytd:{rev_tuition:880000,rev_other:48000,rev_total:928000,exp_salary:272000,exp_retire:28000,exp_welfare:16000,exp_rent:124000,exp_fee:84000,exp_book:36000,exp_ad:24000,exp_deprec:36000,exp_other:100000,exp_total:720000,op1:208000,common:0,op2:208000}},
+  u2m:{id:'u2m',label:'U2M사업본부',level:1,dept:'u2m',parent:'company',children:['jgy','spb','msa','uir'],
+    cur:{rev_tuition:1060000,rev_other:44000,rev_total:1104000,exp_salary:340000,exp_retire:34000,exp_welfare:23000,exp_rent:150000,exp_fee:120000,exp_book:50000,exp_ad:40000,exp_deprec:50000,exp_other:80000,exp_total:887000,op1:217000,common:0,op2:217000},
+    ytd:{rev_tuition:4240000,rev_other:176000,rev_total:4416000,exp_salary:1360000,exp_retire:136000,exp_welfare:92000,exp_rent:600000,exp_fee:480000,exp_book:200000,exp_ad:160000,exp_deprec:200000,exp_other:320000,exp_total:3548000,op1:868000,common:0,op2:868000}},
+  jgy:{id:'jgy',label:'중계',level:2,dept:'u2m',parent:'u2m',children:['jgy-m','jgy-e'],
+    cur:{rev_tuition:300000,rev_other:12000,rev_total:312000,exp_salary:96000,exp_retire:10000,exp_welfare:6000,exp_rent:43000,exp_fee:34000,exp_book:14000,exp_ad:11000,exp_deprec:14000,exp_other:23000,exp_total:251000,op1:61000,common:0,op2:61000},
+    ytd:{rev_tuition:1200000,rev_other:48000,rev_total:1248000,exp_salary:384000,exp_retire:40000,exp_welfare:24000,exp_rent:172000,exp_fee:136000,exp_book:56000,exp_ad:44000,exp_deprec:56000,exp_other:92000,exp_total:1004000,op1:244000,common:0,op2:244000}},
+  'jgy-m':{id:'jgy-m',label:'수학',level:3,dept:'u2m',parent:'jgy',children:[],
+    cur:{rev_tuition:185000,rev_other:7000,rev_total:192000,exp_salary:59000,exp_retire:6000,exp_welfare:4000,exp_rent:27000,exp_fee:21000,exp_book:9000,exp_ad:7000,exp_deprec:9000,exp_other:13000,exp_total:155000,op1:37000,common:0,op2:37000},
+    ytd:{rev_tuition:740000,rev_other:28000,rev_total:768000,exp_salary:236000,exp_retire:24000,exp_welfare:16000,exp_rent:108000,exp_fee:84000,exp_book:36000,exp_ad:28000,exp_deprec:36000,exp_other:52000,exp_total:620000,op1:148000,common:0,op2:148000}},
+  'jgy-e':{id:'jgy-e',label:'영어',level:3,dept:'u2m',parent:'jgy',children:[],
+    cur:{rev_tuition:115000,rev_other:5000,rev_total:120000,exp_salary:37000,exp_retire:4000,exp_welfare:2000,exp_rent:16000,exp_fee:13000,exp_book:5000,exp_ad:4000,exp_deprec:5000,exp_other:10000,exp_total:96000,op1:24000,common:0,op2:24000},
+    ytd:{rev_tuition:460000,rev_other:20000,rev_total:480000,exp_salary:148000,exp_retire:16000,exp_welfare:8000,exp_rent:64000,exp_fee:52000,exp_book:20000,exp_ad:16000,exp_deprec:20000,exp_other:40000,exp_total:384000,op1:96000,common:0,op2:96000}},
+  spb:{id:'spb',label:'송파방이',level:2,dept:'u2m',parent:'u2m',children:['spb-m','spb-e'],
+    cur:{rev_tuition:273000,rev_other:12000,rev_total:285000,exp_salary:88000,exp_retire:9000,exp_welfare:6000,exp_rent:39000,exp_fee:31000,exp_book:13000,exp_ad:10000,exp_deprec:13000,exp_other:20000,exp_total:229000,op1:56000,common:0,op2:56000},
+    ytd:{rev_tuition:1092000,rev_other:48000,rev_total:1140000,exp_salary:352000,exp_retire:36000,exp_welfare:24000,exp_rent:156000,exp_fee:124000,exp_book:52000,exp_ad:40000,exp_deprec:52000,exp_other:80000,exp_total:916000,op1:224000,common:0,op2:224000}},
+  'spb-m':{id:'spb-m',label:'수학',level:3,dept:'u2m',parent:'spb',children:[],
+    cur:{rev_tuition:167000,rev_other:8000,rev_total:175000,exp_salary:54000,exp_retire:6000,exp_welfare:4000,exp_rent:24000,exp_fee:19000,exp_book:8000,exp_ad:6000,exp_deprec:8000,exp_other:12000,exp_total:141000,op1:34000,common:0,op2:34000},
+    ytd:{rev_tuition:668000,rev_other:32000,rev_total:700000,exp_salary:216000,exp_retire:24000,exp_welfare:16000,exp_rent:96000,exp_fee:76000,exp_book:32000,exp_ad:24000,exp_deprec:32000,exp_other:48000,exp_total:564000,op1:136000,common:0,op2:136000}},
+  'spb-e':{id:'spb-e',label:'영어',level:3,dept:'u2m',parent:'spb',children:[],
+    cur:{rev_tuition:106000,rev_other:4000,rev_total:110000,exp_salary:34000,exp_retire:3000,exp_welfare:2000,exp_rent:15000,exp_fee:12000,exp_book:5000,exp_ad:4000,exp_deprec:5000,exp_other:8000,exp_total:88000,op1:22000,common:0,op2:22000},
+    ytd:{rev_tuition:424000,rev_other:16000,rev_total:440000,exp_salary:136000,exp_retire:12000,exp_welfare:8000,exp_rent:60000,exp_fee:48000,exp_book:20000,exp_ad:16000,exp_deprec:20000,exp_other:32000,exp_total:352000,op1:88000,common:0,op2:88000}},
+  msa:{id:'msa',label:'미사',level:2,dept:'u2m',parent:'u2m',children:['msa-m','msa-e'],
+    cur:{rev_tuition:256000,rev_other:11000,rev_total:267000,exp_salary:82000,exp_retire:8000,exp_welfare:5000,exp_rent:37000,exp_fee:29000,exp_book:12000,exp_ad:9000,exp_deprec:12000,exp_other:21000,exp_total:215000,op1:52000,common:0,op2:52000},
+    ytd:{rev_tuition:1024000,rev_other:44000,rev_total:1068000,exp_salary:328000,exp_retire:32000,exp_welfare:20000,exp_rent:148000,exp_fee:116000,exp_book:48000,exp_ad:36000,exp_deprec:48000,exp_other:84000,exp_total:860000,op1:208000,common:0,op2:208000}},
+  'msa-m':{id:'msa-m',label:'수학',level:3,dept:'u2m',parent:'msa',children:[],
+    cur:{rev_tuition:157000,rev_other:8000,rev_total:165000,exp_salary:50000,exp_retire:5000,exp_welfare:3000,exp_rent:23000,exp_fee:18000,exp_book:7000,exp_ad:6000,exp_deprec:7000,exp_other:13000,exp_total:132000,op1:33000,common:0,op2:33000},
+    ytd:{rev_tuition:628000,rev_other:32000,rev_total:660000,exp_salary:200000,exp_retire:20000,exp_welfare:12000,exp_rent:92000,exp_fee:72000,exp_book:28000,exp_ad:24000,exp_deprec:28000,exp_other:52000,exp_total:528000,op1:132000,common:0,op2:132000}},
+  'msa-e':{id:'msa-e',label:'영어',level:3,dept:'u2m',parent:'msa',children:[],
+    cur:{rev_tuition:99000,rev_other:3000,rev_total:102000,exp_salary:32000,exp_retire:3000,exp_welfare:2000,exp_rent:14000,exp_fee:11000,exp_book:5000,exp_ad:3000,exp_deprec:5000,exp_other:8000,exp_total:83000,op1:19000,common:0,op2:19000},
+    ytd:{rev_tuition:396000,rev_other:12000,rev_total:408000,exp_salary:128000,exp_retire:12000,exp_welfare:8000,exp_rent:56000,exp_fee:44000,exp_book:20000,exp_ad:12000,exp_deprec:20000,exp_other:32000,exp_total:332000,op1:76000,common:0,op2:76000}},
+  uir:{id:'uir',label:'위례',level:2,dept:'u2m',parent:'u2m',children:['uir-m','uir-e'],
+    cur:{rev_tuition:231000,rev_other:9000,rev_total:240000,exp_salary:74000,exp_retire:7000,exp_welfare:6000,exp_rent:31000,exp_fee:26000,exp_book:11000,exp_ad:8000,exp_deprec:11000,exp_other:18000,exp_total:192000,op1:48000,common:0,op2:48000},
+    ytd:{rev_tuition:924000,rev_other:36000,rev_total:960000,exp_salary:296000,exp_retire:28000,exp_welfare:24000,exp_rent:124000,exp_fee:104000,exp_book:44000,exp_ad:32000,exp_deprec:44000,exp_other:72000,exp_total:768000,op1:192000,common:0,op2:192000}},
+  'uir-m':{id:'uir-m',label:'수학',level:3,dept:'u2m',parent:'uir',children:[],
+    cur:{rev_tuition:142000,rev_other:6000,rev_total:148000,exp_salary:45000,exp_retire:5000,exp_welfare:4000,exp_rent:19000,exp_fee:16000,exp_book:7000,exp_ad:5000,exp_deprec:7000,exp_other:10000,exp_total:118000,op1:30000,common:0,op2:30000},
+    ytd:{rev_tuition:568000,rev_other:24000,rev_total:592000,exp_salary:180000,exp_retire:20000,exp_welfare:16000,exp_rent:76000,exp_fee:64000,exp_book:28000,exp_ad:20000,exp_deprec:28000,exp_other:40000,exp_total:472000,op1:120000,common:0,op2:120000}},
+  'uir-e':{id:'uir-e',label:'영어',level:3,dept:'u2m',parent:'uir',children:[],
+    cur:{rev_tuition:89000,rev_other:3000,rev_total:92000,exp_salary:29000,exp_retire:2000,exp_welfare:2000,exp_rent:12000,exp_fee:10000,exp_book:4000,exp_ad:3000,exp_deprec:4000,exp_other:8000,exp_total:74000,op1:18000,common:0,op2:18000},
+    ytd:{rev_tuition:356000,rev_other:12000,rev_total:368000,exp_salary:116000,exp_retire:8000,exp_welfare:8000,exp_rent:48000,exp_fee:40000,exp_book:16000,exp_ad:12000,exp_deprec:16000,exp_other:32000,exp_total:296000,op1:72000,common:0,op2:72000}},
+  mirae:{id:'mirae',label:'미래교육사업부',level:1,dept:'mirae',parent:'company',children:[],
+    cur:{rev_tuition:810000,rev_other:13000,rev_total:823000,exp_salary:280000,exp_retire:28000,exp_welfare:19000,exp_rent:120000,exp_fee:100000,exp_book:50000,exp_ad:30000,exp_deprec:40000,exp_other:34000,exp_total:701000,op1:122000,common:0,op2:122000},
+    ytd:{rev_tuition:3240000,rev_other:52000,rev_total:3292000,exp_salary:1120000,exp_retire:112000,exp_welfare:76000,exp_rent:480000,exp_fee:400000,exp_book:200000,exp_ad:120000,exp_deprec:160000,exp_other:136000,exp_total:2804000,op1:488000,common:0,op2:488000}},
+  bghu:{id:'bghu',label:'방과후사업본부',level:1,dept:'bghu',parent:'company',children:[],
+    cur:{rev_tuition:395000,rev_other:17000,rev_total:412000,exp_salary:200000,exp_retire:20000,exp_welfare:13000,exp_rent:80000,exp_fee:50000,exp_book:16000,exp_ad:15000,exp_deprec:20000,exp_other:-16000,exp_total:398000,op1:14000,common:0,op2:14000},
+    ytd:{rev_tuition:1580000,rev_other:68000,rev_total:1648000,exp_salary:800000,exp_retire:80000,exp_welfare:52000,exp_rent:320000,exp_fee:200000,exp_book:64000,exp_ad:60000,exp_deprec:80000,exp_other:-64000,exp_total:1592000,op1:56000,common:0,op2:56000}},
+  mgmt:{id:'mgmt',label:'경영기획실',level:1,dept:'mgmt',parent:'company',children:[],
+    cur:{rev_tuition:325000,rev_other:14000,rev_total:339000,exp_salary:360000,exp_retire:36000,exp_welfare:24000,exp_rent:20000,exp_fee:10000,exp_book:4000,exp_ad:5000,exp_deprec:10000,exp_other:-129000,exp_total:340000,op1:-1000,common:0,op2:-1000},
+    ytd:{rev_tuition:1300000,rev_other:56000,rev_total:1356000,exp_salary:1440000,exp_retire:144000,exp_welfare:96000,exp_rent:80000,exp_fee:40000,exp_book:16000,exp_ad:20000,exp_deprec:40000,exp_other:-672000,exp_total:1204000,op1:152000,common:0,op2:152000}},
+};
+
+// 25년 데이터 생성
+const CHM_NODES = {};
+for(const [id,nd] of Object.entries(_CHM_RAW)){
+  CHM_NODES[id] = {...nd, cur25:_chmGen25(nd.cur), ytd25:_chmGen25(nd.ytd)};
+}
+
+// DFS 순서
+function _chmDfs(rootId){
+  const out=[];
+  function dfs(id){ out.push(id); (CHM_NODES[id].children||[]).forEach(dfs); }
+  dfs(rootId);
+  return out;
+}
+const CHM_ALL_IDS = _chmDfs('company');
+
+// ── 상태 ──────────────────────────────────────────────────────
+let chmExpanded = new Set();
+let chmPeriod = 'cur';   // 'cur' | 'ytd'
+let chmMi = 3;           // 0-based 월 인덱스 (기본 4월)
+
+function _chmIsVisible(id){
+  const nd=CHM_NODES[id];
+  if(!nd.parent) return true;
+  return chmExpanded.has(nd.parent) && _chmIsVisible(nd.parent);
+}
+
+// ── 월 바 ──────────────────────────────────────────────────────
+function _buildChmMonthBar(){
+  const bar=document.getElementById('chm-month-bar');
+  if(!bar) return;
+  const months=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  bar.innerHTML='<span class="month-bar-lbl">기준 월</span>'+
+    months.map((m,i)=>`<button class="mtn-btn${i===chmMi?' on':''}" onclick="setChmMonth(${i})">${m}</button>`).join('');
+}
+
+function setChmMonth(mi){
+  chmMi=mi;
+  _buildChmMonthBar();
+  _renderChmTable();
+}
+
+function setChmPeriod(p){
+  chmPeriod=p;
+  const cur=document.getElementById('chmTabCur');
+  const ytd=document.getElementById('chmTabYtd');
+  if(cur){ cur.style.background=p==='cur'?'#4361EE':'transparent'; cur.style.color=p==='cur'?'#fff':'var(--muted)'; }
+  if(ytd){ ytd.style.background=p==='ytd'?'#4361EE':'transparent'; ytd.style.color=p==='ytd'?'#fff':'var(--muted)'; }
+  _renderChmTable();
+}
+
+// ── 숫자 포맷 ──────────────────────────────────────────────────
+function _chmFmt(v){
+  if(v===undefined||v===null) return '<span style="color:#CBD5E1">—</span>';
+  if(v===0) return '<span style="color:#CBD5E1">0</span>';
+  const abs=Math.abs(v).toLocaleString('ko-KR');
+  return v<0?`<span style="color:#DC2626;font-weight:600">▼ ${abs}</span>`:abs;
+}
+function _chmFmtOp(v){
+  if(v===undefined||v===null) return '<span style="color:#CBD5E1">—</span>';
+  if(v===0) return '<span style="color:#CBD5E1">0</span>';
+  const abs=Math.abs(v).toLocaleString('ko-KR');
+  return v<0?`<span style="color:#DC2626;font-weight:700">▼ ${abs}</span>`
+            :`<span style="color:#059669;font-weight:700">${abs}</span>`;
+}
+
+// ── 컬러 팔레트 ────────────────────────────────────────────────
+const _CHM_DEPT_CLR = {
+  hak:  {thBg:'#EFF6FF',thFg:'#1D4ED8',border:'#93C5FD'},
+  u2m:  {thBg:'#F0FDF4',thFg:'#15803D',border:'#6EE7B7'},
+  mirae:{thBg:'#FFFBEB',thFg:'#B45309',border:'#FCD34D'},
+  bghu: {thBg:'#FDF2F8',thFg:'#9D174D',border:'#F9A8D4'},
+  mgmt: {thBg:'#F8FAFC',thFg:'#475569',border:'#CBD5E1'},
+};
+
+// ── 테이블 렌더 ────────────────────────────────────────────────
+function _renderChmTable(){
+  const table=document.getElementById('chmTable');
+  if(!table) return;
+  const visIds=CHM_ALL_IDS.filter(_chmIsVisible);
+  const p26=chmPeriod, p25=chmPeriod+'25';
+  const mLabel=chmPeriod==='cur'?`당월 (${chmMi+1}월)`:`YTD (1~${chmMi+1}월)`;
+
+  // ── 헤더 1행 ──
+  let h1=`<tr>`;
+  h1+=`<th rowspan="2" style="position:sticky;left:0;z-index:20;background:#F1F5F9;text-align:left;min-width:140px;padding:10px 14px;font-size:10px;font-weight:700;color:#64748B;letter-spacing:.05em;border-right:2px solid #CBD5E1;border-bottom:2px solid #E2E8F0;white-space:nowrap">계정 항목<br><span style="font-size:9px;font-weight:400;color:#94A3B8">${mLabel} · 천원</span></th>`;
+  for(const id of visIds){
+    const nd=CHM_NODES[id];
+    const hasChild=nd.children&&nd.children.length>0;
+    const isExp=chmExpanded.has(id);
+    const is0=nd.level===0;
+    const clr=is0?null:_CHM_DEPT_CLR[nd.dept]||_CHM_DEPT_CLR.mgmt;
+    const thSt=is0
+      ?`background:#141E3C;color:#fff;border-left:3px solid #4361EE`
+      :`background:${clr.thBg};color:${clr.thFg};border-left:2px solid ${clr.border}`;
+    const minW=[140,128,108,92][nd.level]||92;
+    const tog=hasChild
+      ?`<button onclick="chmToggle('${id}')" style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:4px;border:1.5px solid currentColor;background:transparent;font-size:11px;font-weight:800;cursor:pointer;vertical-align:middle;margin-left:4px;color:inherit;opacity:.7">${isExp?'−':'+'}</button>`:'';
+    h1+=`<th colspan="2" style="${thSt};min-width:${minW}px;font-size:11px;font-weight:700;padding:8px 10px;height:44px;vertical-align:middle;text-align:center;white-space:nowrap;border-bottom:1px solid rgba(0,0,0,.06)">${nd.label}${tog}</th>`;
+  }
+  h1+=`</tr>`;
+
+  // ── 헤더 2행 (26년/25년) ──
+  let h2=`<tr>`;
+  for(const id of visIds){
+    const nd=CHM_NODES[id];
+    const is0=nd.level===0;
+    const yr26st=is0?`background:rgba(255,255,255,.08);color:#93C5FD`:`background:rgba(219,234,254,.4);color:#1D4ED8`;
+    const yr25st=is0?`background:rgba(255,255,255,.04);color:rgba(255,255,255,.4)`:`background:rgba(243,244,246,.6);color:#6B7280`;
+    h2+=`<th style="${yr26st};font-size:10px;font-weight:700;padding:4px 8px;height:24px;text-align:center;border-bottom:2px solid #E2E8F0;border-left:1px solid rgba(0,0,0,.06);white-space:nowrap;letter-spacing:.04em;min-width:${is0?68:58}px">26년</th>`;
+    h2+=`<th style="${yr25st};font-size:10px;font-weight:700;padding:4px 8px;height:24px;text-align:center;border-bottom:2px solid #E2E8F0;border-right:1px solid rgba(0,0,0,.08);white-space:nowrap;letter-spacing:.04em;min-width:${is0?68:58}px">25년</th>`;
+  }
+  h2+=`</tr>`;
+
+  // ── 바디 ──
+  let body=`<tbody>`;
+  let prevSec=null;
+  for(const acc of CHM_ACCOUNTS){
+    if(CHM_SEC_LABELS[acc.sec]&&acc.sec!==prevSec){
+      prevSec=acc.sec;
+      body+=`<tr><td style="position:sticky;left:0;z-index:10;background:#EEF2FF;color:#4338CA;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;height:26px;padding:0 14px;border-top:2px solid #E2E8F0;border-right:2px solid #CBD5E1;white-space:nowrap">${CHM_SEC_LABELS[acc.sec]}</td><td colspan="${visIds.length*2}" style="background:#F8FAFC;border-top:2px solid #E2E8F0"></td></tr>`;
+    }
+    const isOp=acc.sec==='op1'||acc.sec==='op2';
+    const isTotal=acc.total||isOp;
+    const rowBg=acc.sec==='op2'?'background:#ECFDF5':(isTotal?'background:#F8FAFC':'');
+    const rowBt=acc.sec==='op2'?'border-top:2px solid #34D399':'';
+    const lblSt=acc.sub?'padding-left:26px;color:#64748B;font-size:11.5px':'';
+    const lblFw=isOp?'font-weight:800':'';
+    const lblClr=acc.sec==='op1'?'color:#0369A1':acc.sec==='op2'?'color:#065F46':acc.sec==='common'?'color:#7C3AED':'';
+    body+=`<tr style="${rowBg};${rowBt};border-bottom:1px solid #F1F5F9">`;
+    body+=`<td style="position:sticky;left:0;z-index:10;background:inherit;text-align:left;padding:0 14px;height:36px;font-size:12px;border-right:2px solid #CBD5E1;white-space:nowrap;${lblSt};${lblFw};${lblClr}">${acc.label}</td>`;
+    for(const id of visIds){
+      const nd=CHM_NODES[id];
+      const row26=nd[p26]||{}, row25=nd[p25]||{};
+      const v26=row26[acc.key], v25=row25[acc.key];
+      const is0=nd.level===0;
+      const clr=is0?null:_CHM_DEPT_CLR[nd.dept]||_CHM_DEPT_CLR.mgmt;
+      const bl26=is0?'border-left:3px solid #4361EE':'border-left:1px solid '+(clr?clr.border:'#E2E8F0');
+      const br25=is0?'':'border-right:1px solid '+(clr?clr.border+'88':'#E2E8F066');
+      body+=`<td style="text-align:right;padding:0 12px;height:36px;font-size:12px;font-variant-numeric:tabular-nums;font-weight:${isTotal?600:400};${bl26};${rowBg}">${isOp?_chmFmtOp(v26):_chmFmt(v26)}</td>`;
+      body+=`<td style="text-align:right;padding:0 12px;height:36px;font-size:11px;font-variant-numeric:tabular-nums;color:#6B7280;${br25};${rowBg}">${isOp?_chmFmtOp(v25):_chmFmt(v25)}</td>`;
+    }
+    body+=`</tr>`;
+  }
+  body+=`</tbody>`;
+  table.innerHTML=`<thead>${h1}${h2}</thead>${body}`;
+}
+
+function chmToggle(id){
+  if(chmExpanded.has(id)){
+    chmExpanded.delete(id);
+    // 자식 접기
+    function collapseDesc(nid){ (CHM_NODES[nid].children||[]).forEach(cid=>{ chmExpanded.delete(cid); collapseDesc(cid); }); }
+    collapseDesc(id);
+  } else {
+    chmExpanded.add(id);
+  }
+  _renderChmTable();
+}
+
+function initChmDash(){
+  // 자동 월 선택 (실 데이터 연동 전 기본값)
+  chmMi = typeof latestActMi==='number'&&latestActMi>=0 ? latestActMi : 3;
+  _buildChmMonthBar();
+  _renderChmTable();
+}
 </script>
 
 <!-- 캠퍼스 편집 모달 -->
