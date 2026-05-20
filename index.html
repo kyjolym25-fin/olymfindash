@@ -6668,10 +6668,9 @@ function _buildChmNodes26(mi){
   const MN=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
   const avail = new Set(RAW_DB.map(r=>r.m));
   const curM  = MN[mi];
-  if(!avail.has(curM)) return;  // 해당 월 데이터 없으면 스킵
   const ytdMs = MN.slice(0,mi+1).filter(m=>avail.has(m));
-  const curAcc = _aggregateChmRaw([curM]);
-  const ytdAcc = _aggregateChmRaw(ytdMs);
+  const curAcc = avail.has(curM) ? _aggregateChmRaw([curM]) : {};
+  const ytdAcc = ytdMs.length   ? _aggregateChmRaw(ytdMs)  : {};
   for(const nd of _CHM_TREE){
     const node = CHM_NODES[nd.id];
     if(!node) continue;
@@ -6780,13 +6779,13 @@ function _chmFmt(v){
   if(v===undefined||v===null) return '<span style="color:#CBD5E1">—</span>';
   if(v===0) return '<span style="color:#CBD5E1">0</span>';
   const abs=Math.abs(v).toLocaleString('ko-KR');
-  return v<0?`-${abs}`:abs;
+  return v<0?`<span style="color:#E53E3E">-${abs}</span>`:abs;
 }
 function _chmFmtOp(v){
   if(v===undefined||v===null) return '<span style="color:#CBD5E1">—</span>';
   if(v===0) return '<span style="color:#CBD5E1">0</span>';
   const abs=Math.abs(v).toLocaleString('ko-KR');
-  return v<0?`<span style="color:#059669;font-weight:700">-${abs}</span>`
+  return v<0?`<span style="color:#E53E3E;font-weight:700">-${abs}</span>`
             :`<span style="color:#059669;font-weight:700">${abs}</span>`;
 }
 
