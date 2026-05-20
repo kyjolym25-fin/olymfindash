@@ -6417,9 +6417,16 @@ applyAuth();
       if(ovEl) goMain('overview', ovEl);
     }
   }
-  // 모든 복원 완료 후 손익계산서 재렌더 (데이터 로드 후 최종 보장)
-  const _chmEl=document.getElementById('chairman-wrap');
-  if(_chmEl&&_chmEl.style.display==='block') initChmDash();
+  // 모든 복원 완료 후 손익계산서 강제 복원 (새로고침 시 display 상태와 무관하게 보장)
+  {
+    const _s3=getSession();
+    const _canPl3=_s3&&(_s3.role==='admin'||(!(_s3.role==='director')&&!!_s3.can_pl));
+    if(getDashView()==='chairman'&&_canPl3){
+      const _chmEl=document.getElementById('chairman-wrap');
+      const _hubEl=document.getElementById('hub-screen');
+      if(_chmEl){ _chmEl.style.display='block'; if(_hubEl) _hubEl.style.display='none'; initChmDash(); }
+    }
+  }
 })();
 window.addEventListener('beforeunload',()=>sessionStorage.setItem('olymp_scrollY', window.scrollY));
 
