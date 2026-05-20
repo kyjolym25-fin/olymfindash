@@ -6377,6 +6377,9 @@ applyAuth();
   await loadRawDB();
   if(RAW_DB.length) applyRawToDashboard();
   autoSelectLatestMonth();
+  // RAW_DB 로드 후 손익계산서가 이미 열려있으면 재렌더 (새로고침 시 빈 테이블 방지)
+  const _chmEl=document.getElementById('chairman-wrap');
+  if(_chmEl&&_chmEl.style.display==='block') initChmDash();
   await _refreshSessionPerms();
   applyAuth();
   loadComments();
