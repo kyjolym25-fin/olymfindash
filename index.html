@@ -6514,105 +6514,172 @@ function _chmGen25(d, rM=0.921, eM=0.948){
   return out;
 }
 
-// ── 목업 데이터 (실 데이터 연동 전 임시) ──────────────────────
-const _CHM_RAW = {
-  company:{id:'company',label:'🏢 회사 전체',level:0,dept:null,parent:null,children:['hak','u2m','mirae','bghu','mgmt'],
-    cur:{rev_tuition:4650000,rev_other:171000,rev_total:4821000,exp_salary:1800000,exp_retire:180000,exp_welfare:120000,exp_rent:650000,exp_fee:480000,exp_book:200000,exp_ad:150000,exp_deprec:200000,exp_other:167000,exp_total:3947000,op1:874000,common:0,op2:874000},
-    ytd:{rev_tuition:18600000,rev_other:684000,rev_total:19284000,exp_salary:7200000,exp_retire:720000,exp_welfare:480000,exp_rent:2600000,exp_fee:1920000,exp_book:800000,exp_ad:600000,exp_deprec:800000,exp_other:512000,exp_total:15632000,op1:3652000,common:0,op2:3652000}},
-  hak:{id:'hak',label:'학원사업본부',level:1,dept:'hak',parent:'company',children:['gwj','sdg','ddm','jrl'],
-    cur:{rev_tuition:2060000,rev_other:83000,rev_total:2143000,exp_salary:620000,exp_retire:62000,exp_welfare:41000,exp_rent:280000,exp_fee:200000,exp_book:80000,exp_ad:60000,exp_deprec:80000,exp_other:198000,exp_total:1621000,op1:522000,common:0,op2:522000},
-    ytd:{rev_tuition:8240000,rev_other:332000,rev_total:8572000,exp_salary:2480000,exp_retire:248000,exp_welfare:164000,exp_rent:1120000,exp_fee:800000,exp_book:320000,exp_ad:240000,exp_deprec:320000,exp_other:792000,exp_total:6484000,op1:2088000,common:0,op2:2088000}},
-  gwj:{id:'gwj',label:'광진',level:2,dept:'hak',parent:'hak',children:['gwj-m','gwj-e'],
-    cur:{rev_tuition:590000,rev_other:22000,rev_total:612000,exp_salary:176000,exp_retire:18000,exp_welfare:12000,exp_rent:80000,exp_fee:58000,exp_book:23000,exp_ad:17000,exp_deprec:23000,exp_other:51000,exp_total:458000,op1:154000,common:0,op2:154000},
-    ytd:{rev_tuition:2360000,rev_other:88000,rev_total:2448000,exp_salary:704000,exp_retire:72000,exp_welfare:48000,exp_rent:320000,exp_fee:232000,exp_book:92000,exp_ad:68000,exp_deprec:92000,exp_other:204000,exp_total:1832000,op1:616000,common:0,op2:616000}},
-  'gwj-m':{id:'gwj-m',label:'수학',level:3,dept:'hak',parent:'gwj',children:[],
-    cur:{rev_tuition:380000,rev_other:9000,rev_total:389000,exp_salary:113000,exp_retire:11000,exp_welfare:7000,exp_rent:51000,exp_fee:37000,exp_book:15000,exp_ad:11000,exp_deprec:15000,exp_other:30000,exp_total:290000,op1:99000,common:0,op2:99000},
-    ytd:{rev_tuition:1520000,rev_other:36000,rev_total:1556000,exp_salary:452000,exp_retire:44000,exp_welfare:28000,exp_rent:204000,exp_fee:148000,exp_book:60000,exp_ad:44000,exp_deprec:60000,exp_other:120000,exp_total:1160000,op1:396000,common:0,op2:396000}},
-  'gwj-e':{id:'gwj-e',label:'영어',level:3,dept:'hak',parent:'gwj',children:[],
-    cur:{rev_tuition:210000,rev_other:13000,rev_total:223000,exp_salary:63000,exp_retire:7000,exp_welfare:5000,exp_rent:29000,exp_fee:21000,exp_book:8000,exp_ad:6000,exp_deprec:8000,exp_other:21000,exp_total:168000,op1:55000,common:0,op2:55000},
-    ytd:{rev_tuition:840000,rev_other:52000,rev_total:892000,exp_salary:252000,exp_retire:28000,exp_welfare:20000,exp_rent:116000,exp_fee:84000,exp_book:32000,exp_ad:24000,exp_deprec:32000,exp_other:84000,exp_total:672000,op1:220000,common:0,op2:220000}},
-  sdg:{id:'sdg',label:'성동',level:2,dept:'hak',parent:'hak',children:['sdg-m','sdg-e'],
-    cur:{rev_tuition:505000,rev_other:18000,rev_total:523000,exp_salary:150000,exp_retire:15000,exp_welfare:10000,exp_rent:68000,exp_fee:49000,exp_book:19000,exp_ad:15000,exp_deprec:19000,exp_other:45000,exp_total:390000,op1:133000,common:0,op2:133000},
-    ytd:{rev_tuition:2020000,rev_other:72000,rev_total:2092000,exp_salary:600000,exp_retire:60000,exp_welfare:40000,exp_rent:272000,exp_fee:196000,exp_book:76000,exp_ad:60000,exp_deprec:76000,exp_other:180000,exp_total:1560000,op1:532000,common:0,op2:532000}},
-  'sdg-m':{id:'sdg-m',label:'수학',level:3,dept:'hak',parent:'sdg',children:[],
-    cur:{rev_tuition:300000,rev_other:12000,rev_total:312000,exp_salary:89000,exp_retire:9000,exp_welfare:6000,exp_rent:41000,exp_fee:29000,exp_book:11000,exp_ad:9000,exp_deprec:11000,exp_other:28000,exp_total:233000,op1:79000,common:0,op2:79000},
-    ytd:{rev_tuition:1200000,rev_other:48000,rev_total:1248000,exp_salary:356000,exp_retire:36000,exp_welfare:24000,exp_rent:164000,exp_fee:116000,exp_book:44000,exp_ad:36000,exp_deprec:44000,exp_other:112000,exp_total:932000,op1:316000,common:0,op2:316000}},
-  'sdg-e':{id:'sdg-e',label:'영어',level:3,dept:'hak',parent:'sdg',children:[],
-    cur:{rev_tuition:205000,rev_other:6000,rev_total:211000,exp_salary:61000,exp_retire:6000,exp_welfare:4000,exp_rent:27000,exp_fee:20000,exp_book:8000,exp_ad:6000,exp_deprec:8000,exp_other:17000,exp_total:157000,op1:54000,common:0,op2:54000},
-    ytd:{rev_tuition:820000,rev_other:24000,rev_total:844000,exp_salary:244000,exp_retire:24000,exp_welfare:16000,exp_rent:108000,exp_fee:80000,exp_book:32000,exp_ad:24000,exp_deprec:32000,exp_other:68000,exp_total:628000,op1:216000,common:0,op2:216000}},
-  ddm:{id:'ddm',label:'동대문',level:2,dept:'hak',parent:'hak',children:['ddm-m','ddm-e'],
-    cur:{rev_tuition:383000,rev_other:15000,rev_total:398000,exp_salary:115000,exp_retire:11000,exp_welfare:8000,exp_rent:52000,exp_fee:37000,exp_book:15000,exp_ad:11000,exp_deprec:15000,exp_other:37000,exp_total:301000,op1:97000,common:0,op2:97000},
-    ytd:{rev_tuition:1532000,rev_other:60000,rev_total:1592000,exp_salary:460000,exp_retire:44000,exp_welfare:32000,exp_rent:208000,exp_fee:148000,exp_book:60000,exp_ad:44000,exp_deprec:60000,exp_other:148000,exp_total:1204000,op1:388000,common:0,op2:388000}},
-  'ddm-m':{id:'ddm-m',label:'수학',level:3,dept:'hak',parent:'ddm',children:[],
-    cur:{rev_tuition:236000,rev_other:9000,rev_total:245000,exp_salary:71000,exp_retire:7000,exp_welfare:5000,exp_rent:32000,exp_fee:23000,exp_book:9000,exp_ad:7000,exp_deprec:9000,exp_other:22000,exp_total:185000,op1:60000,common:0,op2:60000},
-    ytd:{rev_tuition:944000,rev_other:36000,rev_total:980000,exp_salary:284000,exp_retire:28000,exp_welfare:20000,exp_rent:128000,exp_fee:92000,exp_book:36000,exp_ad:28000,exp_deprec:36000,exp_other:88000,exp_total:740000,op1:240000,common:0,op2:240000}},
-  'ddm-e':{id:'ddm-e',label:'영어',level:3,dept:'hak',parent:'ddm',children:[],
-    cur:{rev_tuition:147000,rev_other:6000,rev_total:153000,exp_salary:44000,exp_retire:4000,exp_welfare:3000,exp_rent:20000,exp_fee:14000,exp_book:6000,exp_ad:4000,exp_deprec:6000,exp_other:15000,exp_total:116000,op1:37000,common:0,op2:37000},
-    ytd:{rev_tuition:588000,rev_other:24000,rev_total:612000,exp_salary:176000,exp_retire:16000,exp_welfare:12000,exp_rent:80000,exp_fee:56000,exp_book:24000,exp_ad:16000,exp_deprec:24000,exp_other:60000,exp_total:464000,op1:148000,common:0,op2:148000}},
-  jrl:{id:'jrl',label:'중랑',level:2,dept:'hak',parent:'hak',children:['jrl-m','jrl-e'],
-    cur:{rev_tuition:582000,rev_other:28000,rev_total:610000,exp_salary:179000,exp_retire:18000,exp_welfare:11000,exp_rent:80000,exp_fee:56000,exp_book:23000,exp_ad:17000,exp_deprec:23000,exp_other:65000,exp_total:472000,op1:138000,common:0,op2:138000},
-    ytd:{rev_tuition:2328000,rev_other:112000,rev_total:2440000,exp_salary:716000,exp_retire:72000,exp_welfare:44000,exp_rent:320000,exp_fee:224000,exp_book:92000,exp_ad:68000,exp_deprec:92000,exp_other:260000,exp_total:1888000,op1:552000,common:0,op2:552000}},
-  'jrl-m':{id:'jrl-m',label:'수학',level:3,dept:'hak',parent:'jrl',children:[],
-    cur:{rev_tuition:362000,rev_other:16000,rev_total:378000,exp_salary:111000,exp_retire:11000,exp_welfare:7000,exp_rent:49000,exp_fee:35000,exp_book:14000,exp_ad:11000,exp_deprec:14000,exp_other:40000,exp_total:292000,op1:86000,common:0,op2:86000},
-    ytd:{rev_tuition:1448000,rev_other:64000,rev_total:1512000,exp_salary:444000,exp_retire:44000,exp_welfare:28000,exp_rent:196000,exp_fee:140000,exp_book:56000,exp_ad:44000,exp_deprec:56000,exp_other:160000,exp_total:1168000,op1:344000,common:0,op2:344000}},
-  'jrl-e':{id:'jrl-e',label:'영어',level:3,dept:'hak',parent:'jrl',children:[],
-    cur:{rev_tuition:220000,rev_other:12000,rev_total:232000,exp_salary:68000,exp_retire:7000,exp_welfare:4000,exp_rent:31000,exp_fee:21000,exp_book:9000,exp_ad:6000,exp_deprec:9000,exp_other:25000,exp_total:180000,op1:52000,common:0,op2:52000},
-    ytd:{rev_tuition:880000,rev_other:48000,rev_total:928000,exp_salary:272000,exp_retire:28000,exp_welfare:16000,exp_rent:124000,exp_fee:84000,exp_book:36000,exp_ad:24000,exp_deprec:36000,exp_other:100000,exp_total:720000,op1:208000,common:0,op2:208000}},
-  u2m:{id:'u2m',label:'U2M사업본부',level:1,dept:'u2m',parent:'company',children:['jgy','spb','msa','uir'],
-    cur:{rev_tuition:1060000,rev_other:44000,rev_total:1104000,exp_salary:340000,exp_retire:34000,exp_welfare:23000,exp_rent:150000,exp_fee:120000,exp_book:50000,exp_ad:40000,exp_deprec:50000,exp_other:80000,exp_total:887000,op1:217000,common:0,op2:217000},
-    ytd:{rev_tuition:4240000,rev_other:176000,rev_total:4416000,exp_salary:1360000,exp_retire:136000,exp_welfare:92000,exp_rent:600000,exp_fee:480000,exp_book:200000,exp_ad:160000,exp_deprec:200000,exp_other:320000,exp_total:3548000,op1:868000,common:0,op2:868000}},
-  jgy:{id:'jgy',label:'중계',level:2,dept:'u2m',parent:'u2m',children:['jgy-m','jgy-e'],
-    cur:{rev_tuition:300000,rev_other:12000,rev_total:312000,exp_salary:96000,exp_retire:10000,exp_welfare:6000,exp_rent:43000,exp_fee:34000,exp_book:14000,exp_ad:11000,exp_deprec:14000,exp_other:23000,exp_total:251000,op1:61000,common:0,op2:61000},
-    ytd:{rev_tuition:1200000,rev_other:48000,rev_total:1248000,exp_salary:384000,exp_retire:40000,exp_welfare:24000,exp_rent:172000,exp_fee:136000,exp_book:56000,exp_ad:44000,exp_deprec:56000,exp_other:92000,exp_total:1004000,op1:244000,common:0,op2:244000}},
-  'jgy-m':{id:'jgy-m',label:'수학',level:3,dept:'u2m',parent:'jgy',children:[],
-    cur:{rev_tuition:185000,rev_other:7000,rev_total:192000,exp_salary:59000,exp_retire:6000,exp_welfare:4000,exp_rent:27000,exp_fee:21000,exp_book:9000,exp_ad:7000,exp_deprec:9000,exp_other:13000,exp_total:155000,op1:37000,common:0,op2:37000},
-    ytd:{rev_tuition:740000,rev_other:28000,rev_total:768000,exp_salary:236000,exp_retire:24000,exp_welfare:16000,exp_rent:108000,exp_fee:84000,exp_book:36000,exp_ad:28000,exp_deprec:36000,exp_other:52000,exp_total:620000,op1:148000,common:0,op2:148000}},
-  'jgy-e':{id:'jgy-e',label:'영어',level:3,dept:'u2m',parent:'jgy',children:[],
-    cur:{rev_tuition:115000,rev_other:5000,rev_total:120000,exp_salary:37000,exp_retire:4000,exp_welfare:2000,exp_rent:16000,exp_fee:13000,exp_book:5000,exp_ad:4000,exp_deprec:5000,exp_other:10000,exp_total:96000,op1:24000,common:0,op2:24000},
-    ytd:{rev_tuition:460000,rev_other:20000,rev_total:480000,exp_salary:148000,exp_retire:16000,exp_welfare:8000,exp_rent:64000,exp_fee:52000,exp_book:20000,exp_ad:16000,exp_deprec:20000,exp_other:40000,exp_total:384000,op1:96000,common:0,op2:96000}},
-  spb:{id:'spb',label:'송파방이',level:2,dept:'u2m',parent:'u2m',children:['spb-m','spb-e'],
-    cur:{rev_tuition:273000,rev_other:12000,rev_total:285000,exp_salary:88000,exp_retire:9000,exp_welfare:6000,exp_rent:39000,exp_fee:31000,exp_book:13000,exp_ad:10000,exp_deprec:13000,exp_other:20000,exp_total:229000,op1:56000,common:0,op2:56000},
-    ytd:{rev_tuition:1092000,rev_other:48000,rev_total:1140000,exp_salary:352000,exp_retire:36000,exp_welfare:24000,exp_rent:156000,exp_fee:124000,exp_book:52000,exp_ad:40000,exp_deprec:52000,exp_other:80000,exp_total:916000,op1:224000,common:0,op2:224000}},
-  'spb-m':{id:'spb-m',label:'수학',level:3,dept:'u2m',parent:'spb',children:[],
-    cur:{rev_tuition:167000,rev_other:8000,rev_total:175000,exp_salary:54000,exp_retire:6000,exp_welfare:4000,exp_rent:24000,exp_fee:19000,exp_book:8000,exp_ad:6000,exp_deprec:8000,exp_other:12000,exp_total:141000,op1:34000,common:0,op2:34000},
-    ytd:{rev_tuition:668000,rev_other:32000,rev_total:700000,exp_salary:216000,exp_retire:24000,exp_welfare:16000,exp_rent:96000,exp_fee:76000,exp_book:32000,exp_ad:24000,exp_deprec:32000,exp_other:48000,exp_total:564000,op1:136000,common:0,op2:136000}},
-  'spb-e':{id:'spb-e',label:'영어',level:3,dept:'u2m',parent:'spb',children:[],
-    cur:{rev_tuition:106000,rev_other:4000,rev_total:110000,exp_salary:34000,exp_retire:3000,exp_welfare:2000,exp_rent:15000,exp_fee:12000,exp_book:5000,exp_ad:4000,exp_deprec:5000,exp_other:8000,exp_total:88000,op1:22000,common:0,op2:22000},
-    ytd:{rev_tuition:424000,rev_other:16000,rev_total:440000,exp_salary:136000,exp_retire:12000,exp_welfare:8000,exp_rent:60000,exp_fee:48000,exp_book:20000,exp_ad:16000,exp_deprec:20000,exp_other:32000,exp_total:352000,op1:88000,common:0,op2:88000}},
-  msa:{id:'msa',label:'미사',level:2,dept:'u2m',parent:'u2m',children:['msa-m','msa-e'],
-    cur:{rev_tuition:256000,rev_other:11000,rev_total:267000,exp_salary:82000,exp_retire:8000,exp_welfare:5000,exp_rent:37000,exp_fee:29000,exp_book:12000,exp_ad:9000,exp_deprec:12000,exp_other:21000,exp_total:215000,op1:52000,common:0,op2:52000},
-    ytd:{rev_tuition:1024000,rev_other:44000,rev_total:1068000,exp_salary:328000,exp_retire:32000,exp_welfare:20000,exp_rent:148000,exp_fee:116000,exp_book:48000,exp_ad:36000,exp_deprec:48000,exp_other:84000,exp_total:860000,op1:208000,common:0,op2:208000}},
-  'msa-m':{id:'msa-m',label:'수학',level:3,dept:'u2m',parent:'msa',children:[],
-    cur:{rev_tuition:157000,rev_other:8000,rev_total:165000,exp_salary:50000,exp_retire:5000,exp_welfare:3000,exp_rent:23000,exp_fee:18000,exp_book:7000,exp_ad:6000,exp_deprec:7000,exp_other:13000,exp_total:132000,op1:33000,common:0,op2:33000},
-    ytd:{rev_tuition:628000,rev_other:32000,rev_total:660000,exp_salary:200000,exp_retire:20000,exp_welfare:12000,exp_rent:92000,exp_fee:72000,exp_book:28000,exp_ad:24000,exp_deprec:28000,exp_other:52000,exp_total:528000,op1:132000,common:0,op2:132000}},
-  'msa-e':{id:'msa-e',label:'영어',level:3,dept:'u2m',parent:'msa',children:[],
-    cur:{rev_tuition:99000,rev_other:3000,rev_total:102000,exp_salary:32000,exp_retire:3000,exp_welfare:2000,exp_rent:14000,exp_fee:11000,exp_book:5000,exp_ad:3000,exp_deprec:5000,exp_other:8000,exp_total:83000,op1:19000,common:0,op2:19000},
-    ytd:{rev_tuition:396000,rev_other:12000,rev_total:408000,exp_salary:128000,exp_retire:12000,exp_welfare:8000,exp_rent:56000,exp_fee:44000,exp_book:20000,exp_ad:12000,exp_deprec:20000,exp_other:32000,exp_total:332000,op1:76000,common:0,op2:76000}},
-  uir:{id:'uir',label:'위례',level:2,dept:'u2m',parent:'u2m',children:['uir-m','uir-e'],
-    cur:{rev_tuition:231000,rev_other:9000,rev_total:240000,exp_salary:74000,exp_retire:7000,exp_welfare:6000,exp_rent:31000,exp_fee:26000,exp_book:11000,exp_ad:8000,exp_deprec:11000,exp_other:18000,exp_total:192000,op1:48000,common:0,op2:48000},
-    ytd:{rev_tuition:924000,rev_other:36000,rev_total:960000,exp_salary:296000,exp_retire:28000,exp_welfare:24000,exp_rent:124000,exp_fee:104000,exp_book:44000,exp_ad:32000,exp_deprec:44000,exp_other:72000,exp_total:768000,op1:192000,common:0,op2:192000}},
-  'uir-m':{id:'uir-m',label:'수학',level:3,dept:'u2m',parent:'uir',children:[],
-    cur:{rev_tuition:142000,rev_other:6000,rev_total:148000,exp_salary:45000,exp_retire:5000,exp_welfare:4000,exp_rent:19000,exp_fee:16000,exp_book:7000,exp_ad:5000,exp_deprec:7000,exp_other:10000,exp_total:118000,op1:30000,common:0,op2:30000},
-    ytd:{rev_tuition:568000,rev_other:24000,rev_total:592000,exp_salary:180000,exp_retire:20000,exp_welfare:16000,exp_rent:76000,exp_fee:64000,exp_book:28000,exp_ad:20000,exp_deprec:28000,exp_other:40000,exp_total:472000,op1:120000,common:0,op2:120000}},
-  'uir-e':{id:'uir-e',label:'영어',level:3,dept:'u2m',parent:'uir',children:[],
-    cur:{rev_tuition:89000,rev_other:3000,rev_total:92000,exp_salary:29000,exp_retire:2000,exp_welfare:2000,exp_rent:12000,exp_fee:10000,exp_book:4000,exp_ad:3000,exp_deprec:4000,exp_other:8000,exp_total:74000,op1:18000,common:0,op2:18000},
-    ytd:{rev_tuition:356000,rev_other:12000,rev_total:368000,exp_salary:116000,exp_retire:8000,exp_welfare:8000,exp_rent:48000,exp_fee:40000,exp_book:16000,exp_ad:12000,exp_deprec:16000,exp_other:32000,exp_total:296000,op1:72000,common:0,op2:72000}},
-  mirae:{id:'mirae',label:'미래교육사업부',level:1,dept:'mirae',parent:'company',children:[],
-    cur:{rev_tuition:810000,rev_other:13000,rev_total:823000,exp_salary:280000,exp_retire:28000,exp_welfare:19000,exp_rent:120000,exp_fee:100000,exp_book:50000,exp_ad:30000,exp_deprec:40000,exp_other:34000,exp_total:701000,op1:122000,common:0,op2:122000},
-    ytd:{rev_tuition:3240000,rev_other:52000,rev_total:3292000,exp_salary:1120000,exp_retire:112000,exp_welfare:76000,exp_rent:480000,exp_fee:400000,exp_book:200000,exp_ad:120000,exp_deprec:160000,exp_other:136000,exp_total:2804000,op1:488000,common:0,op2:488000}},
-  bghu:{id:'bghu',label:'방과후사업본부',level:1,dept:'bghu',parent:'company',children:[],
-    cur:{rev_tuition:395000,rev_other:17000,rev_total:412000,exp_salary:200000,exp_retire:20000,exp_welfare:13000,exp_rent:80000,exp_fee:50000,exp_book:16000,exp_ad:15000,exp_deprec:20000,exp_other:-16000,exp_total:398000,op1:14000,common:0,op2:14000},
-    ytd:{rev_tuition:1580000,rev_other:68000,rev_total:1648000,exp_salary:800000,exp_retire:80000,exp_welfare:52000,exp_rent:320000,exp_fee:200000,exp_book:64000,exp_ad:60000,exp_deprec:80000,exp_other:-64000,exp_total:1592000,op1:56000,common:0,op2:56000}},
-  mgmt:{id:'mgmt',label:'경영기획실',level:1,dept:'mgmt',parent:'company',children:[],
-    cur:{rev_tuition:325000,rev_other:14000,rev_total:339000,exp_salary:360000,exp_retire:36000,exp_welfare:24000,exp_rent:20000,exp_fee:10000,exp_book:4000,exp_ad:5000,exp_deprec:10000,exp_other:-129000,exp_total:340000,op1:-1000,common:0,op2:-1000},
-    ytd:{rev_tuition:1300000,rev_other:56000,rev_total:1356000,exp_salary:1440000,exp_retire:144000,exp_welfare:96000,exp_rent:80000,exp_fee:40000,exp_book:16000,exp_ad:20000,exp_deprec:40000,exp_other:-672000,exp_total:1204000,op1:152000,common:0,op2:152000}},
+// ── 노드 트리 정의 (계층 구조) ────────────────────────────────
+// cc: 부서통합 시트 기준 CC명 (leaf만), groupCCs: 하위 CC 목록 전체
+const _CHM_TREE = [
+  {id:'company', label:'🏢 회사 전체',    level:0, dept:null,   parent:null,     children:['hak','u2m','bghu','mirae','mgmt'],
+   groupCCs:['광진수학','광진영어','성동수학','성동영어','동대문수학','동대문영어','중랑수학','중랑영어','학원본부','중계수학','송파방이수학','미사수학','위례수학','교육넷수학','U2M본부','방과후학교','미래교육사업본부','경영기획실','전략기획실']},
+  {id:'hak',     label:'학원사업본부',    level:1, dept:'hak',  parent:'company', children:['gwj','sdg','ddm','jrl','hak-b'],
+   groupCCs:['광진수학','광진영어','성동수학','성동영어','동대문수학','동대문영어','중랑수학','중랑영어','학원본부']},
+  {id:'gwj',     label:'광진',            level:2, dept:'hak',  parent:'hak',     children:['gwj-m','gwj-e'], groupCCs:['광진수학','광진영어']},
+  {id:'gwj-m',   label:'광진수학',        level:3, dept:'hak',  parent:'gwj',     children:[], cc:'광진수학'},
+  {id:'gwj-e',   label:'광진영어',        level:3, dept:'hak',  parent:'gwj',     children:[], cc:'광진영어'},
+  {id:'sdg',     label:'성동',            level:2, dept:'hak',  parent:'hak',     children:['sdg-m','sdg-e'], groupCCs:['성동수학','성동영어']},
+  {id:'sdg-m',   label:'성동수학',        level:3, dept:'hak',  parent:'sdg',     children:[], cc:'성동수학'},
+  {id:'sdg-e',   label:'성동영어',        level:3, dept:'hak',  parent:'sdg',     children:[], cc:'성동영어'},
+  {id:'ddm',     label:'동대문',          level:2, dept:'hak',  parent:'hak',     children:['ddm-m','ddm-e'], groupCCs:['동대문수학','동대문영어']},
+  {id:'ddm-m',   label:'동대문수학',      level:3, dept:'hak',  parent:'ddm',     children:[], cc:'동대문수학'},
+  {id:'ddm-e',   label:'동대문영어',      level:3, dept:'hak',  parent:'ddm',     children:[], cc:'동대문영어'},
+  {id:'jrl',     label:'중랑',            level:2, dept:'hak',  parent:'hak',     children:['jrl-m','jrl-e'], groupCCs:['중랑수학','중랑영어']},
+  {id:'jrl-m',   label:'중랑수학',        level:3, dept:'hak',  parent:'jrl',     children:[], cc:'중랑수학'},
+  {id:'jrl-e',   label:'중랑영어',        level:3, dept:'hak',  parent:'jrl',     children:[], cc:'중랑영어'},
+  {id:'hak-b',   label:'학원본부',        level:2, dept:'hak',  parent:'hak',     children:[], cc:'학원본부'},
+  {id:'u2m',     label:'U2M사업본부',     level:1, dept:'u2m',  parent:'company', children:['jgy','spb','msa','uir','eng','u2m-b'],
+   groupCCs:['중계수학','송파방이수학','미사수학','위례수학','교육넷수학','U2M본부']},
+  {id:'jgy',     label:'중계수학',        level:2, dept:'u2m',  parent:'u2m',     children:[], cc:'중계수학'},
+  {id:'spb',     label:'송파방이수학',    level:2, dept:'u2m',  parent:'u2m',     children:[], cc:'송파방이수학'},
+  {id:'msa',     label:'미사수학',        level:2, dept:'u2m',  parent:'u2m',     children:[], cc:'미사수학'},
+  {id:'uir',     label:'위례수학',        level:2, dept:'u2m',  parent:'u2m',     children:[], cc:'위례수학'},
+  {id:'eng',     label:'교육넷수학',      level:2, dept:'u2m',  parent:'u2m',     children:[], cc:'교육넷수학'},
+  {id:'u2m-b',   label:'U2M본부',         level:2, dept:'u2m',  parent:'u2m',     children:[], cc:'U2M본부'},
+  {id:'bghu',    label:'방과후사업본부',  level:1, dept:'bghu', parent:'company', children:['bghu-c'], groupCCs:['방과후학교']},
+  {id:'bghu-c',  label:'방과후학교',      level:2, dept:'bghu', parent:'bghu',    children:[], cc:'방과후학교'},
+  {id:'mirae',   label:'미래교육사업부',  level:1, dept:'mirae',parent:'company', children:['mirae-c'], groupCCs:['미래교육사업본부']},
+  {id:'mirae-c', label:'미래교육사업본부',level:2, dept:'mirae',parent:'mirae',   children:[], cc:'미래교육사업본부'},
+  {id:'mgmt',    label:'경영기획실',      level:1, dept:'mgmt', parent:'company', children:['mgmt-c','strat'], groupCCs:['경영기획실','전략기획실']},
+  {id:'mgmt-c',  label:'경영기획실',      level:2, dept:'mgmt', parent:'mgmt',    children:[], cc:'경영기획실'},
+  {id:'strat',   label:'전략기획실',      level:2, dept:'mgmt', parent:'mgmt',    children:[], cc:'전략기획실'},
+];
+
+// ── CC 통합 매핑: 부서통합 CC명 → RAW_DB cc 목록 ─────────────
+const CHM_CC_MERGE = {
+  '광진수학':        ['광진수학','광진고등수학','광진영재'],
+  '광진영어':        ['광진영어','광진고등영어'],
+  '성동수학':        ['성동수학','성동고등수학'],
+  '성동영어':        ['성동영어','성동고등영어'],
+  '동대문수학':      ['동대문수학','동대문고등수학'],
+  '동대문영어':      ['동대문영어','동대문고등영어'],
+  '중랑수학':        ['중랑수학','중랑고등수학'],
+  '중랑영어':        ['중랑영어','중랑고등영어'],
+  '학원본부':        ['학원본부'],
+  '중계수학':        ['중계수학'],
+  '송파방이수학':    ['송파방이수학'],
+  '미사수학':        ['미사수학'],
+  '위례수학':        ['위례수학'],
+  '교육넷수학':      ['교육넷수학'],
+  'U2M본부':         ['U2M본부'],
+  '방과후학교':      ['방과후학교'],
+  '미래교육사업본부':['직영수학','직영영어','FC수학'],
+  '경영기획실':      ['경영기획실'],
+  '전략기획실':      ['전략기획실'],
 };
 
-// 25년 데이터 생성
-const CHM_NODES = {};
-for(const [id,nd] of Object.entries(_CHM_RAW)){
-  CHM_NODES[id] = {...nd, cur25:_chmGen25(nd.cur), ytd25:_chmGen25(nd.ytd)};
+// ── 계정 매핑: RAW_DB a 필드 → CHM key ───────────────────────
+const CHM_ACCT_MAP = {
+  '교습비수입':'rev_tuition','가맹비수입':'rev_franchise','도서수입':'rev_book',
+  '온라인컨텐츠수입':'rev_online','재료비수입':'rev_material','방과후학교':'rev_afterschool','임대료수입':'rev_rent',
+  '직원급여':'exp_salary','직원급여(일반)':'exp_salary','직원급여(원어민)':'exp_salary',
+  '상여금(일반)':'exp_bonus','상여금(원어민)':'exp_bonus',
+  '퇴직금':'exp_retire','퇴직금(일반)':'exp_retire',
+  '복리후생비':'exp_welfare','복리후생비(4대보험)':'exp_welfare','복리후생비(일반)':'exp_welfare',
+  '복리후생비(경조사)':'exp_welfare','복리후생비(회식대)':'exp_welfare',
+  '강사비(일반)':'exp_instructor','강사비(비율제)':'exp_instructor','강사비(보조교사)':'exp_instructor',
+  '강사비(임원)':'exp_instructor','강사비(지원금)':'exp_instructor','강사비(회식대)':'exp_instructor',
+  '강사비(공통비)':'exp_instructor',
+  '강사퇴직연금(일반)':'exp_inst_retire','강사퇴직연금(임원)':'exp_inst_retire','강사퇴직연금(공통비)':'exp_inst_retire',
+  '여비교통비':'exp_travel','여비교통비(교통비)':'exp_travel',
+  '기업업무추진비(일반)':'exp_entertain','기업업무추진비(경조사)':'exp_entertain',
+  '통신비':'exp_comm','수도광열비':'exp_utility','세금과공과금':'exp_tax','감가상각비':'exp_deprec',
+  '지급임차료(건물)':'exp_lease','지급임차료(임대물품)':'exp_lease',
+  '수선비':'exp_repair','보험료':'exp_insure','운반비':'exp_ship','교육훈련비':'exp_training',
+  '도서인쇄비(교재구입)':'exp_print','도서인쇄비(교재제작)':'exp_print','도서인쇄비(일반)':'exp_print',
+  '차량유지비':'exp_vehicle',
+  '소모품비(일반)':'exp_supplies','소모품비(교구재비)':'exp_supplies',
+  '지급수수료(PG.VAN)':'exp_fee','지급수수료(일반)':'exp_fee','지급수수료(라이선스)':'exp_fee',
+  '광고선전비(일반)':'exp_ad','광고선전비(학원)':'exp_ad','광고선전비(브랜드)':'exp_ad','광고선전비(이벤트)':'exp_ad',
+  '건물관리비(일반)':'exp_facility','무형고정자산상각':'exp_intangible',
+  '차량운행비(일반)':'exp_car_op','차량운행비(지원금)':'exp_car_op','차량운행비(회식대)':'exp_car_op',
+  '프로그램사용료':'exp_program','청소용역비':'exp_clean','행사비':'exp_event',
+  '판매장려금(교재.온라인)':'exp_incentive','판매장려금(위탁운영)':'exp_incentive',
+  '판매장려금(콩알.배지)':'exp_incentive','판매장려금(가맹비.프로그램)':'exp_incentive',
+  '잡비':'exp_misc','외주용역비':'exp_outsource','포인트충당금전입':'exp_provision',
+};
+// 공통비 (t='공통비') 계정 매핑
+const CHM_COMMON_MAP = {'직원급여':'com_salary','상여금':'com_bonus','퇴직금':'com_retire','복리후생비':'com_welfare'};
+
+// ── 집계 함수 ─────────────────────────────────────────────────
+const _CHM_REV_SUBS  = CHM_ACCOUNTS.filter(a=>a.sec==='rev'   &&a.sub).map(a=>a.key);
+const _CHM_EXP_SUBS  = CHM_ACCOUNTS.filter(a=>a.sec==='exp'   &&a.sub).map(a=>a.key);
+const _CHM_COM_SUBS  = CHM_ACCOUNTS.filter(a=>a.sec==='common'&&a.sub).map(a=>a.key);
+
+function _chmCalcTotals(d){
+  d.rev_total = _CHM_REV_SUBS.reduce((s,k)=>s+(d[k]||0),0);
+  d.exp_total = _CHM_EXP_SUBS.reduce((s,k)=>s+(d[k]||0),0);
+  d.com_total = _CHM_COM_SUBS.reduce((s,k)=>s+(d[k]||0),0);
+  d.op1 = d.rev_total - d.exp_total;
+  d.op2 = d.op1 - d.com_total;
+  return d;
 }
+
+function _aggregateChmRaw(months){
+  // RAW_DB → 부서통합 CC별 {key:값(천원)} 집계
+  const rawToMerged = {};
+  for(const [m,raws] of Object.entries(CHM_CC_MERGE)) raws.forEach(r=>rawToMerged[r]=m);
+  const acc = {};
+  for(const r of RAW_DB){
+    if(!months.includes(r.m)) continue;
+    const mcc = rawToMerged[r.cc];
+    if(!mcc) continue;
+    const key = r.t==='공통비' ? CHM_COMMON_MAP[r.a] : CHM_ACCT_MAP[r.a];
+    if(!key) continue;
+    if(!acc[mcc]) acc[mcc]={};
+    acc[mcc][key] = (acc[mcc][key]||0) + (r.v||0);
+  }
+  // 원→천원 변환 + 합계 계산
+  const result = {};
+  for(const [cc,d] of Object.entries(acc)){
+    const t={};
+    for(const [k,v] of Object.entries(d)) t[k]=Math.round(v/1000);
+    result[cc]=_chmCalcTotals(t);
+  }
+  return result;
+}
+
+function _sumChmCCs(acc, ccList){
+  const d={};
+  for(const cc of ccList){
+    for(const [k,v] of Object.entries(acc[cc]||{})) d[k]=(d[k]||0)+v;
+  }
+  return _chmCalcTotals(d);
+}
+
+function _buildChmNodes26(mi){
+  const MN=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  const avail = new Set(RAW_DB.map(r=>r.m));
+  const curM  = MN[mi];
+  if(!avail.has(curM)) return;  // 해당 월 데이터 없으면 스킵
+  const ytdMs = MN.slice(0,mi+1).filter(m=>avail.has(m));
+  const curAcc = _aggregateChmRaw([curM]);
+  const ytdAcc = _aggregateChmRaw(ytdMs);
+  for(const nd of _CHM_TREE){
+    const node = CHM_NODES[nd.id];
+    if(!node) continue;
+    if(nd.cc){
+      node.cur = curAcc[nd.cc] || {};
+      node.ytd = ytdAcc[nd.cc] || {};
+    } else if(nd.groupCCs){
+      node.cur = _sumChmCCs(curAcc, nd.groupCCs);
+      node.ytd = _sumChmCCs(ytdAcc, nd.groupCCs);
+    }
+  }
+}
+
+// ── CHM_NODES 초기화 (계층 구조만, 데이터는 _buildChmNodes26에서 채움) ──
+const CHM_NODES = {};
+for(const nd of _CHM_TREE){
+  CHM_NODES[nd.id] = {...nd, cur:{}, ytd:{}, cur25:{}, ytd25:{}};
+}
+
 
 // DFS 순서
 function _chmDfs(rootId){
@@ -6645,6 +6712,7 @@ function _buildChmMonthBar(){
 
 function setChmMonth(mi){
   chmMi=mi;
+  _buildChmNodes26(mi);
   _buildChmMonthBar();
   _renderChmTable();
 }
@@ -6768,8 +6836,8 @@ function chmToggle(id){
 }
 
 function initChmDash(){
-  // 자동 월 선택 (실 데이터 연동 전 기본값)
   chmMi = typeof latestActMi==='number'&&latestActMi>=0 ? latestActMi : 3;
+  _buildChmNodes26(chmMi);
   _buildChmMonthBar();
   _renderChmTable();
 }
