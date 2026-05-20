@@ -4955,11 +4955,14 @@ async function renderUserTable(){
     const campusText=u.campus?`<span style="font-size:10px;color:var(--muted);margin-right:6px">${u.campus.replace(/,/g,' · ')}</span>`:'';
     const campusBtn=`<button onclick="setCampusPrompt('${u.email}','${u.campus||''}')" style="font-size:10px;padding:3px 8px;background:var(--s3);border:1px solid var(--border);border-radius:4px;cursor:pointer;color:var(--text)">캠퍼스${u.campus?` <span style='color:var(--c26a)'>✓</span>`:''}</button>`;
     const plOn=!!u.can_pl;
-    const plBtn=isProtected?''
-      :`<button onclick="toggleCanPl('${u.email}',${plOn})" title="손익계산서 접근 ${plOn?'해제':'허용'}"
-          style="font-size:10px;padding:3px 8px;border-radius:4px;cursor:pointer;margin-left:4px;border:1px solid ${plOn?'var(--c26a)':'var(--border)'};background:${plOn?'var(--c26a)22':'var(--s3)'};color:${plOn?'var(--c26a)':'var(--muted)'}">
-          📈 손익계산서${plOn?' ✓':''}
-        </button>`;
+    const plBtn=isProtected
+      ?`<span style="font-size:10px;color:var(--muted);margin-left:8px">손익계산서: 항상허용</span>`
+      :`<label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer;margin-left:8px;vertical-align:middle" title="손익계산서 접근 권한 ${plOn?'해제':'허용'}">
+          <div onclick="toggleCanPl('${u.email}',${plOn})" style="width:34px;height:18px;border-radius:9px;background:${plOn?'#4361EE':'#D1D5DB'};position:relative;cursor:pointer;transition:background .2s;flex-shrink:0">
+            <div style="width:14px;height:14px;border-radius:7px;background:#fff;position:absolute;top:2px;left:${plOn?'18px':'2px'};transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.25)"></div>
+          </div>
+          <span style="font-size:10px;font-weight:600;color:${plOn?'#4361EE':'#9CA3AF'}">손익계산서</span>
+        </label>`;
     return `<tr>
       <td>${u.name}</td><td style="font-size:11px">${u.email}</td>
       <td>${roleSelect}</td>
