@@ -7121,9 +7121,9 @@ function _renderChmTable(){
         const rate = (yv25!=null&&yv25!==0&&yv26!=null) ? (yv26-yv25)/Math.abs(yv25)*100 : null;
         const clr = diff==null?'#CBD5E1': diff<0?'#E53E3E':'var(--text)';
         const diffHtml = diff==null ? '<span style="color:#CBD5E1">—</span>'
-          : `<span style="font-size:10px;font-weight:600;color:${clr}">${diff>0?'+':''}${diff.toLocaleString('ko-KR')}</span>`;
+          : `<span style="font-size:12px;font-weight:600;color:${clr}">${diff>0?'+':''}${diff.toLocaleString('ko-KR')}</span>`;
         const rateHtml = rate==null ? '<span style="color:#CBD5E1">—</span>'
-          : `<span style="font-size:10px;font-weight:700;color:${clr}">${rate>=0?'▲':'▼'}${Math.abs(rate).toFixed(1)}%</span>`;
+          : `<span style="font-size:12px;font-weight:700;color:${clr}">${rate>=0?'▲':'▼'}${Math.abs(rate).toFixed(1)}%</span>`;
         body+=`<td style="border-left:1px solid rgba(228,232,244,.4);background:#F8FAFC"></td>`;
         body+=`<td style="text-align:right;padding:4px 12px;background:#F8FAFC"><div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px">${diffHtml}${rateHtml}</div></td>`;
       }
