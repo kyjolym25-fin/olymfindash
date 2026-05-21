@@ -7139,11 +7139,8 @@ function _renderChmTable(){
         }
         const diff = (yv25!=null&&yv26!=null) ? yv26-yv25 : null;
         const rate = (yv25!=null&&yv25!==0&&yv26!=null) ? (yv26-yv25)/Math.abs(yv25)*100 : null;
-        const isPos = diff!=null && diff>0;
-        // 비용행: 증가=나쁨(빨강), 감소=좋음(초록) / 나머지: 반대
-        const goodClr = isCostRow ? '#E53E3E' : '#059669';
-        const badClr  = isCostRow ? '#059669' : '#E53E3E';
-        const clr = diff==null?'#CBD5E1': isPos?goodClr:badClr;
+        // -인 숫자만 빨간색, 나머지는 기본 컬러
+        const clr = diff==null?'#CBD5E1': diff<0?'#E53E3E':'var(--text)';
         const diffHtml = diff==null
           ? '<span style="color:#CBD5E1">—</span>'
           : `<span style="font-size:10px;font-weight:600;color:${clr}">${diff>0?'+':''}${diff.toLocaleString('ko-KR')}</span>`;
