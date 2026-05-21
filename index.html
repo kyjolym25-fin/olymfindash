@@ -7122,7 +7122,7 @@ function _renderChmTable(){
     if(YOY_KEYS.includes(acc.key) && (showCommon || acc.key!=='op1')){
       const isCostRow = acc.key==='exp_total';
       // 증감액 행 (라벨 셀은 rowspan=2으로 증감률 행과 병합)
-      body+=`<tr style="background:#F8FAFC">`;
+      body+=`<tr style="background:#F8FAFC;border-top:1px solid rgba(228,232,244,.3)">`;
       body+=`<td rowspan="2" style="position:sticky;left:0;z-index:10;background:#F8FAFC;text-align:left;padding:0 14px 0 18px;font-size:10px;color:#94A3B8;border-right:1px solid #E4E8F4;white-space:nowrap;vertical-align:middle">전년대비</td>`;
       for(const id of visIds){
         const nd=CHM_NODES[id];
@@ -7142,12 +7142,12 @@ function _renderChmTable(){
         const diffHtml = diff==null
           ? '<span style="color:#CBD5E1">—</span>'
           : `<span style="font-size:10px;font-weight:600;color:${clr}">${diff>0?'+':''}${diff.toLocaleString('ko-KR')}</span>`;
-        body+=`<td style="text-align:right;padding:0 12px;height:20px;border-left:1px solid rgba(228,232,244,.4);background:#F8FAFC"></td>`;
-        body+=`<td style="text-align:right;padding:0 12px;height:20px;background:#F8FAFC">${diffHtml}</td>`;
+        body+=`<td style="text-align:right;padding:0 12px;height:20px;border-left:1px solid rgba(228,232,244,.4);border-bottom:none;background:#F8FAFC"></td>`;
+        body+=`<td style="text-align:right;padding:0 12px;height:20px;border-bottom:none;background:#F8FAFC">${diffHtml}</td>`;
       }
       body+=`</tr>`;
       // 증감률 행 (라벨 셀 없음 - rowspan으로 병합됨)
-      body+=`<tr style="background:#F8FAFC;border-bottom:1px solid rgba(228,232,244,.4)">`;
+      body+=`<tr style="background:#F8FAFC;border-bottom:1px solid rgba(228,232,244,.3)">`;
       for(const id of visIds){
         const nd=CHM_NODES[id];
         if(nd.level===0 && acc.key==='op1'){
