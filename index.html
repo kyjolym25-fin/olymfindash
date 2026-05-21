@@ -1600,8 +1600,19 @@ thead th{font-size:13px}
 
 </div><!-- /main -->
 
+<!-- pg-admin placeholder (moved outside dashboard-wrap) -->
+</div><!-- /dashboard-wrap (closed early) -->
+
 <!-- ══ 관리자 페이지 ══ -->
-<div class="page" id="pg-admin" style="padding:16px">
+<div id="admin-wrap" style="display:none">
+<div class="main">
+  <div class="dir-header">
+    <button class="dir-back-btn" onclick="goHub()">← 홈</button>
+    <div>
+      <div class="dir-camp-name">관리자 페이지</div>
+    </div>
+  </div>
+<div id="pg-admin" style="padding:16px">
   <!-- 채널 탭 -->
   <div class="adp-tabs">
     <button class="adp-tab on" id="adp-data"  onclick="showAdminPanel('data')">📊 데이터 관리</button>
@@ -1814,7 +1825,8 @@ thead th{font-size:13px}
   </div>
   </div><!-- /adp-c-data -->
 </div><!-- /pg-admin -->
-</div><!-- /dashboard-wrap -->
+</div><!-- /main -->
+</div><!-- /admin-wrap -->
 
 <!-- ══ 인증 모달 ══ -->
 <div class="auth-overlay" id="authOverlay" style="display:none">
@@ -4794,6 +4806,8 @@ async function goHub(){
   if(chmWrap) chmWrap.style.display='none';
   const rcptWrapHub=document.getElementById('receipt-wrap');
   if(rcptWrapHub) rcptWrapHub.style.display='none';
+  const adminWrapHub=document.getElementById('admin-wrap');
+  if(adminWrapHub) adminWrapHub.style.display='none';
   tabs.style.display='none';
   saveDashView('hub');
   initHubWidget();
@@ -4948,28 +4962,13 @@ async function _refreshSessionPerms(){
 function goAdminPanel(){
   const s=getSession();
   if(!s||s.role!=='admin') return;
-  const hub=document.getElementById('hub-screen');
-  const dash=document.getElementById('dashboard-wrap');
-  const dirWrap=document.getElementById('director-wrap');
-  const chmWrap=document.getElementById('chairman-wrap');
-  const tabs=document.getElementById('mainTabs');
-  hub.style.display='none';
-  if(dirWrap) dirWrap.style.display='none';
-  if(chmWrap) chmWrap.style.display='none';
-  const rcptWrap=document.getElementById('receipt-wrap');
-  if(rcptWrap) rcptWrap.style.display='none';
-  dash.style.display='block';
-  tabs.style.display='flex';
-  saveDashView('main');
-  const adminTab=document.getElementById('tab-admin-page');
-  if(adminTab) goMain('admin', adminTab);
-  else {
-    // admin 페이지 직접 활성화
-    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
-    document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
-    const pg=document.getElementById('pg-admin');
-    if(pg){ pg.classList.add('on'); renderAdminPage(); }
-  }
+  ['hub-screen','dashboard-wrap','director-wrap','chairman-wrap','receipt-wrap'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.style.display='none';
+  });
+  document.getElementById('mainTabs').style.display='none';
+  document.getElementById('admin-wrap').style.display='block';
+  saveDashView('admin');
+  renderAdminPage();
 }
 
 function goSoinDash(tab){
@@ -6867,6 +6866,11 @@ function _restoreView(){
 
   const rcptWrapRv=document.getElementById('receipt-wrap');
   if(rcptWrapRv) rcptWrapRv.style.display='none';
+  const adminWrapRv=document.getElementById('admin-wrap');
+  if(adminWrapRv) adminWrapRv.style.display='none';
+  if(view==='admin'&&s.role==='admin'){
+    goAdminPanel(); return;
+  }
   if(view==='chairman'&&canPl){
     hub.style.display='none';
     dash.style.display='none';
