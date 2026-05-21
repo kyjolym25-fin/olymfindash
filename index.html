@@ -7085,8 +7085,6 @@ function _renderChmTable(){
       }
       const row26=nd[p26]||{}, row25=nd[p25]||{};
       let v26=row26[acc.key], v25=row25[acc.key];
-      // 교육 전체 op2: exp_total에 공통비가 이미 포함돼 있으므로 op1 값 사용
-      if(nd.level===0 && acc.sec==='op2'){ v26=row26.op1; v25=row25.op1; }
       if(!showCommon){
         // 26년 비용소계: 공통비 합산
         if(acc.key==='exp_total') v26=(v26||0)+(row26.com_total||0);
@@ -7112,7 +7110,6 @@ function _renderChmTable(){
         }
         const row26=nd[p26]||{}, row25=nd[p25]||{};
         let yv26=row26[acc.key], yv25=row25[acc.key];
-        if(nd.level===0 && acc.key==='op2'){ yv26=row26.op1; yv25=row25.op1; }
         if(!showCommon){
           if(acc.key==='exp_total') yv26=(yv26||0)+(row26.com_total||0);
           if(acc.key==='op2') yv25=row25.op1;
