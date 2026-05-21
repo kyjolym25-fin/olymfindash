@@ -653,7 +653,10 @@ thead th{font-size:13px}
             </div>
             <canvas id="c_hub_stu" height="100"></canvas>
           </div>
-          <div class="hub-stu-grid" id="hubStuCards"></div>
+          <div style="padding:0 18px 6px;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.4px">🏫 학원사업본부</div>
+          <div id="hubStuCards_hak" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:0 18px 16px"></div>
+          <div style="padding:6px 18px 6px;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.4px;border-top:1px solid var(--border)">📐 U2M사업본부</div>
+          <div id="hubStuCards_u2m" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:0 18px 18px"></div>
         </div>
       </div>
 
@@ -4864,36 +4867,60 @@ function _initHubStuPanel(){
     });
   }
 
-  // 캠퍼스 카드
-  const v = (obj, key) => { const x = obj?.[key]?.[lastM]; return (x != null && x !== 0) ? x : null; };
-  const fmt = n => n != null ? n.toLocaleString()+'명' : '—';
-  const cards = campList.map(name=>{
-    const c = STU[name];
-    const m26 = c.yr26a.합계[lastM]??0;
-    const m25 = c.yr25.합계[lastM]||0;
-    const mathCh  = v(c.yr26a.수학, '초중');
-    const mathYr  = v(c.yr26a.수학, '영재');
-    const mathGo  = v(c.yr26a.수학, '대입');
-    const mathTot = v(c.yr26a.수학, '소계');
-    const engCh   = v(c.yr26a.영어, '초중');
-    const engGo   = v(c.yr26a.영어, '대입');
-    const engTot  = v(c.yr26a.영어, '소계');
-    const diff = m26-m25, pct=(diff/m25*100).toFixed(1);
-    const cl = diff>=0?'#16A34A':'#E53E3E', sg=diff>=0?'+':'';
-    const subRow = (label, val) => val!=null ? `<div class="hub-stu-row hub-stu-sub"><span>${label}</span><span>${val.toLocaleString()}명</span></div>` : '';
-    return `<div class="hub-stu-card">
-      <div class="hub-stu-name">${name}</div>
-      <div class="hub-stu-row hub-stu-section"><span>수학</span><span>${fmt(mathTot)}</span></div>
-      ${subRow('ㄴ 초중', mathCh)}${subRow('ㄴ 영재', mathYr)}${subRow('ㄴ 고등', mathGo)}
-      ${engTot!=null ? `<div class="hub-stu-row hub-stu-section" style="margin-top:5px"><span>영어</span><span>${fmt(engTot)}</span></div>
-      ${subRow('ㄴ 초중', engCh)}${subRow('ㄴ 고등', engGo)}` : ''}
-      <div class="hub-stu-total">
-        <div class="hub-stu-total-val">${m26.toLocaleString()}명</div>
-        <div class="hub-stu-yoy" style="color:${cl}">${sg}${diff} (${sg}${pct}%)</div>
-      </div>
-    </div>`;
-  }).join('');
-  document.getElementById('hubStuCards').innerHTML = cards;
+  // 캠퍼스 카드 — renderStuCards와 동일한 카드 스타일
+  const _hubStuCard_hak = (camps) => {
+    const maxBar = Math.max(...camps.map(c => getStu(c, lastM).a26));
+    return camps.map(c => {
+      const d = getStu(c, lastM);
+      const diff = d.a26-d.a25, pct = d.a25>0?((diff/d.a25)*100).toFixed(1):'0';
+      const barW = maxBar>0?(d.a26/maxBar*100).toFixed(0):0;
+      return `<div style="background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <div style="font-size:13px;font-weight:700">📍 ${c}</div>
+          <div style="font-size:10px;color:${diff>=0?'var(--c26a)':'var(--loss)'}">${diff>=0?'▲':'▼'}${Math.abs(diff).toLocaleString()}명 (${Math.abs(pct)}%)</div>
+        </div>
+        <div style="font-size:26px;font-weight:900;color:var(--c26a);line-height:1;margin-bottom:3px">${d.a26.toLocaleString()}<span style="font-size:11px;font-weight:400;color:var(--muted);margin-left:3px">명</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:9px">25년 ${d.a25.toLocaleString()}명</div>
+        <div style="height:4px;background:var(--border);border-radius:2px;margin-bottom:10px;overflow:hidden"><div style="height:100%;width:${barW}%;background:var(--c26a)"></div></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+          <div style="background:var(--s3);border-radius:7px;padding:8px 10px">
+            <div style="font-size:10px;color:var(--muted);margin-bottom:2px">수학</div>
+            <div style="font-size:15px;font-weight:700;color:var(--c25)">${d.ms26.toLocaleString()}<span style="font-size:10px;color:var(--muted);margin-left:2px">명</span></div>
+            <div style="font-size:10px;color:var(--muted);margin-top:3px;line-height:1.5">초중 ${d.mc26.toLocaleString()}${d.mg26?` / 영재 ${d.mg26.toLocaleString()}`:''}${d.md26?` / 고등 ${d.md26.toLocaleString()}`:''}</div>
+          </div>
+          <div style="background:var(--s3);border-radius:7px;padding:8px 10px">
+            <div style="font-size:10px;color:var(--muted);margin-bottom:2px">영어</div>
+            <div style="font-size:15px;font-weight:700;color:var(--c26p)">${d.es26?d.es26.toLocaleString():'-'}<span style="font-size:10px;color:var(--muted);margin-left:2px">${d.es26?'명':''}</span></div>
+            <div style="font-size:10px;color:var(--muted);margin-top:3px;line-height:1.5">${d.es26?`초중 ${d.ec26.toLocaleString()} / 고등 ${d.ed26.toLocaleString()}`:'영어반 없음'}</div>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  };
+  const _hubStuCard_u2m = (camps) => {
+    const maxBar = Math.max(...camps.map(c => getStu(c, lastM).a26));
+    return camps.map(c => {
+      const d = getStu(c, lastM);
+      const diff = d.a26-d.a25, pct = d.a25>0?((diff/d.a25)*100).toFixed(1):'0';
+      const barW = maxBar>0?(d.a26/maxBar*100).toFixed(0):0;
+      return `<div style="background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <div style="font-size:13px;font-weight:700">📍 ${c}</div>
+          <div style="font-size:10px;color:${diff>=0?'var(--c26a)':'var(--loss)'}">${diff>=0?'▲':'▼'}${Math.abs(diff).toLocaleString()}명 (${Math.abs(pct)}%)</div>
+        </div>
+        <div style="font-size:26px;font-weight:900;color:var(--c26a);line-height:1;margin-bottom:3px">${d.a26.toLocaleString()}<span style="font-size:11px;font-weight:400;color:var(--muted);margin-left:3px">명</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:9px">25년 ${d.a25.toLocaleString()}명</div>
+        <div style="height:4px;background:var(--border);border-radius:2px;margin-bottom:10px;overflow:hidden"><div style="height:100%;width:${barW}%;background:var(--c26a)"></div></div>
+        <div style="background:var(--s3);border-radius:7px;padding:8px 10px">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:2px">수학 (고등 포함)</div>
+          <div style="font-size:15px;font-weight:700;color:var(--c25)">${d.ms26.toLocaleString()}<span style="font-size:10px;color:var(--muted);margin-left:2px">명</span></div>
+          <div style="font-size:10px;color:var(--muted);margin-top:3px">25년 ${d.ms25.toLocaleString()}명</div>
+        </div>
+      </div>`;
+    }).join('');
+  };
+  document.getElementById('hubStuCards_hak').innerHTML = _hubStuCard_hak(CAMPS_HAK);
+  document.getElementById('hubStuCards_u2m').innerHTML = _hubStuCard_u2m(CAMPS_U2M);
 }
 
 async function _refreshSessionPerms(){
