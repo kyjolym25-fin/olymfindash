@@ -6394,7 +6394,7 @@ goMain=function(id,el){
 // ============================================================
 function _restoreView(){
   const s=getSession();
-  if(!s) return;
+  if(!s){ console.log('[restore] session없음'); return; }
 
   const isAdmin=s.role==='admin';
   const isDirector=s.role==='director';
@@ -6405,6 +6405,7 @@ function _restoreView(){
   const hPart=h.split('-')[0];
   const saved=getDashView();
   const view=hPart||saved;
+  console.log('[restore] hash='+h+' saved='+saved+' view='+view+' canPl='+canPl+' role='+s.role);
 
   const hub=document.getElementById('hub-screen');
   const dash=document.getElementById('dashboard-wrap');
