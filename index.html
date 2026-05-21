@@ -6919,7 +6919,7 @@ function _renderChmTable(){
   const p26=chmPeriod, p25=chmPeriod+'25';
   const mLabel=chmPeriod==='cur'?`당월 (${chmMi+1}월)`:`YTD (1~${chmMi+1}월)`;
   // 공통비 섹션: level-2 이상 노드가 보일 때만 표시
-  const showCommon=visIds.some(id=>CHM_NODES[id].level>=2);
+  const showCommon=visIds.some(id=>CHM_NODES[id].level>=1);
 
   // ── 헤더 1행 ──
   let h1=`<tr>`;
