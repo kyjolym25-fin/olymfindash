@@ -347,6 +347,12 @@ tbody td.indent{padding-left:28px;color:var(--muted2)}
 .hub-ch-desc{font-size:10px;color:var(--muted);margin-top:2px;line-height:1.5}
 .hub-ch-badge{position:absolute;top:9px;right:10px;font-size:9px;font-weight:700;background:#EEF2FF;color:#4361EE;padding:2px 7px;border-radius:7px}
 .hub-ch-arrow{font-size:14px;color:var(--border2);flex-shrink:0}
+.hub-menu-list{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+.hub-menu-item{display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:pointer;transition:background .15s;border-bottom:1px solid var(--border)}
+.hub-menu-item:last-child{border-bottom:none}
+.hub-menu-item:hover{background:var(--s2)}
+.hub-menu-icon{font-size:15px;width:24px;text-align:center;flex-shrink:0}
+.hub-menu-text{flex:1;font-size:12px;font-weight:600;color:var(--text)}
 /* 구형 클래스 호환 (applyAuth에서 display 제어용) */
 .hub-card-disabled{opacity:.42;cursor:not-allowed}
 @media(max-width:960px){.hub-layout{grid-template-columns:1fr}.hub-channel-col{display:grid;grid-template-columns:1fr 1fr}}
@@ -597,7 +603,6 @@ thead th{font-size:13px}
   <div onclick="goHub()" style="display:flex;align-items:center;padding:0 14px 0 4px;border-right:1px solid var(--border);margin-right:6px;cursor:pointer;color:var(--muted);font-size:12px;gap:5px;white-space:nowrap;flex-shrink:0" onmouseover="this.style.color='#4361EE'" onmouseout="this.style.color='var(--muted)'">← 홈</div>
   <div class="tab" onclick="goMain('overview',this)">📊 총괄 개요</div>
   <div class="tab"     onclick="goMain('dept',this)">🏢 사업부 분석</div>
-  <div class="tab"     onclick="goMain('students',this)">👥 재원생 현황</div>
   <div class="tab admin-only" id="tab-rawdata" onclick="goMain('rawdata',this)">📋 데이터 로우</div>
   <div style="display:flex;align-items:center;gap:8px;margin-left:auto;padding:0 8px;flex-shrink:0;font-size:10px">
     <span style="color:var(--muted);font-size:10px">범례</span>
@@ -695,6 +700,26 @@ thead th{font-size:13px}
             <div class="hub-ch-desc">일별 수납 증분·누계<br>전년 동월 비교 분석</div>
           </div>
           <div class="hub-ch-arrow">›</div>
+        </div>
+
+        <!-- 손익 대시보드 하위 메뉴 -->
+        <div class="hub-channel-label" style="margin-top:10px">손익 대시보드 메뉴</div>
+        <div class="hub-menu-list" id="hubSoinMenus">
+          <div class="hub-menu-item" onclick="goSoinDash('overview')">
+            <span class="hub-menu-icon">📊</span>
+            <span class="hub-menu-text">총괄 개요</span>
+            <span class="hub-ch-arrow">›</span>
+          </div>
+          <div class="hub-menu-item" onclick="goSoinDash('dept')">
+            <span class="hub-menu-icon">🏢</span>
+            <span class="hub-menu-text">사업부 분석</span>
+            <span class="hub-ch-arrow">›</span>
+          </div>
+          <div class="hub-menu-item" onclick="goSoinDash('students')">
+            <span class="hub-menu-icon">👥</span>
+            <span class="hub-menu-text">재원생 현황</span>
+            <span class="hub-ch-arrow">›</span>
+          </div>
         </div>
       </div>
     </div>
@@ -4957,7 +4982,7 @@ function goAdminPanel(){
   }
 }
 
-function goSoinDash(){
+function goSoinDash(tab){
   const s=getSession();
   if(!s||s.role==='director') return;
   const hub=document.getElementById('hub-screen');
@@ -4967,8 +4992,10 @@ function goSoinDash(){
   dash.style.display='block';
   tabs.style.display='flex';
   saveDashView('main');
-  const ovEl=document.querySelector('#mainTabs .tab[onclick*="\'overview\'"]');
-  if(ovEl) goMain('overview',ovEl);
+  const targetTab = tab||'overview';
+  const tabEl=document.querySelector(`#mainTabs .tab[onclick*="'${targetTab}'"]`);
+  if(tabEl) goMain(targetTab, tabEl);
+  else { const ovEl=document.querySelector('#mainTabs .tab[onclick*="\'overview\'"]'); if(ovEl) goMain('overview',ovEl); }
 }
 
 async function goDirectorDash(){
