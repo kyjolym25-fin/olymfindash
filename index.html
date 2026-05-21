@@ -654,9 +654,9 @@ thead th{font-size:13px}
             <canvas id="c_hub_stu" height="100"></canvas>
           </div>
           <div style="padding:0 18px 6px;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.4px">🏫 학원사업본부</div>
-          <div id="hubStuCards_hak" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:0 18px 16px"></div>
+          <div id="hubStuCards_hak" style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:0 18px 16px"></div>
           <div style="padding:6px 18px 6px;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.4px;border-top:1px solid var(--border)">📐 U2M사업본부</div>
-          <div id="hubStuCards_u2m" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:0 18px 18px"></div>
+          <div id="hubStuCards_u2m" style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:0 18px 18px"></div>
         </div>
       </div>
 
@@ -4172,12 +4172,12 @@ function renderStuCards(month){
         <div style="background:var(--s3);border-radius:7px;padding:8px 10px">
           <div style="font-size:10px;color:var(--muted);margin-bottom:2px">수학</div>
           <div style="font-size:15px;font-weight:700;color:var(--c25)">${d.ms26.toLocaleString()}<span style="font-size:10px;color:var(--muted);margin-left:2px">명</span></div>
-          <div style="font-size:10px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">초중 ${d.mc26.toLocaleString()}${d.mg26?` / 영재 ${d.mg26.toLocaleString()}`:''}${d.md26?` / 고등 ${d.md26.toLocaleString()}`:''}</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:3px;font-size:10px">초중 ${d.mc26.toLocaleString()}${d.mg26?` / 영재 ${d.mg26.toLocaleString()}`:''}${d.md26?` / 고등 ${d.md26.toLocaleString()}`:''}</div>
         </div>
         <div style="background:var(--s3);border-radius:7px;padding:8px 10px">
           <div style="font-size:10px;color:var(--muted);margin-bottom:2px">영어</div>
           <div style="font-size:15px;font-weight:700;color:var(--c26p)">${d.es26?d.es26.toLocaleString():'-'}<span style="font-size:10px;color:var(--muted);margin-left:2px">${d.es26?'명':''}</span></div>
-          <div style="font-size:10px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${d.es26?`초중 ${d.ec26.toLocaleString()} / 고등 ${d.ed26.toLocaleString()}`:'영어반 없음'}</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:3px;font-size:10px">${d.es26?`초중 ${d.ec26.toLocaleString()} / 고등 ${d.ed26.toLocaleString()}`:'영어반 없음'}</div>
         </div>
       </div>
     </div>`;
@@ -4886,12 +4886,12 @@ function _initHubStuPanel(){
           <div style="background:var(--s3);border-radius:7px;padding:8px 10px">
             <div style="font-size:10px;color:var(--muted);margin-bottom:2px">수학</div>
             <div style="font-size:15px;font-weight:700;color:var(--c25)">${d.ms26.toLocaleString()}<span style="font-size:10px;color:var(--muted);margin-left:2px">명</span></div>
-            <div style="font-size:10px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">초중 ${d.mc26.toLocaleString()}${d.mg26?` / 영재 ${d.mg26.toLocaleString()}`:''}${d.md26?` / 고등 ${d.md26.toLocaleString()}`:''}</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:3px;font-size:10px">초중 ${d.mc26.toLocaleString()}${d.mg26?` / 영재 ${d.mg26.toLocaleString()}`:''}${d.md26?` / 고등 ${d.md26.toLocaleString()}`:''}</div>
           </div>
           <div style="background:var(--s3);border-radius:7px;padding:8px 10px">
             <div style="font-size:10px;color:var(--muted);margin-bottom:2px">영어</div>
             <div style="font-size:15px;font-weight:700;color:var(--c26p)">${d.es26?d.es26.toLocaleString():'-'}<span style="font-size:10px;color:var(--muted);margin-left:2px">${d.es26?'명':''}</span></div>
-            <div style="font-size:10px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${d.es26?`초중 ${d.ec26.toLocaleString()} / 고등 ${d.ed26.toLocaleString()}`:'영어반 없음'}</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:3px;font-size:10px">${d.es26?`초중 ${d.ec26.toLocaleString()} / 고등 ${d.ed26.toLocaleString()}`:'영어반 없음'}</div>
           </div>
         </div>
       </div>`;
