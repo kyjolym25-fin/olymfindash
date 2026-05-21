@@ -7121,9 +7121,9 @@ function _renderChmTable(){
     const YOY_KEYS = ['rev_total','exp_total','op1','op2'];
     if(YOY_KEYS.includes(acc.key) && (showCommon || acc.key!=='op1')){
       const isCostRow = acc.key==='exp_total';
-      // 증감액 행
+      // 증감액 행 (라벨 셀은 rowspan=2으로 증감률 행과 병합)
       body+=`<tr style="background:#F8FAFC">`;
-      body+=`<td style="position:sticky;left:0;z-index:10;background:#F8FAFC;text-align:left;padding:0 14px 0 18px;height:20px;font-size:10px;color:#94A3B8;border-right:1px solid #E4E8F4;white-space:nowrap">증감액</td>`;
+      body+=`<td rowspan="2" style="position:sticky;left:0;z-index:10;background:#F8FAFC;text-align:left;padding:0 14px 0 18px;font-size:10px;color:#94A3B8;border-right:1px solid #E4E8F4;white-space:nowrap;vertical-align:middle">전년대비</td>`;
       for(const id of visIds){
         const nd=CHM_NODES[id];
         if(nd.level===0 && acc.key==='op1'){
@@ -7146,9 +7146,8 @@ function _renderChmTable(){
         body+=`<td style="text-align:right;padding:0 12px;height:20px;background:#F8FAFC">${diffHtml}</td>`;
       }
       body+=`</tr>`;
-      // 증감률 행
+      // 증감률 행 (라벨 셀 없음 - rowspan으로 병합됨)
       body+=`<tr style="background:#F8FAFC;border-bottom:1px solid rgba(228,232,244,.4)">`;
-      body+=`<td style="position:sticky;left:0;z-index:10;background:#F8FAFC;text-align:left;padding:0 14px 0 18px;height:20px;font-size:10px;color:#94A3B8;border-right:1px solid #E4E8F4;white-space:nowrap">증감률</td>`;
       for(const id of visIds){
         const nd=CHM_NODES[id];
         if(nd.level===0 && acc.key==='op1'){
