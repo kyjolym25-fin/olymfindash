@@ -7085,7 +7085,8 @@ function _renderChmTable(){
       }
       const row26=nd[p26]||{}, row25=nd[p25]||{};
       let v26=row26[acc.key], v25=row25[acc.key];
-      if(!showCommon){
+      // company(level-0)는 showCommon 보정 제외 — 항상 고유값 사용
+      if(!showCommon && nd.level>0){
         // 26년 비용소계: 공통비 합산
         if(acc.key==='exp_total') v26=(v26||0)+(row26.com_total||0);
         // 25년 영업이익: op2 대신 op1 사용 (공통비 미차감)
@@ -7110,7 +7111,7 @@ function _renderChmTable(){
         }
         const row26=nd[p26]||{}, row25=nd[p25]||{};
         let yv26=row26[acc.key], yv25=row25[acc.key];
-        if(!showCommon){
+        if(!showCommon && nd.level>0){
           if(acc.key==='exp_total') yv26=(yv26||0)+(row26.com_total||0);
           if(acc.key==='op2') yv25=row25.op1;
         }
