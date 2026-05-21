@@ -7293,8 +7293,12 @@ function _genRcptMock25() {
 let RCPT_DATA_25 = [];
 
 function goReceiptDash() {
-  document.getElementById('hub-screen').style.display = 'none';
-  document.getElementById('receipt-wrap').style.display = 'block';
+  ['hub-screen','dashboard-wrap','director-wrap','chairman-wrap'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.style.display='none';
+  });
+  const tabs=document.getElementById('mainTabs');
+  if(tabs) tabs.style.display='none';
+  document.getElementById('receipt-wrap').style.display='block';
   initReceiptDash();
 }
 
