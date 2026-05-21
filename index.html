@@ -6851,7 +6851,11 @@ applyAuth();
   autoSelectLatestMonth();
   await _refreshSessionPerms();
   loadComments();
-  loadStu26();
+  await loadStu26();
+  // Supabase STU 데이터 로드 완료 후 허브 위젯 갱신
+  _hubWidgetDone = false;
+  const hubEl = document.getElementById('hub-screen');
+  if(hubEl && hubEl.style.display === 'flex') initHubWidget();
   // ── 뷰 복원 (데이터·권한 로드 완료 후 단일 실행) ──
   _restoreView();
   // ── 권한 기반 UI 갱신만 (뷰는 건드리지 않음) ──
