@@ -7025,7 +7025,7 @@ function _renderChmTable(){
 
   // ── 헤더 1행 ──
   let h1=`<tr>`;
-  h1+=`<th rowspan="2" style="position:sticky;top:0;left:0;z-index:40;background:#F1F5F9;text-align:left;min-width:140px;padding:10px 14px;font-size:10px;font-weight:700;color:#64748B;letter-spacing:.05em;border-right:1px solid #E4E8F4;border-bottom:1px solid #E4E8F4;white-space:nowrap">계정 항목<br><span style="font-size:9px;font-weight:400;color:#94A3B8">${mLabel} · 천원</span></th>`;
+  h1+=`<th rowspan="2" style="position:sticky;top:0;left:0;z-index:40;background:#F1F5F9;text-align:left;min-width:140px;padding:10px 14px;font-size:10px;font-weight:700;color:#64748B;letter-spacing:.05em;border-right:1px solid #E4E8F4;border-bottom:1px solid #E4E8F4;white-space:nowrap">구분<br><span style="font-size:9px;font-weight:400;color:#94A3B8">${mLabel} · 천원</span></th>`;
   for(const id of visIds){
     const nd=CHM_NODES[id];
     const hasChild=nd.children&&nd.children.length>0;
@@ -7064,8 +7064,8 @@ function _renderChmTable(){
     }
     const isOp=acc.sec==='op1'||acc.sec==='op2';
     const isTotal=acc.total||isOp;
-    const rowBg=acc.sec==='op2'?'background:#ECFDF5':(isTotal?'background:#F8FAFC':'');
-    const rowBt=acc.sec==='op2'?'border-top:1px solid #E4E8F4':'';
+    const rowBg=(acc.sec==='op2'||acc.sec==='op1')?'background:#ECFDF5':(isTotal?'background:#F8FAFC':'');
+    const rowBt=(acc.sec==='op2'||acc.sec==='op1')?'border-top:1px solid #E4E8F4':'';
     const lblSt=acc.sub?'padding-left:26px;color:#64748B;font-size:11.5px':'';
     const lblFw=isOp?'font-weight:800':'';
     const lblClr=acc.sec==='op1'?'color:#0369A1':acc.sec==='op2'?'color:#065F46':acc.sec==='common'?'color:#7C3AED':'';
