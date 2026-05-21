@@ -2360,16 +2360,18 @@ function renderCampMountain(camp, canvasId, section) {
       const c2 = chart.ctx;
       chart.data.datasets.forEach((ds, di) => {
         const meta = chart.getDatasetMeta(di);
+        const is26a = ds.label === '26년 실적';
         ds.data.forEach((v, pi) => {
           if(v == null) return;
           const pt = meta.data[pi];
           if(!pt) return;
           c2.save();
-          c2.font = 'bold 13px sans-serif';
+          c2.font = is26a ? 'bold 13px sans-serif' : '400 10px sans-serif';
           c2.fillStyle = ds.borderColor;
           c2.textAlign = 'center';
-          if(v >= 0){ c2.textBaseline='bottom'; c2.fillText(v, pt.x, pt.y-5); }
-          else      { c2.textBaseline='top';    c2.fillText(v, pt.x, pt.y+5); }
+          const off = is26a ? 6 : 4;
+          if(v >= 0){ c2.textBaseline='bottom'; c2.fillText(v, pt.x, pt.y-off); }
+          else      { c2.textBaseline='top';    c2.fillText(v, pt.x, pt.y+off); }
           c2.restore();
         });
       });
@@ -2442,15 +2444,17 @@ function renderCampSalesMtn(camp, canvasId, section){
       const c2 = chart.ctx;
       chart.data.datasets.forEach((ds,di)=>{
         const meta = chart.getDatasetMeta(di);
+        const is26a = ds.label === '26년 실적';
         ds.data.forEach((v,pi)=>{
           if(v==null) return;
           const pt = meta.data[pi]; if(!pt) return;
           c2.save();
-          c2.font='bold 13px sans-serif';
+          c2.font = is26a ? 'bold 13px sans-serif' : '400 10px sans-serif';
           c2.fillStyle=ds.borderColor;
           c2.textAlign='center';
-          if(v>=0){ c2.textBaseline='bottom'; c2.fillText(v, pt.x, pt.y-5); }
-          else    { c2.textBaseline='top';    c2.fillText(v, pt.x, pt.y+5); }
+          const off = is26a ? 6 : 4;
+          if(v>=0){ c2.textBaseline='bottom'; c2.fillText(v, pt.x, pt.y-off); }
+          else    { c2.textBaseline='top';    c2.fillText(v, pt.x, pt.y+off); }
           c2.restore();
         });
       });
