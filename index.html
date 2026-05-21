@@ -6972,6 +6972,15 @@ function _renderChmTable(){
     body+=`<td style="position:sticky;left:0;z-index:10;background:inherit;text-align:left;padding:0 14px;height:36px;font-size:12px;border-right:1px solid #E4E8F4;white-space:nowrap;${lblSt};${lblFw};${lblClr}">${dispLabel}</td>`;
     for(const id of visIds){
       const nd=CHM_NODES[id];
+      const bg25=rowBg?rowBg:'background:#F8FAFF';
+      const bg26=rowBg?rowBg:'background:#fff';
+      const cellSt25=`text-align:right;padding:0 12px;height:36px;font-size:12px;font-variant-numeric:tabular-nums;font-weight:${isTotal?600:400};border-left:1px solid rgba(228,232,244,.4);${bg25}`;
+      const cellSt26=`text-align:right;padding:0 12px;height:36px;font-size:12px;font-variant-numeric:tabular-nums;font-weight:${isTotal?600:400};${bg26}`;
+      // 교육 전체(level-0) 컬럼은 공통비·영업이익1 행에 — 표시
+      if(nd.level===0 && (acc.sec==='common'||acc.sec==='op1')){
+        body+=`<td style="${cellSt25}">—</td><td style="${cellSt26}">—</td>`;
+        continue;
+      }
       const row26=nd[p26]||{}, row25=nd[p25]||{};
       let v26=row26[acc.key], v25=row25[acc.key];
       if(!showCommon){
@@ -6980,10 +6989,8 @@ function _renderChmTable(){
         // 25년 영업이익: op2 대신 op1 사용 (공통비 미차감)
         if(acc.key==='op2') v25=row25.op1;
       }
-      const bg25=rowBg?rowBg:'background:#F8FAFF';
-      const bg26=rowBg?rowBg:'background:#fff';
-      body+=`<td style="text-align:right;padding:0 12px;height:36px;font-size:12px;font-variant-numeric:tabular-nums;font-weight:${isTotal?600:400};border-left:1px solid rgba(228,232,244,.4);${bg25}">${isOp?_chmFmtOp(v25):_chmFmt(v25)}</td>`;
-      body+=`<td style="text-align:right;padding:0 12px;height:36px;font-size:12px;font-variant-numeric:tabular-nums;font-weight:${isTotal?600:400};${bg26}">${isOp?_chmFmtOp(v26):_chmFmt(v26)}</td>`;
+      body+=`<td style="${cellSt25}">${isOp?_chmFmtOp(v25):_chmFmt(v25)}</td>`;
+      body+=`<td style="${cellSt26}">${isOp?_chmFmtOp(v26):_chmFmt(v26)}</td>`;
     }
     body+=`</tr>`;
   }
