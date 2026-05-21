@@ -498,6 +498,20 @@ thead th{font-size:13px}
   thead th{font-size:9px;padding:6px 5px}
   tbody td{padding:6px 5px;font-size:10px}
 }
+/* 수납현황 대시보드 */
+#receipt-wrap{display:none}
+.rcpt-kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+@media(max-width:900px){.rcpt-kpi-grid{grid-template-columns:repeat(2,1fr)}}
+.rcpt-kpi{background:var(--s1);border-radius:12px;padding:18px 20px;box-shadow:0 2px 12px rgba(0,0,0,.08)}
+.rcpt-kpi-lbl{font-size:11px;font-weight:600;color:var(--muted);margin-bottom:8px;letter-spacing:.3px}
+.rcpt-kpi-val{font-size:22px;font-weight:800;color:var(--text);letter-spacing:-1px}
+.rcpt-kpi-sub{font-size:11px;color:var(--muted);margin-top:6px}
+.rcpt-badge{display:inline-block;border-radius:20px;padding:2px 8px;font-size:11px;font-weight:700}
+.rcpt-up{background:#D1FAE5;color:#065F46}
+.rcpt-dn{background:#FEE2E2;color:#991B1B}
+.rcpt-charts{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px}
+@media(max-width:900px){.rcpt-charts{grid-template-columns:1fr}}
+.rcpt-inc-badge{display:inline-block;background:#FEF3C7;color:#92400E;border-radius:20px;padding:2px 9px;font-size:11px;font-weight:700}
 </style>
 </head>
 <body>
@@ -576,6 +590,12 @@ thead th{font-size:13px}
       <div class="hub-card-title">직영캠퍼스<br>원장단 대시보드</div>
       <div class="hub-card-desc">소속 캠퍼스 수학·영어<br>손익을 월별로 확인합니다</div>
     </div>
+    <div class="hub-card" id="hubCardReceipt" onclick="goReceiptDash()">
+      <span class="hub-card-badge new">NEW</span>
+      <div class="hub-card-icon">💳</div>
+      <div class="hub-card-title">실시간<br>수납 현황</div>
+      <div class="hub-card-desc">일별 수납 증분·누계<br>전년 동월 비교 분석</div>
+    </div>
   </div>
 </div>
 
@@ -609,6 +629,86 @@ thead th{font-size:13px}
       <div id="dir-detail-content"></div>
       <!-- 안내 문구 (JS로 렌더링) -->
       <div id="dir-notice" style="margin-top:12px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 수납 현황 대시보드 ══ -->
+<div id="receipt-wrap" style="display:none">
+  <div class="main">
+    <div class="dir-header">
+      <button class="dir-back-btn" onclick="document.getElementById('receipt-wrap').style.display='none';document.getElementById('hub-screen').style.display='block'">← 홈</button>
+      <div>
+        <div class="dir-camp-name">실시간 수납 현황</div>
+        <div class="dir-camp-sub" id="rcptSubTitle">5월 기준 · 전일 마감 + 오늘 증분</div>
+      </div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
+        <button class="auth-btn-primary" style="width:auto;padding:8px 18px;font-size:12px;white-space:nowrap" onclick="document.getElementById('rcptXlsxFile').click()">📂 수납 파일 업로드</button>
+        <input type="file" id="rcptXlsxFile" accept=".xlsx" style="display:none" onchange="handleRcptUpload(this)">
+      </div>
+    </div>
+
+    <!-- 월 탭 -->
+    <div class="month-bar" id="rcpt-month-bar" style="margin-bottom:16px"></div>
+
+    <!-- 마감일 안내 -->
+    <div id="rcptClosingInfo" style="font-size:12px;color:var(--muted);margin-bottom:14px;padding:8px 14px;background:var(--s2);border-radius:8px;border-left:3px solid var(--c26a)"></div>
+
+    <!-- KPI 카드 -->
+    <div class="rcpt-kpi-grid" id="rcptKpiGrid"></div>
+
+    <!-- 차트 -->
+    <div class="rcpt-charts">
+      <div class="card" style="padding:20px">
+        <div class="ch"><div><div class="ct">일별 누적 수납 추이</div><div class="cs">교습비+교재+원격 합계 · 단위: 백만원</div></div></div>
+        <div style="height:260px"><canvas id="c_rcpt_trend"></canvas></div>
+      </div>
+      <div class="card" style="padding:20px">
+        <div class="ch"><div><div class="ct">캠퍼스별 수납</div><div class="cs">당월 누계 교습비 기준</div></div></div>
+        <div style="height:260px"><canvas id="c_rcpt_camp"></canvas></div>
+      </div>
+    </div>
+
+    <!-- 증분 테이블 -->
+    <div class="card" style="padding:20px;margin-bottom:20px">
+      <div class="ch">
+        <div>
+          <div class="ct">수납 내역 <span id="rcptIncBadge" class="rcpt-inc-badge"></span></div>
+          <div class="cs" id="rcptTableDesc">전일 마감 이후 증분 데이터</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <select id="rcptFilterCamp" onchange="renderRcptTable()" style="font-size:12px;padding:5px 10px;border:1px solid var(--border);border-radius:6px;background:var(--s1);color:var(--text)">
+            <option value="">전체 캠퍼스</option>
+            <option>광진</option><option>성동</option><option>동대문</option><option>중랑</option>
+            <option>중계</option><option>송파방이</option><option>미사</option><option>위례</option>
+          </select>
+          <select id="rcptFilterType" onchange="renderRcptTable()" style="font-size:12px;padding:5px 10px;border:1px solid var(--border);border-radius:6px;background:var(--s1);color:var(--text)">
+            <option value="">전체 증분</option>
+            <option value="today">오늘만</option>
+            <option value="all">마감 포함 전체</option>
+          </select>
+        </div>
+      </div>
+      <div style="overflow-x:auto;margin-top:12px">
+        <table style="width:100%;border-collapse:collapse;font-size:12px" id="rcptTable">
+          <thead>
+            <tr style="background:#F1F5F9">
+              <th style="padding:8px 12px;text-align:left;color:var(--muted);font-weight:600;white-space:nowrap">수납일자</th>
+              <th style="padding:8px 12px;text-align:left;color:var(--muted);font-weight:600">캠퍼스</th>
+              <th style="padding:8px 12px;text-align:left;color:var(--muted);font-weight:600">과목</th>
+              <th style="padding:8px 12px;text-align:left;color:var(--muted);font-weight:600">학년</th>
+              <th style="padding:8px 12px;text-align:left;color:var(--muted);font-weight:600">수강월</th>
+              <th style="padding:8px 12px;text-align:left;color:var(--muted);font-weight:600">결제수단</th>
+              <th style="padding:8px 12px;text-align:right;color:var(--muted);font-weight:600">교습비</th>
+              <th style="padding:8px 12px;text-align:right;color:var(--muted);font-weight:600">교재</th>
+              <th style="padding:8px 12px;text-align:right;color:var(--muted);font-weight:600">원격</th>
+              <th style="padding:8px 12px;text-align:right;color:var(--c26a);font-weight:700">합계</th>
+            </tr>
+          </thead>
+          <tbody id="rcptTableBody"></tbody>
+        </table>
+      </div>
+      <div id="rcptTablePager" style="display:flex;justify-content:center;gap:6px;margin-top:12px;flex-wrap:wrap"></div>
     </div>
   </div>
 </div>
@@ -7115,6 +7215,282 @@ function initChmDash(){
     const t=document.getElementById('chmTable');
     if(t) t.innerHTML='<tr><td style="color:red;padding:20px">오류: '+e.message+'</td></tr>';
   }
+}
+
+// ============================================================
+// 수납 현황 대시보드 (프로토타입 - 목업 데이터)
+// ============================================================
+let rcptMonth = 4; // 0-based (4=5월)
+let rcptChartTrend = null, rcptChartCamp = null;
+let RCPT_DATA = []; // 실제 데이터 (업로드 시 채워짐)
+let rcptPage = 1;
+const RCPT_RPS = 15;
+
+// 목업 데이터 생성
+function _genRcptMock() {
+  const camps = ['광진','성동','동대문','중랑','중계','송파방이','미사','위례'];
+  const subjects = ['수학','영어'];
+  const grades = ['초1','초2','초3','초4','초5','초6','중1','중2','중3','고1','고2','고3'];
+  const payMethods = ['현금','카드','카드(온)','무통장','가상계좌'];
+  const rows = [];
+  // 캠퍼스별 일평균 수납 건수 가중치
+  const campWeight = [18,14,12,10,8,8,7,7];
+  for(let d=1; d<=21; d++){
+    const date = `2025-05-${String(d).padStart(2,'0')}`;
+    camps.forEach((camp, ci) => {
+      const cnt = Math.floor(campWeight[ci] * (0.8 + Math.random()*0.4));
+      for(let i=0; i<cnt; i++){
+        const subj = subjects[Math.floor(Math.random()*2)];
+        const grade = grades[Math.floor(Math.random()*grades.length)];
+        const pay = payMethods[Math.floor(Math.random()*payMethods.length)];
+        const enrollMon = Math.random() < 0.85 ? '5월' : '6월';
+        const baseT = subj==='수학'
+          ? [320000,380000,430000,480000][Math.floor(Math.random()*4)]
+          : [300000,350000,400000][Math.floor(Math.random()*3)];
+        const book = Math.random()<0.3 ? [22000,35000,45000][Math.floor(Math.random()*3)] : 0;
+        const remote = subj==='수학'&&Math.random()<0.2 ? 55000 : 0;
+        rows.push({date, camp, subject:subj, grade, enrollMonth:enrollMon, payMethod:pay, tuition:baseT, textbook:book, remote});
+      }
+    });
+  }
+  return rows;
+}
+
+// 25년 동월 목업 (약 15% 낮게)
+function _genRcptMock25() {
+  const mock26 = _genRcptMock();
+  return mock26.map(r => ({
+    ...r,
+    date: r.date.replace('2025','2024'),
+    tuition: Math.round(r.tuition * 0.87),
+    textbook: Math.round(r.textbook * 0.87),
+    remote: Math.round(r.remote * 0.87)
+  }));
+}
+
+let RCPT_DATA_25 = [];
+
+function goReceiptDash() {
+  document.getElementById('hub-screen').style.display = 'none';
+  document.getElementById('receipt-wrap').style.display = 'block';
+  initReceiptDash();
+}
+
+function initReceiptDash() {
+  if(!RCPT_DATA.length) {
+    RCPT_DATA = _genRcptMock();
+    RCPT_DATA_25 = _genRcptMock25();
+  }
+  buildRcptMonthBar();
+  renderReceiptDash();
+}
+
+function buildRcptMonthBar() {
+  const bar = document.getElementById('rcpt-month-bar');
+  if(!bar) return;
+  const months = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  bar.innerHTML = months.map((m,i) =>
+    `<button class="month-btn${i===rcptMonth?' on':''}" onclick="rcptMonth=${i};renderReceiptDash()">${m}</button>`
+  ).join('');
+}
+
+function renderReceiptDash() {
+  const mon = rcptMonth; // 0-based
+  const monStr = `${mon+1}월`;
+
+  // 마감일 = 이번 달 20일 (목업)
+  const closingDay = 20;
+  const todayDay = 21;
+  document.getElementById('rcptSubTitle').textContent = `${monStr} 기준 · ${closingDay}일 마감 + ${todayDay}일 증분`;
+  document.getElementById('rcptClosingInfo').innerHTML =
+    `📋 <strong>전일 마감:</strong> ${mon+1}월 ${closingDay}일 | <strong>오늘 증분:</strong> ${mon+1}월 ${todayDay}일 | 수납월 기준 집계`;
+
+  const dataM = RCPT_DATA.filter(r => r.date.startsWith(`2025-${String(mon+1).padStart(2,'0')}`));
+  const dataM25 = RCPT_DATA_25.filter(r => r.date.startsWith(`2024-${String(mon+1).padStart(2,'0')}`));
+
+  const closed = dataM.filter(r => parseInt(r.date.split('-')[2]) <= closingDay);
+  const today = dataM.filter(r => parseInt(r.date.split('-')[2]) === todayDay);
+  const total = v => v.reduce((s,r) => s+r.tuition+r.textbook+r.remote, 0);
+  const tot25 = total(dataM25.filter(r => parseInt(r.date.split('-')[2]) <= todayDay));
+  const tot26 = total(closed) + total(today);
+  const yoy = tot25 > 0 ? (tot26 - tot25) / tot25 * 100 : 0;
+  const enrollThis = dataM.filter(r => r.enrollMonth === monStr);
+
+  // KPI
+  const kpiEl = document.getElementById('rcptKpiGrid');
+  const fmt = v => (v/1e6).toFixed(1)+'M';
+  const fmtK = v => Math.round(v/1000).toLocaleString()+'천';
+  kpiEl.innerHTML = `
+    <div class="rcpt-kpi">
+      <div class="rcpt-kpi-lbl">📥 ${monStr} 누계 수납</div>
+      <div class="rcpt-kpi-val">${fmt(total(closed))}</div>
+      <div class="rcpt-kpi-sub">${closed.length}건 · 마감(${closingDay}일)까지</div>
+    </div>
+    <div class="rcpt-kpi">
+      <div class="rcpt-kpi-lbl">⚡ 오늘 증분 (${todayDay}일)</div>
+      <div class="rcpt-kpi-val" style="color:var(--c26a)">${fmt(total(today))}</div>
+      <div class="rcpt-kpi-sub">${today.length}건 신규 · 누계 합산 ${fmt(tot26)}</div>
+    </div>
+    <div class="rcpt-kpi">
+      <div class="rcpt-kpi-lbl">📊 전년 동기 대비</div>
+      <div class="rcpt-kpi-val" style="color:${yoy>=0?'var(--c26a)':'var(--loss)'}">${yoy>=0?'+':''}${yoy.toFixed(1)}%</div>
+      <div class="rcpt-kpi-sub">25년 동기 ${fmt(tot25)} → 26년 ${fmt(tot26)}</div>
+    </div>
+    <div class="rcpt-kpi">
+      <div class="rcpt-kpi-lbl">🎯 수강월 귀속 (${monStr})</div>
+      <div class="rcpt-kpi-val" style="color:var(--c26p)">${fmt(total(enrollThis))}</div>
+      <div class="rcpt-kpi-sub">${enrollThis.length}건 · 실제 매출 귀속분</div>
+    </div>`;
+
+  renderReceiptTrendChart(dataM, dataM25, closingDay, todayDay);
+  renderReceiptCampChart(closed.concat(today));
+  renderRcptTable();
+}
+
+function renderReceiptTrendChart(dataM, dataM25, closingDay, todayDay) {
+  const ctx = document.getElementById('c_rcpt_trend');
+  if(!ctx) return;
+  if(rcptChartTrend) { rcptChartTrend.destroy(); rcptChartTrend = null; }
+
+  const days = Array.from({length:31},(_,i)=>i+1);
+  // 일별 누적 (26년)
+  let cum26 = 0;
+  const data26 = days.map(d => {
+    const dayRows = dataM.filter(r => parseInt(r.date.split('-')[2]) === d);
+    cum26 += dayRows.reduce((s,r) => s+r.tuition+r.textbook+r.remote, 0);
+    return d <= todayDay ? +(cum26/1e6).toFixed(2) : null;
+  });
+  // 26년 계획선 (마감까지는 실선, 이후 null)
+  const data26proj = days.map(d => d <= closingDay ? data26[d-1] : null);
+
+  // 일별 누적 (25년)
+  let cum25 = 0;
+  const data25 = days.map(d => {
+    const dayRows = dataM25.filter(r => parseInt(r.date.split('-')[2]) === d);
+    cum25 += dayRows.reduce((s,r) => s+r.tuition+r.textbook+r.remote, 0);
+    return d <= 31 ? +(cum25/1e6).toFixed(2) : null;
+  });
+
+  rcptChartTrend = new Chart(ctx.getContext('2d'), {
+    type: 'line',
+    data: {
+      labels: days.map(d => d+'일'),
+      datasets: [
+        { label:'26년', data:data26, borderColor:'#10B981', backgroundColor:'rgba(16,185,129,0.08)',
+          fill:true, borderWidth:2.5, tension:.35, spanGaps:false,
+          pointRadius: days.map((_,i) => i+1===todayDay ? 6 : 2),
+          pointBackgroundColor:'#10B981', pointBorderColor:'#fff', pointBorderWidth:2 },
+        { label:'25년', data:data25, borderColor:'rgba(67,97,238,0.7)', backgroundColor:'transparent',
+          borderWidth:1.5, borderDash:[4,3], tension:.35,
+          pointRadius:0 }
+      ]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{display:true, position:'top', labels:{color:'#7B87A8',font:{size:11},boxWidth:12,padding:10}},
+        tooltip:{mode:'index',intersect:false}
+      },
+      scales:{
+        x:{grid:{color:'#E4E8F4'}, ticks:{color:'#9DA8C3',font:{size:11},maxTicksLimit:16}},
+        y:{grid:{color:'#E4E8F4'}, ticks:{color:'#9DA8C3',font:{size:11}},
+           title:{display:true,text:'백만원',color:'#9DA8C3',font:{size:10}}}
+      }
+    }
+  });
+}
+
+function renderReceiptCampChart(data) {
+  const ctx = document.getElementById('c_rcpt_camp');
+  if(!ctx) return;
+  if(rcptChartCamp) { rcptChartCamp.destroy(); rcptChartCamp = null; }
+
+  const camps = ['광진','성동','동대문','중랑','중계','송파방이','미사','위례'];
+  const vals = camps.map(c => {
+    const rows = data.filter(r => r.camp === c);
+    return +(rows.reduce((s,r) => s+r.tuition, 0)/1e6).toFixed(2);
+  });
+  const sorted = camps.map((c,i) => ({c, v:vals[i]})).sort((a,b)=>b.v-a.v);
+
+  rcptChartCamp = new Chart(ctx.getContext('2d'), {
+    type:'bar',
+    data:{
+      labels: sorted.map(x=>x.c),
+      datasets:[{ label:'교습비(M)', data:sorted.map(x=>x.v),
+        backgroundColor:'rgba(67,97,238,0.75)', borderRadius:6, barThickness:18 }]
+    },
+    options:{
+      indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{callbacks:{label:c=>`${c.parsed.x}M`}} },
+      scales:{
+        x:{grid:{color:'#E4E8F4'}, ticks:{color:'#9DA8C3',font:{size:11}}},
+        y:{grid:{display:false}, ticks:{color:'#374151',font:{size:12,weight:'500'}}}
+      }
+    }
+  });
+}
+
+function renderRcptTable() {
+  const campF = document.getElementById('rcptFilterCamp')?.value || '';
+  const typeF = document.getElementById('rcptFilterType')?.value || '';
+  const mon = rcptMonth;
+  const closingDay = 20;
+  const todayDay = 21;
+
+  let rows = RCPT_DATA.filter(r => r.date.startsWith(`2025-${String(mon+1).padStart(2,'0')}`));
+  if(campF) rows = rows.filter(r => r.camp === campF);
+  if(typeF === 'today') rows = rows.filter(r => parseInt(r.date.split('-')[2]) === todayDay);
+  else if(typeF !== 'all') rows = rows.filter(r => parseInt(r.date.split('-')[2]) >= closingDay);
+
+  // 최신순
+  rows = [...rows].sort((a,b) => b.date.localeCompare(a.date));
+  const todayRows = rows.filter(r => parseInt(r.date.split('-')[2]) === todayDay);
+
+  document.getElementById('rcptIncBadge').textContent = `오늘 ${todayRows.length}건`;
+  document.getElementById('rcptTableDesc').textContent =
+    typeF==='all' ? '전체 수납 내역' : typeF==='today' ? `${todayDay}일 오늘 수납` : `${closingDay}일 마감 이후 증분`;
+
+  const total = rows.length;
+  const pages = Math.ceil(total/RCPT_RPS);
+  if(rcptPage > pages) rcptPage = 1;
+  const slice = rows.slice((rcptPage-1)*RCPT_RPS, rcptPage*RCPT_RPS);
+
+  const fmtAmt = v => v ? v.toLocaleString() : '—';
+  const isToday = r => parseInt(r.date.split('-')[2]) === todayDay;
+  document.getElementById('rcptTableBody').innerHTML = slice.map(r => `
+    <tr style="border-bottom:1px solid var(--border);${isToday(r)?'background:#F0FDF4':''}">
+      <td style="padding:8px 12px;white-space:nowrap">${r.date}${isToday(r)?'<span style="font-size:10px;background:#D1FAE5;color:#065F46;border-radius:4px;padding:1px 5px;margin-left:4px">신규</span>':''}</td>
+      <td style="padding:8px 12px">${r.camp}</td>
+      <td style="padding:8px 12px">${r.subject}</td>
+      <td style="padding:8px 12px">${r.grade}</td>
+      <td style="padding:8px 12px">${r.enrollMonth}</td>
+      <td style="padding:8px 12px">${r.payMethod}</td>
+      <td style="padding:8px 12px;text-align:right">${fmtAmt(r.tuition)}</td>
+      <td style="padding:8px 12px;text-align:right">${fmtAmt(r.textbook)}</td>
+      <td style="padding:8px 12px;text-align:right">${fmtAmt(r.remote)}</td>
+      <td style="padding:8px 12px;text-align:right;font-weight:700;color:var(--text)">${(r.tuition+r.textbook+r.remote).toLocaleString()}</td>
+    </tr>`).join('');
+
+  const pager = document.getElementById('rcptTablePager');
+  pager.innerHTML = '';
+  for(let p=1;p<=pages;p++)
+    pager.innerHTML+=`<button class="pbtn${p===rcptPage?' on':''}" onclick="rcptPage=${p};renderRcptTable()">${p}</button>`;
+}
+
+function handleRcptUpload(input) {
+  const file = input.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const wb = XLSX.read(new Uint8Array(e.target.result), {type:'array'});
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, {header:1});
+      // TODO: 실제 컬럼 파싱 (수납일자, 캠퍼스, 과목, 학년, 수강월, 결제수단, 교습비, 교재, 원격)
+      alert(`${rows.length-1}건 로드됨 (파싱 로직 연결 예정)`);
+    } catch(err) { alert('파싱 오류: '+err.message); }
+    input.value = '';
+  };
+  reader.readAsArrayBuffer(file);
 }
 </script>
 
