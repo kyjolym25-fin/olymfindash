@@ -4473,7 +4473,7 @@ async function doLogin(){
   const inMaintenance=mOverlay&&mOverlay.style.display!=='none';
   if(inMaintenance&&u.role!=='admin'){err.textContent='현재 점검 중입니다. 관리자만 접근 가능합니다.';return;}
   await sb.from('users').update({last_login:new Date().toISOString().slice(0,10)}).eq('email',email);
-  saveSession({email:u.email,name:u.name,role:u.role,campus:u.campus||'',can_pl:!!u.can_pl,can_soin:!!u.can_soin});
+  saveSession({email:u.email,name:u.name,role:u.role,campus:u.campus||'',can_pl:!!u.can_pl,can_soin:!!u.can_soin,can_rcpt:!!u.can_rcpt});
   if(inMaintenance&&u.role==='admin') mOverlay.style.display='none';
   closeAuth();
   applyAuth();
@@ -4614,11 +4614,12 @@ function applyAuth(noRestore=false){
       hubCardChairman.style.display=canPl?'':'none';
       if(canPl) hubCardChairman.onclick=goChairmanDash;
     }
-    // 허브 카드: 수납 현황 (admin만)
+    // 허브 카드: 수납 현황 (admin 또는 can_rcpt)
     const hubCardReceipt=document.getElementById('hubCardReceipt');
+    const canRcpt=isAdmin||!!(s&&s.can_rcpt);
     if(hubCardReceipt){
-      hubCardReceipt.style.display=isAdmin?'':'none';
-      if(isAdmin) hubCardReceipt.onclick=goReceiptDash;
+      hubCardReceipt.style.display=canRcpt?'':'none';
+      if(canRcpt) hubCardReceipt.onclick=goReceiptDash;
     }
     // 허브 환영 메시지
     const wt=document.getElementById('hubWelcomeTitle');
@@ -4685,8 +4686,8 @@ async function goHub(){
 async function _refreshSessionPerms(){
   const s=getSession();
   if(!s) return;
-  const {data:fresh}=await sb.from('users').select('role,campus,can_soin,can_pl').eq('email',s.email).maybeSingle();
-  if(fresh) saveSession({...s, role:fresh.role||s.role, campus:fresh.campus||'', can_soin:!!fresh.can_soin, can_pl:!!fresh.can_pl});
+  const {data:fresh}=await sb.from('users').select('role,campus,can_soin,can_pl,can_rcpt').eq('email',s.email).maybeSingle();
+  if(fresh) saveSession({...s, role:fresh.role||s.role, campus:fresh.campus||'', can_soin:!!fresh.can_soin, can_pl:!!fresh.can_pl, can_rcpt:!!fresh.can_rcpt});
 }
 
 function goAdminPanel(){
@@ -5170,6 +5171,7 @@ async function renderUserTable(){
     const soinOn = isProtected || !!u.can_soin;
     const campOn = !!u.campus;
     const plOn   = isProtected || !!u.can_pl;
+    const rcptOn = isProtected || !!u.can_rcpt;
 
     const mkToggle = (on, handler, label, alwaysOn) => {
       if(alwaysOn) return `<div style="display:inline-flex;align-items:center;gap:4px;opacity:.45;cursor:default">
@@ -5199,11 +5201,13 @@ async function renderUserTable(){
            ${mkToggle(true,  '', '손익 대시보드', true)}
            ${mkToggle(true,  '', '캠퍼스', true)}
            ${mkToggle(true,  '', '손익계산서', true)}
+           ${mkToggle(true,  '', '수납 현황', true)}
          </div>`
       : `<div style="display:flex;flex-direction:column;gap:5px">
            ${mkToggle(soinOn, `toggleCanSoin('${u.email}',${soinOn})`, '손익 대시보드', false)}
            ${campCell}
            ${mkToggle(plOn,   `toggleCanPl('${u.email}',${plOn})`,   '손익계산서', false)}
+           ${mkToggle(rcptOn, `toggleCanRcpt('${u.email}',${rcptOn})`, '수납 현황', false)}
          </div>`;
 
     return `<tr>
@@ -5247,6 +5251,10 @@ async function toggleCanPl(email,current){
 }
 async function toggleCanSoin(email,current){
   await sb.from('users').update({can_soin:!current}).eq('email',email);
+  renderUserTable();
+}
+async function toggleCanRcpt(email,current){
+  await sb.from('users').update({can_rcpt:!current}).eq('email',email);
   renderUserTable();
 }
 let _campEditEmail='';
