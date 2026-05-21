@@ -7087,8 +7087,12 @@ function _renderChmTable(){
       let v26=row26[acc.key], v25=row25[acc.key];
       // 26년 비용소계: 공통비 행 숨길 때 exp_total에 합산 (level>0만)
       if(!showCommon && nd.level>0 && acc.key==='exp_total') v26=(v26||0)+(row26.com_total||0);
-      // 25년 op2: exp_total에 공통비 이미 포함 → op1 사용 (항상, 모든 노드)
-      if(acc.key==='op2') v25=row25.op1;
+      // 25년 op2: company(level-0)만 op1 사용 (company는 com_total 이중차감 발생)
+      // 본부/캠퍼스는 !showCommon일 때만 op1, 그 외엔 op2 그대로
+      if(acc.key==='op2'){
+        if(nd.level===0) v25=row25.op1;
+        else if(!showCommon) v25=row25.op1;
+      }
       body+=`<td style="${cellSt25}">${isOp?_chmFmtOp(v25):_chmFmt(v25)}</td>`;
       body+=`<td style="${cellSt26}">${isOp?_chmFmtOp(v26):_chmFmt(v26)}</td>`;
     }
@@ -7109,7 +7113,10 @@ function _renderChmTable(){
         const row26=nd[p26]||{}, row25=nd[p25]||{};
         let yv26=row26[acc.key], yv25=row25[acc.key];
         if(!showCommon && nd.level>0 && acc.key==='exp_total') yv26=(yv26||0)+(row26.com_total||0);
-        if(acc.key==='op2') yv25=row25.op1;
+        if(acc.key==='op2'){
+          if(nd.level===0) yv25=row25.op1;
+          else if(!showCommon) yv25=row25.op1;
+        }
         const diff = (yv25!=null&&yv26!=null) ? yv26-yv25 : null;
         const rate = (yv25!=null&&yv25!==0&&yv26!=null) ? (yv26-yv25)/Math.abs(yv25)*100 : null;
         const clr = diff==null?'#CBD5E1': diff<0?'#E53E3E':'var(--text)';
