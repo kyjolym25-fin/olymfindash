@@ -4623,6 +4623,8 @@ function applyAuth(noRestore=false){
     dash.style.display='none';
     dirWrap.style.display='none';
     if(chmWrap) chmWrap.style.display='none';
+    const rcptWrap0=document.getElementById('receipt-wrap');
+    if(rcptWrap0) rcptWrap0.style.display='none';
     tabs.style.display='none';
     if(authBtn) authBtn.style.display='none';
     if(adminHdrBtn) adminHdrBtn.style.display='none';
@@ -4665,6 +4667,8 @@ async function goHub(){
   dash.style.display='none';
   dirWrap.style.display='none';
   if(chmWrap) chmWrap.style.display='none';
+  const rcptWrapHub=document.getElementById('receipt-wrap');
+  if(rcptWrapHub) rcptWrapHub.style.display='none';
   tabs.style.display='none';
   saveDashView('hub');
   // 허브 진입 시 항상 DB에서 최신 권한 갱신
@@ -4690,6 +4694,8 @@ function goAdminPanel(){
   hub.style.display='none';
   if(dirWrap) dirWrap.style.display='none';
   if(chmWrap) chmWrap.style.display='none';
+  const rcptWrap=document.getElementById('receipt-wrap');
+  if(rcptWrap) rcptWrap.style.display='none';
   dash.style.display='block';
   tabs.style.display='flex';
   saveDashView('main');
@@ -6588,6 +6594,8 @@ function _restoreView(){
   const chmWrap=document.getElementById('chairman-wrap');
   const tabs=document.getElementById('mainTabs');
 
+  const rcptWrapRv=document.getElementById('receipt-wrap');
+  if(rcptWrapRv) rcptWrapRv.style.display='none';
   if(view==='chairman'&&canPl){
     hub.style.display='none';
     dash.style.display='none';
