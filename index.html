@@ -278,19 +278,75 @@ tbody td.indent{padding-left:28px;color:var(--muted2)}
 .admin-only{display:none}
 
 /* ── 허브 화면 ── */
-#hub-screen{min-height:calc(100vh - 110px);display:none;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;gap:40px}
-.hub-cards{display:flex;gap:24px;flex-wrap:wrap;justify-content:center}
-.hub-card{background:#fff;border-radius:16px;padding:36px 32px;width:280px;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,.08);transition:box-shadow .2s,transform .15s;text-align:center;position:relative;border:2px solid transparent}
-.hub-card:hover:not(.hub-card-disabled){box-shadow:0 8px 28px rgba(67,97,238,.18);transform:translateY(-3px);border-color:#4361EE}
+#hub-screen{min-height:calc(100vh - 56px);display:none;flex-direction:column;padding:26px 20px 60px;background:var(--s1)}
+.hub-inner{max-width:1180px;width:100%;margin:0 auto}
+.hub-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
+.hub-greeting-title{font-size:19px;font-weight:800;color:var(--text);letter-spacing:-.4px}
+.hub-greeting-sub{font-size:12px;color:var(--muted);margin-top:3px}
+.hub-date-chip{font-size:11px;color:var(--muted);background:#fff;border:1px solid var(--border);border-radius:8px;padding:6px 14px}
+.hub-layout{display:grid;grid-template-columns:1fr 300px;gap:18px;align-items:start}
+/* 위젯 카드 */
+.hub-widget{background:#fff;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,.07);overflow:hidden}
+.hub-widget-header{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.hub-toggle-group{display:flex;background:var(--s2);border-radius:9px;padding:3px;gap:2px}
+.hub-toggle-btn{font-size:12px;font-weight:600;color:var(--muted);background:transparent;border:none;border-radius:7px;padding:7px 15px;cursor:pointer;transition:all .18s;white-space:nowrap;letter-spacing:-.2px}
+.hub-toggle-btn.active{background:#fff;color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.10)}
+.hub-widget-summary{font-size:11px;color:var(--muted)}
+.hub-panel{display:none}
+.hub-panel.show{display:block}
+/* 허브 KPI */
+.hub-kpi-row{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--s2)}
+.hub-kpi{background:#fff;padding:15px 18px}
+.hub-kpi-label{font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.04em;margin-bottom:4px}
+.hub-kpi-val{font-size:19px;font-weight:800;color:var(--text);letter-spacing:-.4px;line-height:1.1}
+.hub-kpi-val small{font-size:11px;font-weight:400;color:var(--muted);margin-left:2px}
+.hub-kpi-yoy{font-size:11px;font-weight:600;margin-top:3px}
+/* 허브 차트 */
+.hub-chart-wrap{padding:16px 18px 14px}
+.hub-chart-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.hub-chart-title{font-size:11px;font-weight:600;color:var(--muted)}
+.hub-chart-legend{display:flex;gap:10px}
+.hub-leg{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted)}
+.hub-leg-dot{width:8px;height:8px;border-radius:50%}
+/* 허브 캠퍼스 바 */
+.hub-camp-section{padding:0 18px 18px}
+.hub-camp-label{font-size:10px;font-weight:600;color:var(--muted);letter-spacing:.04em;margin-bottom:8px}
+.hub-camp-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:5px}
+.hub-camp-item{display:flex;flex-direction:column;align-items:center;gap:3px}
+.hub-camp-bar{width:100%;background:var(--s2);border-radius:3px;height:40px;display:flex;align-items:flex-end;padding:0 2px;gap:2px}
+.hub-bar-fill{flex:1;border-radius:2px 2px 0 0}
+.hub-camp-name{font-size:9px;color:var(--muted);font-weight:500}
+.hub-camp-val{font-size:9px;color:#475569;font-weight:600}
+/* 허브 재원생 카드 */
+.hub-stu-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:14px 18px 18px}
+.hub-stu-card{background:var(--s1);border-radius:10px;padding:11px 13px;border:1px solid var(--border)}
+.hub-stu-name{font-size:11px;font-weight:700;color:#475569;margin-bottom:7px}
+.hub-stu-row{display:flex;justify-content:space-between;font-size:11px;margin-bottom:2px}
+.hub-stu-row span:first-child{color:var(--muted)}
+.hub-stu-row span:last-child{font-weight:700;color:var(--text)}
+.hub-stu-total{display:flex;justify-content:space-between;align-items:center;margin-top:6px;padding-top:5px;border-top:1px solid var(--border)}
+.hub-stu-total-val{font-size:14px;font-weight:800;color:var(--text)}
+.hub-stu-yoy{font-size:10px;font-weight:600;text-align:right}
+/* 준비중 */
+.hub-preparing{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:64px 20px;gap:12px;color:var(--muted)}
+.hub-preparing-icon{font-size:36px;opacity:.4}
+.hub-preparing-text{font-size:13px;font-weight:600}
+.hub-preparing-sub{font-size:11px;opacity:.7}
+/* 채널 카드 */
+.hub-channel-col{display:flex;flex-direction:column;gap:10px}
+.hub-channel-label{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.06em;padding-left:2px;margin-bottom:2px}
+.hub-ch-card{background:#fff;border-radius:13px;padding:14px 15px;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.06);transition:all .18s;border:2px solid transparent;display:flex;align-items:center;gap:11px;position:relative}
+.hub-ch-card:hover{box-shadow:0 6px 22px rgba(67,97,238,.15);transform:translateY(-2px);border-color:#4361EE}
+.hub-ch-icon{font-size:22px;width:40px;height:40px;background:var(--s1);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.hub-ch-body{flex:1;min-width:0}
+.hub-ch-title{font-size:12px;font-weight:700;color:var(--text);line-height:1.45;letter-spacing:-.2px}
+.hub-ch-desc{font-size:10px;color:var(--muted);margin-top:2px;line-height:1.5}
+.hub-ch-badge{position:absolute;top:9px;right:10px;font-size:9px;font-weight:700;background:#EEF2FF;color:#4361EE;padding:2px 7px;border-radius:7px}
+.hub-ch-arrow{font-size:14px;color:var(--border2);flex-shrink:0}
+/* 구형 클래스 호환 (applyAuth에서 display 제어용) */
 .hub-card-disabled{opacity:.42;cursor:not-allowed}
-.hub-card-icon{font-size:44px;margin-bottom:14px}
-.hub-card-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:8px}
-.hub-card-desc{font-size:12px;color:var(--muted);line-height:1.6}
-.hub-card-badge{position:absolute;top:12px;right:14px;font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px}
-.hub-card-badge.new{background:#4361EE22;color:#4361EE}
-.hub-welcome{text-align:center}
-.hub-welcome-title{font-size:22px;font-weight:700;color:var(--fg);margin-bottom:8px}
-.hub-welcome-sub{font-size:14px;color:var(--muted);line-height:1.7}
+@media(max-width:960px){.hub-layout{grid-template-columns:1fr}.hub-channel-col{display:grid;grid-template-columns:1fr 1fr}}
+@media(max-width:640px){.hub-kpi-row{grid-template-columns:1fr 1fr}.hub-camp-grid{grid-template-columns:repeat(4,1fr)}.hub-stu-grid{grid-template-columns:1fr 1fr}.hub-channel-col{grid-template-columns:1fr}}
 
 /* ── 원장단 대시보드 ── */
 #director-wrap{display:none}
@@ -549,32 +605,91 @@ thead th{font-size:13px}
 
 <!-- ══ 로그인 후 허브 화면 ══ -->
 <div id="hub-screen">
-  <div class="hub-welcome">
-    <div class="hub-welcome-title" id="hubWelcomeTitle">환영합니다</div>
-    <div class="hub-welcome-sub">이용할 대시보드를 선택하세요.</div>
-  </div>
-  <div class="hub-cards">
-    <div class="hub-card" id="hubCardChairman" onclick="goChairmanDash()">
-      <div class="hub-card-icon">📈</div>
-      <div class="hub-card-title">올림피아드교육<br>손익계산서</div>
-      <div class="hub-card-desc">회사 전체 · 사업부 · 캠퍼스<br>계층별 손익을 종합합니다</div>
+  <div class="hub-inner">
+    <!-- 인사 -->
+    <div class="hub-top">
+      <div>
+        <div class="hub-greeting-title" id="hubWelcomeTitle">환영합니다</div>
+        <div class="hub-greeting-sub">이용할 대시보드를 선택하세요.</div>
+      </div>
+      <div class="hub-date-chip" id="hubDateChip"></div>
     </div>
-    <div class="hub-card" id="hubCardSoin" onclick="goSoinDash()">
-      <div class="hub-card-icon">📊</div>
-      <div class="hub-card-title">올림피아드교육<br>손익 대시보드</div>
-      <div class="hub-card-desc">전사 사업부별 손익·재원생<br>실적을 종합 분석합니다</div>
-    </div>
-    <div class="hub-card" id="hubCardDir" onclick="goDirectorDash()">
-      <span class="hub-card-badge new">NEW</span>
-      <div class="hub-card-icon">🏫</div>
-      <div class="hub-card-title">직영캠퍼스<br>원장단 대시보드</div>
-      <div class="hub-card-desc">소속 캠퍼스 수학·영어<br>손익을 월별로 확인합니다</div>
-    </div>
-    <div class="hub-card" id="hubCardReceipt" onclick="goReceiptDash()">
-      <span class="hub-card-badge new">NEW</span>
-      <div class="hub-card-icon">💳</div>
-      <div class="hub-card-title">실시간<br>수납 현황</div>
-      <div class="hub-card-desc">일별 수납 증분·누계<br>전년 동월 비교 분석</div>
+
+    <div class="hub-layout">
+      <!-- 왼쪽: 위젯 -->
+      <div class="hub-widget">
+        <!-- 토글 헤더 -->
+        <div class="hub-widget-header">
+          <div class="hub-toggle-group">
+            <button class="hub-toggle-btn" id="hubBtn-rcpt" onclick="switchHubPanel('rcpt')">💳 일자별 수납 현황</button>
+            <button class="hub-toggle-btn active" id="hubBtn-stu" onclick="switchHubPanel('stu')">👥 월 재원생 현황</button>
+          </div>
+          <div class="hub-widget-summary" id="hubWidgetSummary"></div>
+        </div>
+
+        <!-- 수납 패널: 준비중 -->
+        <div class="hub-panel" id="hubPanel-rcpt">
+          <div class="hub-preparing">
+            <div class="hub-preparing-icon">📋</div>
+            <div class="hub-preparing-text">일자별 수납 현황 준비중</div>
+            <div class="hub-preparing-sub">API 연동 후 자동으로 업데이트됩니다.</div>
+          </div>
+        </div>
+
+        <!-- 재원생 패널 -->
+        <div class="hub-panel show" id="hubPanel-stu">
+          <div class="hub-kpi-row" id="hubStuKpi"></div>
+          <div class="hub-chart-wrap">
+            <div class="hub-chart-top">
+              <span class="hub-chart-title">월별 재원생 추이 (명)</span>
+              <div class="hub-chart-legend">
+                <div class="hub-leg"><div class="hub-leg-dot" style="background:#4361EE"></div>26년</div>
+                <div class="hub-leg"><div class="hub-leg-dot" style="background:#CBD5E1"></div>25년</div>
+              </div>
+            </div>
+            <canvas id="c_hub_stu" height="100"></canvas>
+          </div>
+          <div class="hub-stu-grid" id="hubStuCards"></div>
+        </div>
+      </div>
+
+      <!-- 오른쪽: 채널 카드 -->
+      <div class="hub-channel-col">
+        <div class="hub-channel-label">대시보드 바로가기</div>
+        <div class="hub-ch-card" id="hubCardChairman">
+          <div class="hub-ch-icon">📈</div>
+          <div class="hub-ch-body">
+            <div class="hub-ch-title">올림피아드교육<br>손익계산서</div>
+            <div class="hub-ch-desc">회사 전체 · 사업부 · 캠퍼스<br>계층별 손익 종합</div>
+          </div>
+          <div class="hub-ch-arrow">›</div>
+        </div>
+        <div class="hub-ch-card" id="hubCardSoin">
+          <div class="hub-ch-icon">📊</div>
+          <div class="hub-ch-body">
+            <div class="hub-ch-title">올림피아드교육<br>손익 대시보드</div>
+            <div class="hub-ch-desc">전사 사업부별 손익·재원생<br>실적 종합 분석</div>
+          </div>
+          <div class="hub-ch-arrow">›</div>
+        </div>
+        <div class="hub-ch-card" id="hubCardDir">
+          <span class="hub-ch-badge">NEW</span>
+          <div class="hub-ch-icon">🏫</div>
+          <div class="hub-ch-body">
+            <div class="hub-ch-title">직영캠퍼스<br>원장단 대시보드</div>
+            <div class="hub-ch-desc">소속 캠퍼스 수학·영어<br>손익 월별 확인</div>
+          </div>
+          <div class="hub-ch-arrow">›</div>
+        </div>
+        <div class="hub-ch-card" id="hubCardReceipt">
+          <div class="hub-ch-icon">💳</div>
+          <div class="hub-ch-body">
+            <div class="hub-ch-title">일자별<br>수납 현황</div>
+            <div class="hub-ch-desc">일별 수납 증분·누계<br>전년 동월 비교 분석</div>
+          </div>
+          <div class="hub-ch-arrow">›</div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -4572,6 +4687,7 @@ function applyAuth(noRestore=false){
       } else {
         hub.style.display='flex';
         tabs.style.display='none';
+        initHubWidget();
       }
     }
     // 허브 카드 활성/비활성
@@ -4658,9 +4774,112 @@ async function goHub(){
   if(rcptWrapHub) rcptWrapHub.style.display='none';
   tabs.style.display='none';
   saveDashView('hub');
+  initHubWidget();
   // 허브 진입 시 항상 DB에서 최신 권한 갱신
   await _refreshSessionPerms();
   applyAuth();
+}
+
+// ── 허브 위젯 ──
+let _hubWidgetDone = false;
+let _hubStuChart = null;
+
+function initHubWidget(){
+  // 날짜 칩
+  const dc = document.getElementById('hubDateChip');
+  if(dc){
+    const d = new Date();
+    const days = ['일','월','화','수','목','금','토'];
+    dc.textContent = `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일 (${days[d.getDay()]})`;
+  }
+  if(_hubWidgetDone) return;
+  _hubWidgetDone = true;
+  _initHubStuPanel();
+}
+
+function switchHubPanel(id){
+  ['rcpt','stu'].forEach(k=>{
+    document.getElementById('hubPanel-'+k).classList.toggle('show', k===id);
+    document.getElementById('hubBtn-'+k).classList.toggle('active', k===id);
+  });
+  const summaries = {
+    rcpt: 'API 연동 준비중',
+    stu: `전체 ${_hubStuTotal.toLocaleString()}명 · 전년比 <span style="color:${_hubStuYoy>=0?'#16A34A':'#E53E3E'}">${_hubStuYoy>=0?'+':''}${_hubStuYoy.toFixed(1)}%</span>`
+  };
+  document.getElementById('hubWidgetSummary').innerHTML = summaries[id]||'';
+}
+
+let _hubStuTotal = 0, _hubStuYoy = 0;
+
+function _initHubStuPanel(){
+  // STU 데이터에서 월별 합계 계산
+  const campList = Object.keys(STU);
+  const months12 = Array.from({length:12},(_,i)=>i);
+  const tot25 = months12.map(m=> campList.reduce((s,c)=> s+(STU[c].yr25.합계[m]||0),0));
+  const tot26 = months12.map(m=>{
+    const v = campList.reduce((s,c)=>{ const x=STU[c].yr26a.합계[m]; return s+(x!=null?x:0); },0);
+    return campList.some(c=>STU[c].yr26a.합계[m]!=null) ? v : null;
+  });
+
+  // 최신 월 파악
+  let lastM = 0;
+  tot26.forEach((v,i)=>{ if(v!=null) lastM=i; });
+  _hubStuTotal = tot26[lastM]||0;
+  _hubStuYoy = tot25[lastM]>0 ? (_hubStuTotal - tot25[lastM]) / tot25[lastM] * 100 : 0;
+
+  // KPI
+  const mathTot26 = campList.reduce((s,c)=>{ const v=STU[c].yr26a.수학.소계[lastM]; return s+(v!=null?v:0); },0);
+  const engTot26  = campList.reduce((s,c)=>{ const v=STU[c].yr26a.영어.소계[lastM]; return s+(v!=null?v:0); },0);
+  const mathTot25 = campList.reduce((s,c)=>s+(STU[c].yr25.수학.소계[lastM]||0),0);
+  const engTot25  = campList.reduce((s,c)=>s+(STU[c].yr25.영어.소계[lastM]||0),0);
+  const mLabel = `${lastM+1}월`;
+  const fmtYoy = (v26,v25)=>{ const d=v26-v25,p=(d/v25*100); const cl=d>=0?'#16A34A':'#E53E3E'; const sg=d>=0?'+':''; return `<span style="color:${cl}">${sg}${p.toFixed(1)}%</span>`; };
+  document.getElementById('hubStuKpi').innerHTML = `
+    <div class="hub-kpi"><div class="hub-kpi-label">${mLabel} 전체</div><div class="hub-kpi-val">${_hubStuTotal.toLocaleString()}<small>명</small></div><div class="hub-kpi-yoy">${fmtYoy(_hubStuTotal,tot25[lastM])} vs 전년</div></div>
+    <div class="hub-kpi"><div class="hub-kpi-label">수학</div><div class="hub-kpi-val">${mathTot26.toLocaleString()}<small>명</small></div><div class="hub-kpi-yoy">${fmtYoy(mathTot26,mathTot25)} vs 전년</div></div>
+    <div class="hub-kpi"><div class="hub-kpi-label">영어</div><div class="hub-kpi-val">${engTot26.toLocaleString()}<small>명</small></div><div class="hub-kpi-yoy">${fmtYoy(engTot26,engTot25)} vs 전년</div></div>`;
+
+  // 요약 업데이트
+  document.getElementById('hubWidgetSummary').innerHTML =
+    `전체 ${_hubStuTotal.toLocaleString()}명 · 전년比 <span style="color:${_hubStuYoy>=0?'#16A34A':'#E53E3E'}">${_hubStuYoy>=0?'+':''}${_hubStuYoy.toFixed(1)}%</span>`;
+
+  // 월별 추이 차트
+  const ctx = document.getElementById('c_hub_stu');
+  if(ctx){
+    if(_hubStuChart){ _hubStuChart.destroy(); _hubStuChart=null; }
+    _hubStuChart = new Chart(ctx.getContext('2d'),{
+      type:'line',
+      data:{
+        labels:['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'],
+        datasets:[
+          {label:'26년',data:tot26,borderColor:'#4361EE',backgroundColor:'rgba(67,97,238,.07)',borderWidth:2.5,fill:true,tension:.35,pointRadius:tot26.map(v=>v!=null?3:0),pointBackgroundColor:'#4361EE',spanGaps:false},
+          {label:'25년',data:tot25,borderColor:'#CBD5E1',borderWidth:1.5,borderDash:[4,3],fill:false,tension:.35,pointRadius:2,pointBackgroundColor:'#CBD5E1'}
+        ]
+      },
+      options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false,callbacks:{label:c=>c.parsed.y!=null?`${c.dataset.label}: ${c.parsed.y.toLocaleString()}명`:null}}},scales:{x:{grid:{display:false},ticks:{font:{size:9},color:'#94A3B8'}},y:{grid:{color:'rgba(0,0,0,.04)'},ticks:{font:{size:9},color:'#94A3B8',callback:v=>v.toLocaleString()}}}}
+    });
+  }
+
+  // 캠퍼스 카드
+  const cards = campList.map(name=>{
+    const c = STU[name];
+    const m26 = c.yr26a.합계[lastM]??0;
+    const m25 = c.yr25.합계[lastM]||0;
+    const math = c.yr26a.수학.소계[lastM]??0;
+    const eng  = c.yr26a.영어.소계[lastM]??0;
+    const diff = m26-m25, pct=(diff/m25*100).toFixed(1);
+    const cl = diff>=0?'#16A34A':'#E53E3E', sg=diff>=0?'+':'';
+    return `<div class="hub-stu-card">
+      <div class="hub-stu-name">${name}</div>
+      <div class="hub-stu-row"><span>수학</span><span>${math.toLocaleString()}명</span></div>
+      <div class="hub-stu-row"><span>영어</span><span>${eng||'—'}</span></div>
+      <div class="hub-stu-total">
+        <div class="hub-stu-total-val">${m26.toLocaleString()}명</div>
+        <div class="hub-stu-yoy" style="color:${cl}">${sg}${diff} (${sg}${pct}%)</div>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('hubStuCards').innerHTML = cards;
 }
 
 async function _refreshSessionPerms(){
