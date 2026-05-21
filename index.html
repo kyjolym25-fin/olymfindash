@@ -4614,6 +4614,12 @@ function applyAuth(noRestore=false){
       hubCardChairman.style.display=canPl?'':'none';
       if(canPl) hubCardChairman.onclick=goChairmanDash;
     }
+    // 허브 카드: 수납 현황 (admin만)
+    const hubCardReceipt=document.getElementById('hubCardReceipt');
+    if(hubCardReceipt){
+      hubCardReceipt.style.display=isAdmin?'':'none';
+      if(isAdmin) hubCardReceipt.onclick=goReceiptDash;
+    }
     // 허브 환영 메시지
     const wt=document.getElementById('hubWelcomeTitle');
     if(wt) wt.textContent=`안녕하세요, ${s.name}님`;
