@@ -6453,11 +6453,12 @@ applyAuth();
   if(RAW_DB.length) applyRawToDashboard();
   autoSelectLatestMonth();
   await _refreshSessionPerms();
-  applyAuth();
   loadComments();
   loadStu26();
   // ── 뷰 복원 (데이터·권한 로드 완료 후 단일 실행) ──
   _restoreView();
+  // ── 권한 기반 UI 갱신 (뷰 복원 후 실행해야 간섭 없음) ──
+  applyAuth();
 })();
 window.addEventListener('beforeunload',()=>sessionStorage.setItem('olymp_scrollY', window.scrollY));
 
