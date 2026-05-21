@@ -324,6 +324,10 @@ tbody td.indent{padding-left:28px;color:var(--muted2)}
 .hub-stu-row{display:flex;justify-content:space-between;font-size:11px;margin-bottom:2px}
 .hub-stu-row span:first-child{color:var(--muted)}
 .hub-stu-row span:last-child{font-weight:700;color:var(--text)}
+.hub-stu-section span:first-child{color:var(--text);font-weight:600}
+.hub-stu-sub{padding-left:8px}
+.hub-stu-sub span:first-child{color:var(--muted);font-size:10px}
+.hub-stu-sub span:last-child{font-size:10px;font-weight:500;color:#64748B}
 .hub-stu-total{display:flex;justify-content:space-between;align-items:center;margin-top:6px;padding-top:5px;border-top:1px solid var(--border)}
 .hub-stu-total-val{font-size:14px;font-weight:800;color:var(--text)}
 .hub-stu-yoy{font-size:10px;font-weight:600;text-align:right}
@@ -4861,18 +4865,28 @@ function _initHubStuPanel(){
   }
 
   // 캠퍼스 카드
+  const v = (obj, key) => { const x = obj?.[key]?.[lastM]; return (x != null && x !== 0) ? x : null; };
+  const fmt = n => n != null ? n.toLocaleString()+'명' : '—';
   const cards = campList.map(name=>{
     const c = STU[name];
     const m26 = c.yr26a.합계[lastM]??0;
     const m25 = c.yr25.합계[lastM]||0;
-    const math = c.yr26a.수학.소계[lastM]??0;
-    const eng  = c.yr26a.영어.소계[lastM]??0;
+    const mathCh  = v(c.yr26a.수학, '초중');
+    const mathYr  = v(c.yr26a.수학, '영재');
+    const mathGo  = v(c.yr26a.수학, '대입');
+    const mathTot = v(c.yr26a.수학, '소계');
+    const engCh   = v(c.yr26a.영어, '초중');
+    const engGo   = v(c.yr26a.영어, '대입');
+    const engTot  = v(c.yr26a.영어, '소계');
     const diff = m26-m25, pct=(diff/m25*100).toFixed(1);
     const cl = diff>=0?'#16A34A':'#E53E3E', sg=diff>=0?'+':'';
+    const subRow = (label, val) => val!=null ? `<div class="hub-stu-row hub-stu-sub"><span>${label}</span><span>${val.toLocaleString()}명</span></div>` : '';
     return `<div class="hub-stu-card">
       <div class="hub-stu-name">${name}</div>
-      <div class="hub-stu-row"><span>수학</span><span>${math.toLocaleString()}명</span></div>
-      <div class="hub-stu-row"><span>영어</span><span>${eng||'—'}</span></div>
+      <div class="hub-stu-row hub-stu-section"><span>수학</span><span>${fmt(mathTot)}</span></div>
+      ${subRow('ㄴ 초중', mathCh)}${subRow('ㄴ 영재', mathYr)}${subRow('ㄴ 고등', mathGo)}
+      ${engTot!=null ? `<div class="hub-stu-row hub-stu-section" style="margin-top:5px"><span>영어</span><span>${fmt(engTot)}</span></div>
+      ${subRow('ㄴ 초중', engCh)}${subRow('ㄴ 고등', engGo)}` : ''}
       <div class="hub-stu-total">
         <div class="hub-stu-total-val">${m26.toLocaleString()}명</div>
         <div class="hub-stu-yoy" style="color:${cl}">${sg}${diff} (${sg}${pct}%)</div>
