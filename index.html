@@ -294,11 +294,11 @@ tbody td.indent{padding-left:28px;color:var(--muted2)}
 
 /* ── 원장단 대시보드 ── */
 #director-wrap{display:none}
-.dir-header{display:flex;align-items:center;gap:12px;padding:16px 0 12px;margin-bottom:4px}
-.dir-back-btn{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:6px 14px;font-size:12px;color:var(--muted);cursor:pointer;transition:border-color .15s}
-.dir-back-btn:hover{border-color:#4361EE;color:#4361EE}
-.dir-camp-name{font-size:18px;font-weight:700;color:var(--text)}
-.dir-camp-sub{font-size:12px;color:var(--muted)}
+.dir-header{display:flex;align-items:center;gap:12px;padding:18px 0 14px;margin-bottom:6px;border-bottom:1px solid var(--border)}
+.dir-back-btn{background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:7px 16px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .15s;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.dir-back-btn:hover{border-color:#4361EE;color:#4361EE;background:#EEF2FF}
+.dir-camp-name{font-size:20px;font-weight:800;color:var(--text);letter-spacing:-.3px}
+.dir-camp-sub{font-size:12px;color:var(--muted);margin-top:2px}
 .dir-pl-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px}
 @media(max-width:700px){.dir-pl-grid{grid-template-columns:1fr}}
 .dir-pl-card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 12px rgba(0,0,0,.08)}
@@ -376,6 +376,22 @@ tbody td.indent{padding-left:28px;color:var(--muted2)}
 .dir-pl-full-tbl th:first-child,.dir-pl-full-tbl td:first-child{width:100px;min-width:100px;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* 상세 KPI 카드 */
 .dir-kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+@media(max-width:900px){.dir-kpi-grid{grid-template-columns:repeat(2,1fr)}}
+.dir-kpi-card{border-radius:14px;padding:18px 20px;position:relative;overflow:hidden;flex:1}
+.dir-kpi-card::after{content:'';position:absolute;right:-18px;top:-18px;width:75px;height:75px;border-radius:50%;background:rgba(255,255,255,.13)}
+.dir-kpi-blue{background:linear-gradient(135deg,#4361EE,#738EFF);color:#fff}
+.dir-kpi-green{background:linear-gradient(135deg,#059669,#34D399);color:#fff}
+.dir-kpi-purple{background:linear-gradient(135deg,#7C5CFC,#A78BFA);color:#fff}
+.dir-kpi-amber{background:linear-gradient(135deg,#D97706,#FBBF24);color:#fff}
+.dir-kpi-red{background:linear-gradient(135deg,#DC2626,#F87171);color:#fff}
+.dir-kpi-lbl{font-size:11px;font-weight:600;opacity:.85;letter-spacing:.3px;margin-bottom:8px}
+.dir-kpi-val{font-size:24px;font-weight:900;letter-spacing:-1px;line-height:1.1}
+.dir-kpi-unit{font-size:11px;font-weight:400;opacity:.8;margin-left:2px}
+.dir-kpi-sub{margin-top:7px;font-size:11px;opacity:.85;display:flex;align-items:center;gap:4px}
+.dir-kpi-delta{display:inline-block;background:rgba(255,255,255,.22);border-radius:20px;padding:1px 8px;font-weight:700;font-size:11px}
+.dir-detail-bar{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.dir-detail-period-tag{font-size:11px;font-weight:600;color:var(--c25);background:#EEF2FF;border:1px solid #C7D2FE;border-radius:20px;padding:4px 14px}
+.dir-detail-unit-tag{font-size:11px;color:var(--muted);padding:4px 0}
 .dir-notice-toggle{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:#92400e;cursor:pointer;user-select:none;margin-bottom:10px;padding:8px 12px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;width:fit-content}
 .dir-notice-toggle:hover{background:#fef3c7}
 /* 캠퍼스 카드 25년 실적 */
@@ -4415,7 +4431,7 @@ async function doChangePw(){
 
 function doLogout(){ clearSession(); saveDashView('hub'); closeAuth(); applyAuth(); }
 
-function applyAuth(){
+function applyAuth(noRestore=false){
   const s=getSession();
   const isAdmin=s&&s.role==='admin';
   const isDirector=s&&s.role==='director';
@@ -4441,13 +4457,13 @@ function applyAuth(){
     const dashOpen = dash.style.display==='block';
     const dirOpen  = dirWrap.style.display==='block';
     const chmOpen  = chmWrap&&chmWrap.style.display==='block';
-    if(!dashOpen && !dirOpen && !chmOpen){
+    if(!noRestore && !dashOpen && !dirOpen && !chmOpen){
       const saved=getDashView();
       const canPl2=isAdmin||(!isDirector&&!!(s&&s.can_pl));
       if(saved==='chairman'&&canPl2){
         hub.style.display='none';
         chmWrap.style.display='block';
-        initChmDash();
+        // initChmDash()는 _restoreView()에서 데이터 로드 후 호출
       } else if(saved==='main'&&!isDirector){
         hub.style.display='none';
         dash.style.display='block';
@@ -6160,6 +6176,57 @@ function renderDirDetail(){
     return `<span style="color:${pct>=0?'#065f46':'var(--loss)'};font-weight:700">${pct>=0?'+':''}${pct}%</span>`;
   };
 
+  // ── KPI 카드 추출 ──
+  const getKpiSums=(labelKey,typeKey)=>{
+    let row=null;
+    for(const r of baseData.rows){
+      if(typeKey&&r.type===typeKey){row=r;break;}
+      if(labelKey&&norm(r.label).includes(labelKey)){row=r;break;}
+    }
+    if(!row) return {y25:null,y26:null,y25f:null};
+    const v25=row.vals||{};
+    const v26r=lookup26[norm(row.label)]||{};
+    return {
+      y25:activeMs.reduce((s,m)=>s+(v25[m]||0),0),
+      y26:hasYr26?activeMs.reduce((s,m)=>s+(v26r[m]||0),0):null,
+      y25f:ALL12.reduce((s,m)=>s+(v25[m]||0),0)
+    };
+  };
+  const revK=getKpiSums('매출합계',null);
+  const p1K=getKpiSums(null,'profit1');
+  const p2K=getKpiSums(null,'profit2');
+  const fxK=v=>v!=null?Math.round(v/1000).toLocaleString('ko-KR'):'-';
+  const growK=(a,b)=>{if(b==null||b===0||a==null)return '';const p=Math.round((a-b)/Math.abs(b)*100);return `<span class="dir-kpi-delta">${p>=0?'+':''}${p}%</span>`;};
+  const pctK=(a,b)=>(!b||b===0||a==null)?'-':Math.round(a/b*100)+'%';
+  const periodLbl=activeMs.length===1?MN[activeMs[0]]:`${MN[activeMs[0]]}~${MN[activeMs[activeMs.length-1]]}`;
+  const rev=hasYr26?revK.y26:revK.y25;
+  const p1v=hasYr26?p1K.y26:p1K.y25;
+  const p2v=hasYr26?p2K.y26:p2K.y25;
+  const p1Cls=p1v==null||p1v>=0?'dir-kpi-green':'dir-kpi-red';
+  const p2Cls=p2v==null||p2v>=0?'dir-kpi-purple':'dir-kpi-red';
+  const kpiHtml=`<div class="dir-kpi-grid">
+    <div class="dir-kpi-card dir-kpi-blue">
+      <div class="dir-kpi-lbl">매출 합계</div>
+      <div class="dir-kpi-val">${fxK(rev)}<span class="dir-kpi-unit">천원</span></div>
+      <div class="dir-kpi-sub">${hasYr26?growK(revK.y26,revK.y25):''}${periodLbl} 누계</div>
+    </div>
+    <div class="dir-kpi-card ${p1Cls}">
+      <div class="dir-kpi-lbl">영업이익 1</div>
+      <div class="dir-kpi-val">${fxK(p1v)}<span class="dir-kpi-unit">천원</span></div>
+      <div class="dir-kpi-sub">${hasYr26?growK(p1K.y26,p1K.y25):''}${periodLbl} 누계</div>
+    </div>
+    <div class="dir-kpi-card ${p2Cls}">
+      <div class="dir-kpi-lbl">영업이익 2</div>
+      <div class="dir-kpi-val">${fxK(p2v)}<span class="dir-kpi-unit">천원</span></div>
+      <div class="dir-kpi-sub">${hasYr26?growK(p2K.y26,p2K.y25):''}${periodLbl} 누계</div>
+    </div>
+    <div class="dir-kpi-card dir-kpi-amber">
+      <div class="dir-kpi-lbl">25년 대비 달성률</div>
+      <div class="dir-kpi-val" style="font-size:26px">${pctK(rev,revK.y25f)}</div>
+      <div class="dir-kpi-sub">${periodLbl} / 25년 전체</div>
+    </div>
+  </div>`;
+
   const H=`style="display:none"`;
   let tbody='<tbody>';
   let stbody='<tbody>';
@@ -6243,13 +6310,17 @@ function renderDirDetail(){
           ▶ 펼치기
         </button></div>` : '';
 
-  el.innerHTML=`<div style="font-size:11px;color:var(--muted);margin-bottom:4px">(단위: 천원)</div>
-  ${toggleBar}
-  <div style="display:flex;border-radius:12px;box-shadow:0 2px 16px rgba(26,35,64,.1);overflow:hidden;max-height:calc(100vh - 220px)">
-    <div id="dirPlScroll" style="flex:1;min-width:0;overflow:auto;max-height:calc(100vh - 220px)">
+  el.innerHTML=`${kpiHtml}
+  <div class="dir-detail-bar">
+    <span class="dir-detail-period-tag">📅 ${hasYr26?'26년':'25년'} ${periodLbl}</span>
+    <span class="dir-detail-unit-tag">단위: 천원</span>
+    ${nR>0?`<div style="margin-left:auto"><button id="dirRemainBtn" onclick="dirToggleRemain(this)" data-folded="1" data-fw="${foldedW}" data-ew="${expandedW}" data-yr="${YR}" data-lbl="${expandLbl}" style="font-size:11px;color:var(--muted);background:var(--s1);border:1px solid var(--border);border-radius:6px;padding:4px 12px;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor='var(--c25)';this.style.color='var(--c25)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">▶ 펼치기</button></div>`:''}
+  </div>
+  <div style="display:flex;border-radius:12px;box-shadow:0 2px 16px rgba(26,35,64,.1);overflow:hidden;max-height:calc(100vh - 320px)">
+    <div id="dirPlScroll" style="flex:1;min-width:0;overflow:auto;max-height:calc(100vh - 320px)">
       <table class="dir-pl-full-tbl" id="dir-pl-main-tbl" data-acct="${ACCT}" data-na="${nA}" data-yr="${YR}" style="width:${initW}px">${colgroup}${thead}${tbody}</table>
     </div>
-    <div id="dirPlSummary" style="flex-shrink:0;width:${stickyW}px;overflow-y:auto;overflow-x:hidden;max-height:calc(100vh - 220px);border-left:1px solid var(--border)">
+    <div id="dirPlSummary" style="flex-shrink:0;width:${stickyW}px;overflow-y:auto;overflow-x:hidden;max-height:calc(100vh - 320px);border-left:1px solid var(--border)">
       <table class="dir-pl-full-tbl" style="width:${stickyW}px;table-layout:fixed">${spColgroup}${spHead}${stbody}</table>
     </div>
   </div>`;
@@ -6458,8 +6529,8 @@ applyAuth();
   loadStu26();
   // ── 뷰 복원 (데이터·권한 로드 완료 후 단일 실행) ──
   _restoreView();
-  // ── 권한 기반 UI 갱신 (뷰 복원 후 실행해야 간섭 없음) ──
-  applyAuth();
+  // ── 권한 기반 UI 갱신만 (뷰는 건드리지 않음) ──
+  applyAuth(true);
 })();
 window.addEventListener('beforeunload',()=>sessionStorage.setItem('olymp_scrollY', window.scrollY));
 
@@ -7015,14 +7086,22 @@ async function _resetNotice(elId, storageKey){
 }
 
 function initChmDash(){
-  chmMi = typeof latestActMi==='number'&&latestActMi>=0 ? latestActMi : 3;
-  // company 노드는 항상 펼쳐서 사업부 행이 기본으로 표시되게
-  if(!chmExpanded.has('company')) chmExpanded.add('company');
-  _buildChmNodes26(chmMi);
-  _buildChmNodes25(chmMi);
-  _buildChmMonthBar();
-  _renderChmTable();
-  _renderNotice('chm-notice','notice_chm');
+  try{
+    chmMi = typeof latestActMi==='number'&&latestActMi>=0 ? latestActMi : 3;
+    console.log('[CHM] initChmDash 시작, mi='+chmMi+', RAW_DB.length='+RAW_DB.length);
+    // company 노드는 항상 펼쳐서 사업부 행이 기본으로 표시되게
+    if(!chmExpanded.has('company')) chmExpanded.add('company');
+    _buildChmNodes26(chmMi);
+    _buildChmNodes25(chmMi);
+    _buildChmMonthBar();
+    _renderChmTable();
+    _renderNotice('chm-notice','notice_chm');
+    console.log('[CHM] initChmDash 완료');
+  }catch(e){
+    console.error('[CHM] initChmDash 에러:', e);
+    const t=document.getElementById('chmTable');
+    if(t) t.innerHTML='<tr><td style="color:red;padding:20px">오류: '+e.message+'</td></tr>';
+  }
 }
 </script>
 
