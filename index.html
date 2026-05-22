@@ -4218,10 +4218,7 @@ function _drawStuStackTotals(chart){
 }
 
 function renderStuMathEng(month){
-  const legOpts={
-    plugins:{legend:{labels:{color:'#9DA8C3',font:{size:10},boxWidth:8,padding:8}}},
-    animation:{onComplete({chart}){ _drawStuStackTotals(chart); }}
-  };
+  const legOpts={plugins:{legend:{labels:{color:'#9DA8C3',font:{size:10},boxWidth:8,padding:8}}}};
 
   stuMathChart=mkBar('c_stu_math',CAMPS_ALL,[
     {label:'26년 초중',data:CAMPS_ALL.map(c=>getStu(c,month).mc26),backgroundColor:'#10B981cc',borderRadius:3,borderSkipped:false,stack:'26'},
@@ -4238,6 +4235,11 @@ function renderStuMathEng(month){
     {label:'25년 초중',data:CAMPS_HAK.map(c=>getStu(c,month).ec25),backgroundColor:'#10B98144',borderRadius:3,borderSkipped:false,stack:'25'},
     {label:'25년 고등',data:CAMPS_HAK.map(c=>getStu(c,month).ed25),backgroundColor:'#7C5CFC44',borderRadius:3,borderSkipped:false,stack:'25'},
   ],legOpts);
+
+  requestAnimationFrame(()=>{
+    if(stuMathChart) _drawStuStackTotals(stuMathChart);
+    if(stuEngChart)  _drawStuStackTotals(stuEngChart);
+  });
 }
 
 function renderStuTable(month){
