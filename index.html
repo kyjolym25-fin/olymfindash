@@ -4918,15 +4918,15 @@ function _initHubStuPanel(){
         <div style="font-size:11px;color:var(--muted);margin-bottom:9px">25년 ${d.a25.toLocaleString()}명</div>
         <div style="height:4px;background:var(--border);border-radius:2px;margin-bottom:10px;overflow:hidden"><div style="height:100%;width:${barW}%;background:var(--c26a)"></div></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
-          <div style="background:var(--s3);border-radius:7px;padding:8px 10px">
-            <div style="font-size:10px;color:var(--muted);margin-bottom:2px">수학</div>
+          <div style="background:var(--s3);border-radius:7px;padding:8px 10px;cursor:pointer;transition:background .15s" onmouseenter="this.style.background='#dde3f0'" onmouseleave="this.style.background='var(--s3)'" onclick="showStuTrendModal('${c}','수학')">
+            <div style="font-size:10px;color:var(--muted);margin-bottom:2px">수학 📈</div>
             <div style="font-size:15px;font-weight:700;color:var(--c25)">${d.ms26.toLocaleString()}<span style="font-size:10px;color:var(--muted);margin-left:2px">명</span></div>
-            <div style="font-size:10px;color:var(--muted);margin-top:3px;font-size:10px">초중 ${d.mc26.toLocaleString()}${d.mg26?` / 영재 ${d.mg26.toLocaleString()}`:''}${d.md26?` / 고등 ${d.md26.toLocaleString()}`:''}</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:3px">초중 ${d.mc26.toLocaleString()}${d.mg26?` / 영재 ${d.mg26.toLocaleString()}`:''}${d.md26?` / 고등 ${d.md26.toLocaleString()}`:''}</div>
           </div>
-          <div style="background:var(--s3);border-radius:7px;padding:8px 10px">
-            <div style="font-size:10px;color:var(--muted);margin-bottom:2px">영어</div>
+          <div style="background:var(--s3);border-radius:7px;padding:8px 10px;cursor:pointer;transition:background .15s" onmouseenter="this.style.background='#dde3f0'" onmouseleave="this.style.background='var(--s3)'" onclick="showStuTrendModal('${c}','영어')">
+            <div style="font-size:10px;color:var(--muted);margin-bottom:2px">영어 📈</div>
             <div style="font-size:15px;font-weight:700;color:var(--c26p)">${d.es26?d.es26.toLocaleString():'-'}<span style="font-size:10px;color:var(--muted);margin-left:2px">${d.es26?'명':''}</span></div>
-            <div style="font-size:10px;color:var(--muted);margin-top:3px;font-size:10px">${d.es26?`초중 ${d.ec26.toLocaleString()} / 고등 ${d.ed26.toLocaleString()}`:'영어반 없음'}</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:3px">${d.es26?`초중 ${d.ec26.toLocaleString()} / 고등 ${d.ed26.toLocaleString()}`:'영어반 없음'}</div>
           </div>
         </div>
       </div>`;
@@ -4946,8 +4946,8 @@ function _initHubStuPanel(){
         <div style="font-size:26px;font-weight:900;color:var(--c26a);line-height:1;margin-bottom:3px">${d.a26.toLocaleString()}<span style="font-size:11px;font-weight:400;color:var(--muted);margin-left:3px">명</span></div>
         <div style="font-size:11px;color:var(--muted);margin-bottom:9px">25년 ${d.a25.toLocaleString()}명</div>
         <div style="height:4px;background:var(--border);border-radius:2px;margin-bottom:10px;overflow:hidden"><div style="height:100%;width:${barW}%;background:var(--c26a)"></div></div>
-        <div style="background:var(--s3);border-radius:7px;padding:8px 10px">
-          <div style="font-size:10px;color:var(--muted);margin-bottom:2px">수학 (고등 포함)</div>
+        <div style="background:var(--s3);border-radius:7px;padding:8px 10px;cursor:pointer;transition:background .15s" onmouseenter="this.style.background='#dde3f0'" onmouseleave="this.style.background='var(--s3)'" onclick="showStuTrendModal('${c}','수학')">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:2px">수학 (고등 포함) 📈</div>
           <div style="font-size:15px;font-weight:700;color:var(--c25)">${d.ms26.toLocaleString()}<span style="font-size:10px;color:var(--muted);margin-left:2px">명</span></div>
           <div style="font-size:10px;color:var(--muted);margin-top:3px">25년 ${d.ms25.toLocaleString()}명</div>
         </div>
