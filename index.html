@@ -1441,24 +1441,12 @@ thead th{font-size:13px}
     <div class="month-bar" id="stu-month-bar"></div>
     <!-- KPI 카드 (동적) -->
     <div id="stu_kpi_cards" class="mini-cards mc4" style="margin-bottom:20px"></div>
-    <!-- 차트 영역 -->
-    <div class="g2" style="margin-bottom:16px">
-      <div class="card">
-        <div class="ch"><div><div class="ct">캠퍼스별 재원생 비교</div><div class="cs" id="stu_bar_label">1월 기준 · 25년 vs 26년 (명)</div></div></div>
-        <div class="cw" style="height:260px"><canvas id="c_stu_bar"></canvas></div>
-      </div>
-      <div class="card">
-        <div class="ch">
-          <div><div class="ct">캠퍼스 월별 추이</div><div class="cs">25년 전체(1~12월) · 26년 누적 실적 비교</div></div>
-          <select class="fsel" id="stu_campus_sel" onchange="updateStudentTrend()" style="font-size:12px;padding:5px 10px">
-            <option value="광진">광진</option><option value="성동">성동</option>
-            <option value="동대문">동대문</option><option value="중랑">중랑</option>
-            <option value="중계">중계</option><option value="송파방이">송파방이</option>
-            <option value="위례">위례</option><option value="미사">미사</option>
-          </select>
-        </div>
-        <div class="cw" style="height:240px"><canvas id="c_stu_trend"></canvas></div>
-      </div>
+    <!-- 차트 영역 (임시 숨김) -->
+    <div style="display:none">
+      <canvas id="c_stu_bar"></canvas>
+      <canvas id="c_stu_trend"></canvas>
+      <span id="stu_bar_label"></span>
+      <select id="stu_campus_sel"><option value="광진">광진</option><option value="성동">성동</option><option value="동대문">동대문</option><option value="중랑">중랑</option><option value="중계">중계</option><option value="송파방이">송파방이</option><option value="위례">위례</option><option value="미사">미사</option></select>
     </div>
     <div id="cb-stu-s1" class="comment-box" style="display:none"><div class="cb-label"><span>✦</span> COMMENT</div><div class="cb-text" id="cb-text-stu-s1"></div><div class="cb-date" id="cb-date-stu-s1"></div></div>
     <div id="ce-stu-s1" class="comment-editor"><div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div><textarea id="ce-text-stu-s1" placeholder="코멘트를 입력하세요..."></textarea><div class="cb-btns"><button class="cb-del" onclick="deleteComment('stu-s1')">삭제</button><button class="cb-save" onclick="saveComment('stu-s1')">저장</button></div></div>
