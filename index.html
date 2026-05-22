@@ -487,6 +487,13 @@ thead th{font-size:13px}
    ③ 모바일 반응형 (≤768px)
 ═══════════════════════════════════ */
 @media(max-width:768px){
+  /* 재원생 stu-wrap 캠퍼스 카드: 4열 → 2열 */
+  #stu_hak_cards,#stu_u2m_cards{grid-template-columns:repeat(2,1fr)!important}
+  /* 손익계산서 헤더 모바일 */
+  #chairman-wrap .dir-header{flex-wrap:wrap;padding-bottom:10px}
+  #chairman-wrap .dir-header>div:last-child{margin-left:0!important;width:100%;flex-direction:column;align-items:flex-start;gap:6px}
+  #chm-month-bar{width:100%;flex-wrap:wrap;padding:4px 0!important;border:none!important}
+  #chairman-wrap .dir-camp-sub{display:none}
   /* 헤더 */
   .hdr{padding:10px 14px;height:auto;flex-direction:column;align-items:flex-start;gap:6px}
   .hdr-l{gap:10px}
@@ -4133,7 +4140,7 @@ function renderStuCards(month){
     const barW=maxBar>0?(d.a26/maxBar*100).toFixed(0):0;
     return `<div style="background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:16px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-        <div style="font-size:13px;font-weight:700">📍 ${c}</div>
+        <div style="font-size:13px;font-weight:700;white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis">📍 ${c}</div>
         <div style="font-size:10px;color:${diff>=0?'var(--c26a)':'var(--loss)'}">${diff>=0?'▲':'▼'}${Math.abs(diff).toLocaleString()}명 (${Math.abs(pct)}%)</div>
       </div>
       <div style="font-size:26px;font-weight:900;color:var(--c26a);line-height:1;margin-bottom:3px">${d.a26.toLocaleString()}<span style="font-size:11px;font-weight:400;color:var(--muted);margin-left:3px">명</span></div>
@@ -4143,12 +4150,12 @@ function renderStuCards(month){
         <div style="background:var(--s3);border-radius:7px;padding:8px 10px;cursor:pointer;transition:background .15s" onmouseenter="this.style.background='#dde3f0'" onmouseleave="this.style.background='var(--s3)'" onclick="showStuTrendModal('${c}','수학')">
           <div style="font-size:10px;color:var(--muted);margin-bottom:2px">수학 📈</div>
           <div style="font-size:15px;font-weight:700;color:var(--c25)">${d.ms26.toLocaleString()}<span style="font-size:10px;color:var(--muted);margin-left:2px">명</span></div>
-          <div style="font-size:10px;color:var(--muted);margin-top:3px">초중 ${d.mc26.toLocaleString()}${d.mg26?` / 영재 ${d.mg26.toLocaleString()}`:''}${d.md26?` / 고등 ${d.md26.toLocaleString()}`:''}</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:3px;word-break:keep-all;line-height:1.5">초중 ${d.mc26.toLocaleString()}${d.mg26?` / 영재 ${d.mg26.toLocaleString()}`:''}${d.md26?` / 고등 ${d.md26.toLocaleString()}`:''}</div>
         </div>
         <div style="background:var(--s3);border-radius:7px;padding:8px 10px;cursor:pointer;transition:background .15s" onmouseenter="this.style.background='#dde3f0'" onmouseleave="this.style.background='var(--s3)'" onclick="showStuTrendModal('${c}','영어')">
           <div style="font-size:10px;color:var(--muted);margin-bottom:2px">영어 📈</div>
           <div style="font-size:15px;font-weight:700;color:var(--c26p)">${d.es26?d.es26.toLocaleString():'-'}<span style="font-size:10px;color:var(--muted);margin-left:2px">${d.es26?'명':''}</span></div>
-          <div style="font-size:10px;color:var(--muted);margin-top:3px">${d.es26?`초중 ${d.ec26.toLocaleString()} / 고등 ${d.ed26.toLocaleString()}`:'영어반 없음'}</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:3px;word-break:keep-all;line-height:1.5">${d.es26?`초중 ${d.ec26.toLocaleString()} / 고등 ${d.ed26.toLocaleString()}`:'영어반 없음'}</div>
         </div>
       </div>
     </div>`;
@@ -4163,7 +4170,7 @@ function renderStuCards(month){
     const barW=maxBar>0?(d.a26/maxBar*100).toFixed(0):0;
     return `<div style="background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:16px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-        <div style="font-size:13px;font-weight:700">📍 ${c}</div>
+        <div style="font-size:13px;font-weight:700;white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis">📍 ${c}</div>
         <div style="font-size:10px;color:${diff>=0?'var(--c26a)':'var(--loss)'}">${diff>=0?'▲':'▼'}${Math.abs(diff).toLocaleString()}명 (${Math.abs(pct)}%)</div>
       </div>
       <div style="font-size:26px;font-weight:900;color:var(--c26a);line-height:1;margin-bottom:3px">${d.a26.toLocaleString()}<span style="font-size:11px;font-weight:400;color:var(--muted);margin-left:3px">명</span></div>
@@ -4911,7 +4918,7 @@ function _initHubStuPanel(){
       const barW = maxBar>0?(d.a26/maxBar*100).toFixed(0):0;
       return `<div style="background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:16px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-          <div style="font-size:13px;font-weight:700">📍 ${c}</div>
+          <div style="font-size:13px;font-weight:700;white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis">📍 ${c}</div>
           <div style="font-size:10px;color:${diff>=0?'var(--c26a)':'var(--loss)'}">${diff>=0?'▲':'▼'}${Math.abs(diff).toLocaleString()}명 (${Math.abs(pct)}%)</div>
         </div>
         <div style="font-size:26px;font-weight:900;color:var(--c26a);line-height:1;margin-bottom:3px">${d.a26.toLocaleString()}<span style="font-size:11px;font-weight:400;color:var(--muted);margin-left:3px">명</span></div>
@@ -4921,12 +4928,12 @@ function _initHubStuPanel(){
           <div style="background:var(--s3);border-radius:7px;padding:8px 10px;cursor:pointer;transition:background .15s" onmouseenter="this.style.background='#dde3f0'" onmouseleave="this.style.background='var(--s3)'" onclick="showStuTrendModal('${c}','수학')">
             <div style="font-size:10px;color:var(--muted);margin-bottom:2px">수학 📈</div>
             <div style="font-size:15px;font-weight:700;color:var(--c25)">${d.ms26.toLocaleString()}<span style="font-size:10px;color:var(--muted);margin-left:2px">명</span></div>
-            <div style="font-size:10px;color:var(--muted);margin-top:3px">초중 ${d.mc26.toLocaleString()}${d.mg26?` / 영재 ${d.mg26.toLocaleString()}`:''}${d.md26?` / 고등 ${d.md26.toLocaleString()}`:''}</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:3px;word-break:keep-all;line-height:1.5">초중 ${d.mc26.toLocaleString()}${d.mg26?` / 영재 ${d.mg26.toLocaleString()}`:''}${d.md26?` / 고등 ${d.md26.toLocaleString()}`:''}</div>
           </div>
           <div style="background:var(--s3);border-radius:7px;padding:8px 10px;cursor:pointer;transition:background .15s" onmouseenter="this.style.background='#dde3f0'" onmouseleave="this.style.background='var(--s3)'" onclick="showStuTrendModal('${c}','영어')">
             <div style="font-size:10px;color:var(--muted);margin-bottom:2px">영어 📈</div>
             <div style="font-size:15px;font-weight:700;color:var(--c26p)">${d.es26?d.es26.toLocaleString():'-'}<span style="font-size:10px;color:var(--muted);margin-left:2px">${d.es26?'명':''}</span></div>
-            <div style="font-size:10px;color:var(--muted);margin-top:3px">${d.es26?`초중 ${d.ec26.toLocaleString()} / 고등 ${d.ed26.toLocaleString()}`:'영어반 없음'}</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:3px;word-break:keep-all;line-height:1.5">${d.es26?`초중 ${d.ec26.toLocaleString()} / 고등 ${d.ed26.toLocaleString()}`:'영어반 없음'}</div>
           </div>
         </div>
       </div>`;
@@ -4940,7 +4947,7 @@ function _initHubStuPanel(){
       const barW = maxBar>0?(d.a26/maxBar*100).toFixed(0):0;
       return `<div style="background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:16px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-          <div style="font-size:13px;font-weight:700">📍 ${c}</div>
+          <div style="font-size:13px;font-weight:700;white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis">📍 ${c}</div>
           <div style="font-size:10px;color:${diff>=0?'var(--c26a)':'var(--loss)'}">${diff>=0?'▲':'▼'}${Math.abs(diff).toLocaleString()}명 (${Math.abs(pct)}%)</div>
         </div>
         <div style="font-size:26px;font-weight:900;color:var(--c26a);line-height:1;margin-bottom:3px">${d.a26.toLocaleString()}<span style="font-size:11px;font-weight:400;color:var(--muted);margin-left:3px">명</span></div>
