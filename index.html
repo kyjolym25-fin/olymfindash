@@ -4194,21 +4194,60 @@ function renderStuBar(month){
 }
 
 function renderStuMathEng(month){
-  stuMathChart=mkBar('c_stu_math',CAMPS_ALL,[
+  // 스택 합계를 막대 위에 표시하는 인라인 플러그인
+  const stackTotalPlugin = {
+    id:'stackTotal',
+    afterDatasetsDraw(chart){
+      const {ctx, data, scales:{x,y}} = chart;
+      const nPts = data.datasets[0]?.data?.length || 0;
+      ctx.save();
+      ctx.textAlign='center'; ctx.textBaseline='bottom';
+      for(let i=0; i<nPts; i++){
+        const totals={}, minY={};
+        data.datasets.forEach((ds,di)=>{
+          const meta=chart.getDatasetMeta(di);
+          if(meta.hidden) return;
+          const st=ds.stack||'def';
+          totals[st]=(totals[st]||0)+(ds.data[i]||0);
+          const bar=meta.data[i];
+          if(bar) minY[st]=Math.min(minY[st]??Infinity, bar.y);
+        });
+        Object.entries(totals).forEach(([st,tot])=>{
+          if(tot<=0) return;
+          ctx.font=st==='26'?'bold 11px sans-serif':'11px sans-serif';
+          ctx.fillStyle=st==='26'?'#1a1a1a':'#9DA8C3';
+          ctx.fillText(tot.toLocaleString(), x.getPixelForIndex(i), (minY[st]??0)-4);
+        });
+      }
+      ctx.restore();
+    }
+  };
+
+  const mkStackBar=(id,labels,datasets)=>{
+    const el=document.getElementById(id); if(!el) return;
+    _destroyChart(el);
+    return new Chart(el.getContext('2d'),{
+      type:'bar', data:{labels,datasets},
+      options:{...CO_SM, plugins:{legend:{labels:{color:'#9DA8C3',font:{size:10},boxWidth:8,padding:8}}}},
+      plugins:[stackTotalPlugin]
+    });
+  };
+
+  stuMathChart=mkStackBar('c_stu_math',CAMPS_ALL,[
     {label:'26년 초중',data:CAMPS_ALL.map(c=>getStu(c,month).mc26),backgroundColor:'#10B981cc',borderRadius:3,borderSkipped:false,stack:'26'},
     {label:'26년 영재',data:CAMPS_ALL.map(c=>getStu(c,month).mg26),backgroundColor:'#7C5CFCcc',borderRadius:3,borderSkipped:false,stack:'26'},
     {label:'26년 고등',data:CAMPS_ALL.map(c=>getStu(c,month).md26),backgroundColor:'#F59E0Bcc',borderRadius:3,borderSkipped:false,stack:'26'},
     {label:'25년 초중',data:CAMPS_ALL.map(c=>getStu(c,month).mc25),backgroundColor:'#4361EE44',borderRadius:3,borderSkipped:false,stack:'25'},
     {label:'25년 영재',data:CAMPS_ALL.map(c=>getStu(c,month).mg25),backgroundColor:'#7C5CFC44',borderRadius:3,borderSkipped:false,stack:'25'},
     {label:'25년 고등',data:CAMPS_ALL.map(c=>getStu(c,month).md25),backgroundColor:'#F59E0B44',borderRadius:3,borderSkipped:false,stack:'25'},
-  ],{plugins:{legend:{labels:{color:'#9DA8C3',font:{size:10},boxWidth:8,padding:8}}}});
+  ]);
 
-  stuEngChart=mkBar('c_stu_eng',CAMPS_HAK,[
+  stuEngChart=mkStackBar('c_stu_eng',CAMPS_HAK,[
     {label:'26년 초중',data:CAMPS_HAK.map(c=>getStu(c,month).ec26),backgroundColor:'#10B981cc',borderRadius:3,borderSkipped:false,stack:'26'},
     {label:'26년 고등',data:CAMPS_HAK.map(c=>getStu(c,month).ed26),backgroundColor:'#F59E0Bcc',borderRadius:3,borderSkipped:false,stack:'26'},
     {label:'25년 초중',data:CAMPS_HAK.map(c=>getStu(c,month).ec25),backgroundColor:'#4361EE44',borderRadius:3,borderSkipped:false,stack:'25'},
     {label:'25년 고등',data:CAMPS_HAK.map(c=>getStu(c,month).ed25),backgroundColor:'#7C5CFC44',borderRadius:3,borderSkipped:false,stack:'25'},
-  ],{plugins:{legend:{labels:{color:'#9DA8C3',font:{size:10},boxWidth:8,padding:8}}}});
+  ]);
 }
 
 function renderStuTable(month){
