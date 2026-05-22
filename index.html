@@ -4627,7 +4627,11 @@ function applyAuth(noRestore=false){
     if(!noRestore && !dashOpen && !dirOpen && !chmOpen && !stuOpen){
       const saved=getDashView();
       const canPl2=isAdmin||(!isDirector&&!!(s&&s.can_pl));
-      if(saved==='chairman'&&canPl2){
+      if(saved==='students'){
+        // 데이터 로드 후 _restoreView()에서 goStuDash() 처리, 여기선 대기
+        hub.style.display='none';
+        const sw=document.getElementById('stu-wrap'); if(sw) sw.style.display='none';
+      } else if(saved==='chairman'&&canPl2){
         hub.style.display='none';
         chmWrap.style.display='block';
         // initChmDash()는 _restoreView()에서 데이터 로드 후 호출
@@ -4745,6 +4749,7 @@ async function goHub(){
   const stuWrapHub=document.getElementById('stu-wrap');
   if(stuWrapHub) stuWrapHub.style.display='none';
   tabs.style.display='none';
+  history.replaceState(null,'',window.location.pathname);
   saveDashView('hub');
   initHubWidget();
   // 허브 진입 시 항상 DB에서 최신 권한 갱신
@@ -4760,6 +4765,7 @@ function goStuDash(){
   document.getElementById('stu-wrap').style.display='block';
   // .page 클래스는 기본 display:none이므로 명시적으로 on 추가
   document.getElementById('pg-students').classList.add('on');
+  history.replaceState(null,'','#students');
   saveDashView('students');
   const lmi = latestActMi >= 0 ? latestActMi : 0;
   if(!inited['students']){ inited['students']=true; stuMonth=lmi; initStudents(); }
