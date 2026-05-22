@@ -704,7 +704,7 @@ thead th{font-size:13px}
         </div>
 
         <!-- 재원생 현황 바로가기 -->
-        <div class="hub-ch-card" onclick="goSoinDash('students')">
+        <div class="hub-ch-card" onclick="goStuDash()">
           <div class="hub-ch-icon">👥</div>
           <div class="hub-ch-body">
             <div class="hub-ch-title">재원생 현황</div>
@@ -1401,184 +1401,6 @@ thead th{font-size:13px}
 
 </div><!-- /dept -->
 
-<!-- ═══════════════════════════ 재원생 현황 ═══════════════════════════ -->
-<div class="page" id="pg-students">
-
-  <!-- 월 선택 -->
-  <div class="month-bar" id="stu-month-bar"></div>
-
-  <!-- KPI 카드 (동적) -->
-  <div id="stu_kpi_cards" class="mini-cards mc4" style="margin-bottom:20px"></div>
-
-  <!-- 차트 영역 (그래프 먼저) -->
-  <div class="g2" style="margin-bottom:16px">
-    <div class="card">
-      <div class="ch">
-        <div><div class="ct">캠퍼스별 재원생 비교</div><div class="cs" id="stu_bar_label">1월 기준 · 25년 vs 26년 (명)</div></div>
-      </div>
-      <div class="cw" style="height:260px"><canvas id="c_stu_bar"></canvas></div>
-    </div>
-    <div class="card">
-      <div class="ch">
-        <div><div class="ct">캠퍼스 월별 추이</div><div class="cs">25년 전체(1~12월) · 26년 누적 실적 비교</div></div>
-        <select class="fsel" id="stu_campus_sel" onchange="updateStudentTrend()" style="font-size:12px;padding:5px 10px">
-          <option value="광진">광진</option><option value="성동">성동</option>
-          <option value="동대문">동대문</option><option value="중랑">중랑</option>
-          <option value="중계">중계</option><option value="송파방이">송파방이</option>
-          <option value="위례">위례</option><option value="미사">미사</option>
-        </select>
-      </div>
-      <div class="cw" style="height:240px"><canvas id="c_stu_trend"></canvas></div>
-    </div>
-  </div>
-
-
-  <div id="cb-stu-s1" class="comment-box" style="display:none">
-    <div class="cb-label"><span>✦</span> COMMENT</div>
-    <div class="cb-text" id="cb-text-stu-s1"></div>
-    <div class="cb-date" id="cb-date-stu-s1"></div>
-  </div>
-  <div id="ce-stu-s1" class="comment-editor">
-    <div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div>
-    <textarea id="ce-text-stu-s1" placeholder="코멘트를 입력하세요..."></textarea>
-    <div class="cb-btns">
-      <button class="cb-del" onclick="deleteComment('stu-s1')">삭제</button>
-      <button class="cb-save" onclick="saveComment('stu-s1')">저장</button>
-    </div>
-  </div>
-
-  <!-- 수학/영어 분리 차트 -->
-  <div class="g2" style="margin-bottom:16px">
-    <div class="card">
-      <div class="ch"><div><div class="ct" id="stu_math_title">수학 과목별 재원생 (1월)</div><div class="cs">초중 · 영재 · 고등 · 26년 실적 vs 25년 실적</div></div></div>
-      <div class="cw" style="height:230px"><canvas id="c_stu_math"></canvas></div>
-    </div>
-    <div class="card">
-      <div class="ch"><div><div class="ct" id="stu_eng_title">영어 과목별 재원생 (1월)</div><div class="cs">초중 · 고등 · 학원사업본부 캠퍼스</div></div></div>
-      <div class="cw" style="height:230px"><canvas id="c_stu_eng"></canvas></div>
-    </div>
-  </div>
-
-
-  <div id="cb-stu-s2" class="comment-box" style="display:none">
-    <div class="cb-label"><span>✦</span> COMMENT</div>
-    <div class="cb-text" id="cb-text-stu-s2"></div>
-    <div class="cb-date" id="cb-date-stu-s2"></div>
-  </div>
-  <div id="ce-stu-s2" class="comment-editor">
-    <div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div>
-    <textarea id="ce-text-stu-s2" placeholder="코멘트를 입력하세요..."></textarea>
-    <div class="cb-btns">
-      <button class="cb-del" onclick="deleteComment('stu-s2')">삭제</button>
-      <button class="cb-save" onclick="saveComment('stu-s2')">저장</button>
-    </div>
-  </div>
-
-  <!-- 캠퍼스 카드 (그래프 아래) -->
-  <div class="full card" style="margin-bottom:18px">
-    <div style="margin-bottom:12px;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.5px">🏫 학원사업본부 캠퍼스별 재원생</div>
-    <div id="stu_hak_cards" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px"></div>
-  </div>
-
-  <div class="full card" style="margin-bottom:18px">
-    <div style="margin-bottom:12px;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.5px">📐 U2M사업본부 캠퍼스별 재원생</div>
-    <div id="stu_u2m_cards" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px"></div>
-  </div>
-
-
-  <div id="cb-stu-s3" class="comment-box" style="display:none">
-    <div class="cb-label"><span>✦</span> COMMENT</div>
-    <div class="cb-text" id="cb-text-stu-s3"></div>
-    <div class="cb-date" id="cb-date-stu-s3"></div>
-  </div>
-  <div id="ce-stu-s3" class="comment-editor">
-    <div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div>
-    <textarea id="ce-text-stu-s3" placeholder="코멘트를 입력하세요..."></textarea>
-    <div class="cb-btns">
-      <button class="cb-del" onclick="deleteComment('stu-s3')">삭제</button>
-      <button class="cb-save" onclick="saveComment('stu-s3')">저장</button>
-    </div>
-  </div>
-
-  <!-- 당월 상세표 -->
-  <div class="full card">
-    <div class="ch"><div><div class="ct" id="stu_table_title">캠퍼스별 재원생 상세표 (1월)</div><div class="cs">수학(초중/영재/고등) + 영어(초중/고등) · 전년 대비</div></div></div>
-    <div class="tw"><table>
-      <thead><tr>
-        <th>캠퍼스</th>
-        <th class="r" style="color:var(--c26a)">26년<br>합계</th>
-        <th class="r">수학<br>소계</th>
-        <th class="r" style="color:var(--muted)">└초중</th>
-        <th class="r" style="color:var(--muted)">└영재</th>
-        <th class="r" style="color:var(--muted)">└고등</th>
-        <th class="r">영어<br>소계</th>
-        <th class="r" style="color:var(--muted)">└초중</th>
-        <th class="r" style="color:var(--muted)">└고등</th>
-        <th class="r" style="color:var(--c25)">25년<br>합계</th>
-        <th class="r">YoY<br>증감</th>
-        <th class="r">YoY<br>(%)</th>
-      </tr></thead>
-      <tbody id="stu_table"></tbody>
-    </table></div>
-  </div>
-
-
-  <div id="cb-stu-s4" class="comment-box" style="display:none">
-    <div class="cb-label"><span>✦</span> COMMENT</div>
-    <div class="cb-text" id="cb-text-stu-s4"></div>
-    <div class="cb-date" id="cb-date-stu-s4"></div>
-  </div>
-  <div id="ce-stu-s4" class="comment-editor">
-    <div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div>
-    <textarea id="ce-text-stu-s4" placeholder="코멘트를 입력하세요..."></textarea>
-    <div class="cb-btns">
-      <button class="cb-del" onclick="deleteComment('stu-s4')">삭제</button>
-      <button class="cb-save" onclick="saveComment('stu-s4')">저장</button>
-    </div>
-  </div>
-
-  <!-- YTD 섹션 구분 -->
-  <div class="period-section-hd" style="margin-top:24px">
-    <span class="period-badge ytd">📊 YTD 누적 재원생 (1~<span id="stu_ytd_month_label">1</span>월)</span>
-    <div class="period-line"></div>
-  </div>
-
-  <!-- YTD 상세표 -->
-  <div class="full card">
-    <div class="ch"><div><div class="ct" id="stu_ytd_title">캠퍼스별 재원생 YTD 누적 (1~1월)</div><div class="cs">월별 재원생 합계 누적 · 25년 YTD 대비</div></div></div>
-    <div class="tw"><table>
-      <thead>
-        <tr>
-          <th rowspan="2">캠퍼스</th>
-          <th class="r" rowspan="2" style="color:var(--c26a)">26년<br>YTD</th>
-          <th class="r" rowspan="2" style="color:var(--c25)">25년<br>YTD</th>
-          <th class="r" colspan="2" style="text-align:center;border-left:1px solid var(--border2);padding-bottom:3px">YoY</th>
-          <th class="r" colspan="2" style="text-align:center;border-left:1px solid var(--border2);padding-bottom:3px">월평균</th>
-        </tr>
-        <tr>
-          <th class="r" style="color:var(--muted);border-left:1px solid var(--border2)">증감</th>
-          <th class="r" style="color:var(--muted)">(%)</th>
-          <th class="r" style="color:var(--c26a);border-left:1px solid var(--border2)">26년</th>
-          <th class="r" style="color:var(--c25)">25년</th>
-        </tr>
-      </thead>
-      <tbody id="stu_ytd_table"></tbody>
-    </table></div>
-  </div>
-  <div id="cb-stu-s5" class="comment-box" style="display:none">
-    <div class="cb-label"><span>✦</span> COMMENT</div>
-    <div class="cb-text" id="cb-text-stu-s5"></div>
-    <div class="cb-date" id="cb-date-stu-s5"></div>
-  </div>
-  <div id="ce-stu-s5" class="comment-editor">
-    <div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div>
-    <textarea id="ce-text-stu-s5" placeholder="코멘트를 입력하세요..."></textarea>
-    <div class="cb-btns">
-      <button class="cb-del" onclick="deleteComment('stu-s5')">삭제</button>
-      <button class="cb-save" onclick="saveComment('stu-s5')">저장</button>
-    </div>
-  </div>
-</div>
 
 <!-- ═══════════════════════════ 데이터 로우 ═══════════════════════════ -->
 <div class="page" id="pg-rawdata">
@@ -1603,6 +1425,115 @@ thead th{font-size:13px}
 
 <!-- pg-admin placeholder (moved outside dashboard-wrap) -->
 </div><!-- /dashboard-wrap (closed early) -->
+
+<!-- ══ 재원생 현황 ══ -->
+<div id="stu-wrap" style="display:none">
+<div class="main">
+  <div class="dir-header">
+    <button class="dir-back-btn" onclick="goHub()">← 홈</button>
+    <div>
+      <div class="dir-camp-name">재원생 현황</div>
+      <div class="dir-camp-sub">캠퍼스별 수학·영어 재원생 월별 현황</div>
+    </div>
+  </div>
+  <div class="page on" id="pg-students">
+    <!-- 월 선택 -->
+    <div class="month-bar" id="stu-month-bar"></div>
+    <!-- KPI 카드 (동적) -->
+    <div id="stu_kpi_cards" class="mini-cards mc4" style="margin-bottom:20px"></div>
+    <!-- 차트 영역 -->
+    <div class="g2" style="margin-bottom:16px">
+      <div class="card">
+        <div class="ch"><div><div class="ct">캠퍼스별 재원생 비교</div><div class="cs" id="stu_bar_label">1월 기준 · 25년 vs 26년 (명)</div></div></div>
+        <div class="cw" style="height:260px"><canvas id="c_stu_bar"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="ch">
+          <div><div class="ct">캠퍼스 월별 추이</div><div class="cs">25년 전체(1~12월) · 26년 누적 실적 비교</div></div>
+          <select class="fsel" id="stu_campus_sel" onchange="updateStudentTrend()" style="font-size:12px;padding:5px 10px">
+            <option value="광진">광진</option><option value="성동">성동</option>
+            <option value="동대문">동대문</option><option value="중랑">중랑</option>
+            <option value="중계">중계</option><option value="송파방이">송파방이</option>
+            <option value="위례">위례</option><option value="미사">미사</option>
+          </select>
+        </div>
+        <div class="cw" style="height:240px"><canvas id="c_stu_trend"></canvas></div>
+      </div>
+    </div>
+    <div id="cb-stu-s1" class="comment-box" style="display:none"><div class="cb-label"><span>✦</span> COMMENT</div><div class="cb-text" id="cb-text-stu-s1"></div><div class="cb-date" id="cb-date-stu-s1"></div></div>
+    <div id="ce-stu-s1" class="comment-editor"><div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div><textarea id="ce-text-stu-s1" placeholder="코멘트를 입력하세요..."></textarea><div class="cb-btns"><button class="cb-del" onclick="deleteComment('stu-s1')">삭제</button><button class="cb-save" onclick="saveComment('stu-s1')">저장</button></div></div>
+    <!-- 수학/영어 분리 차트 -->
+    <div class="g2" style="margin-bottom:16px">
+      <div class="card">
+        <div class="ch"><div><div class="ct" id="stu_math_title">수학 과목별 재원생 (1월)</div><div class="cs">초중 · 영재 · 고등 · 26년 실적 vs 25년 실적</div></div></div>
+        <div class="cw" style="height:230px"><canvas id="c_stu_math"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="ch"><div><div class="ct" id="stu_eng_title">영어 과목별 재원생 (1월)</div><div class="cs">초중 · 고등 · 학원사업본부 캠퍼스</div></div></div>
+        <div class="cw" style="height:230px"><canvas id="c_stu_eng"></canvas></div>
+      </div>
+    </div>
+    <div id="cb-stu-s2" class="comment-box" style="display:none"><div class="cb-label"><span>✦</span> COMMENT</div><div class="cb-text" id="cb-text-stu-s2"></div><div class="cb-date" id="cb-date-stu-s2"></div></div>
+    <div id="ce-stu-s2" class="comment-editor"><div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div><textarea id="ce-text-stu-s2" placeholder="코멘트를 입력하세요..."></textarea><div class="cb-btns"><button class="cb-del" onclick="deleteComment('stu-s2')">삭제</button><button class="cb-save" onclick="saveComment('stu-s2')">저장</button></div></div>
+    <!-- 캠퍼스 카드 -->
+    <div class="full card" style="margin-bottom:18px">
+      <div style="margin-bottom:12px;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.5px">🏫 학원사업본부 캠퍼스별 재원생</div>
+      <div id="stu_hak_cards" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px"></div>
+    </div>
+    <div class="full card" style="margin-bottom:18px">
+      <div style="margin-bottom:12px;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.5px">📐 U2M사업본부 캠퍼스별 재원생</div>
+      <div id="stu_u2m_cards" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px"></div>
+    </div>
+    <div id="cb-stu-s3" class="comment-box" style="display:none"><div class="cb-label"><span>✦</span> COMMENT</div><div class="cb-text" id="cb-text-stu-s3"></div><div class="cb-date" id="cb-date-stu-s3"></div></div>
+    <div id="ce-stu-s3" class="comment-editor"><div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div><textarea id="ce-text-stu-s3" placeholder="코멘트를 입력하세요..."></textarea><div class="cb-btns"><button class="cb-del" onclick="deleteComment('stu-s3')">삭제</button><button class="cb-save" onclick="saveComment('stu-s3')">저장</button></div></div>
+    <!-- 당월 상세표 -->
+    <div class="full card">
+      <div class="ch"><div><div class="ct" id="stu_table_title">캠퍼스별 재원생 상세표 (1월)</div><div class="cs">수학(초중/영재/고등) + 영어(초중/고등) · 전년 대비</div></div></div>
+      <div class="tw"><table><thead><tr>
+        <th>캠퍼스</th>
+        <th class="r" style="color:var(--c26a)">26년<br>합계</th>
+        <th class="r">수학<br>소계</th>
+        <th class="r" style="color:var(--muted)">└초중</th>
+        <th class="r" style="color:var(--muted)">└영재</th>
+        <th class="r" style="color:var(--muted)">└고등</th>
+        <th class="r">영어<br>소계</th>
+        <th class="r" style="color:var(--muted)">└초중</th>
+        <th class="r" style="color:var(--muted)">└고등</th>
+        <th class="r" style="color:var(--c25)">25년<br>합계</th>
+        <th class="r">YoY<br>증감</th>
+        <th class="r">YoY<br>(%)</th>
+      </tr></thead><tbody id="stu_table"></tbody></table></div>
+    </div>
+    <div id="cb-stu-s4" class="comment-box" style="display:none"><div class="cb-label"><span>✦</span> COMMENT</div><div class="cb-text" id="cb-text-stu-s4"></div><div class="cb-date" id="cb-date-stu-s4"></div></div>
+    <div id="ce-stu-s4" class="comment-editor"><div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div><textarea id="ce-text-stu-s4" placeholder="코멘트를 입력하세요..."></textarea><div class="cb-btns"><button class="cb-del" onclick="deleteComment('stu-s4')">삭제</button><button class="cb-save" onclick="saveComment('stu-s4')">저장</button></div></div>
+    <!-- YTD 섹션 -->
+    <div class="period-section-hd" style="margin-top:24px">
+      <span class="period-badge ytd">📊 YTD 누적 재원생 (1~<span id="stu_ytd_month_label">1</span>월)</span>
+      <div class="period-line"></div>
+    </div>
+    <div class="full card">
+      <div class="ch"><div><div class="ct" id="stu_ytd_title">캠퍼스별 재원생 YTD 누적 (1~1월)</div><div class="cs">월별 재원생 합계 누적 · 25년 YTD 대비</div></div></div>
+      <div class="tw"><table><thead>
+        <tr>
+          <th rowspan="2">캠퍼스</th>
+          <th class="r" rowspan="2" style="color:var(--c26a)">26년<br>YTD</th>
+          <th class="r" rowspan="2" style="color:var(--c25)">25년<br>YTD</th>
+          <th class="r" colspan="2" style="text-align:center;border-left:1px solid var(--border2);padding-bottom:3px">YoY</th>
+          <th class="r" colspan="2" style="text-align:center;border-left:1px solid var(--border2);padding-bottom:3px">월평균</th>
+        </tr>
+        <tr>
+          <th class="r" style="color:var(--muted);border-left:1px solid var(--border2)">증감</th>
+          <th class="r" style="color:var(--muted)">(%)</th>
+          <th class="r" style="color:var(--c26a);border-left:1px solid var(--border2)">26년</th>
+          <th class="r" style="color:var(--c25)">25년</th>
+        </tr>
+      </thead><tbody id="stu_ytd_table"></tbody></table></div>
+    </div>
+    <div id="cb-stu-s5" class="comment-box" style="display:none"><div class="cb-label"><span>✦</span> COMMENT</div><div class="cb-text" id="cb-text-stu-s5"></div><div class="cb-date" id="cb-date-stu-s5"></div></div>
+    <div id="ce-stu-s5" class="comment-editor"><div class="ce-hd"><span class="ce-hd-title">💬 코멘트</span><span class="ce-hd-badge">편집 중</span></div><textarea id="ce-text-stu-s5" placeholder="코멘트를 입력하세요..."></textarea><div class="cb-btns"><button class="cb-del" onclick="deleteComment('stu-s5')">삭제</button><button class="cb-save" onclick="saveComment('stu-s5')">저장</button></div></div>
+  </div><!-- /pg-students -->
+</div><!-- /main -->
+</div><!-- /stu-wrap -->
 
 <!-- ══ 관리자 페이지 ══ -->
 <div id="admin-wrap" style="display:none">
@@ -4691,7 +4622,9 @@ function applyAuth(noRestore=false){
     const dashOpen = dash.style.display==='block';
     const dirOpen  = dirWrap.style.display==='block';
     const chmOpen  = chmWrap&&chmWrap.style.display==='block';
-    if(!noRestore && !dashOpen && !dirOpen && !chmOpen){
+    const stuWrapEl= document.getElementById('stu-wrap');
+    const stuOpen  = stuWrapEl&&stuWrapEl.style.display==='block';
+    if(!noRestore && !dashOpen && !dirOpen && !chmOpen && !stuOpen){
       const saved=getDashView();
       const canPl2=isAdmin||(!isDirector&&!!(s&&s.can_pl));
       if(saved==='chairman'&&canPl2){
@@ -4809,12 +4742,26 @@ async function goHub(){
   if(rcptWrapHub) rcptWrapHub.style.display='none';
   const adminWrapHub=document.getElementById('admin-wrap');
   if(adminWrapHub) adminWrapHub.style.display='none';
+  const stuWrapHub=document.getElementById('stu-wrap');
+  if(stuWrapHub) stuWrapHub.style.display='none';
   tabs.style.display='none';
   saveDashView('hub');
   initHubWidget();
   // 허브 진입 시 항상 DB에서 최신 권한 갱신
   await _refreshSessionPerms();
   applyAuth();
+}
+
+function goStuDash(){
+  ['hub-screen','dashboard-wrap','director-wrap','chairman-wrap','receipt-wrap','admin-wrap'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.style.display='none';
+  });
+  document.getElementById('mainTabs').style.display='none';
+  document.getElementById('stu-wrap').style.display='block';
+  saveDashView('students');
+  const lmi = latestActMi >= 0 ? latestActMi : 0;
+  if(!inited['students']){ inited['students']=true; stuMonth=lmi; initStudents(); }
+  else { buildStuMonthBar(); setStuMonth(stuMonth); }
 }
 
 // ── 허브 위젯 ──
@@ -6869,6 +6816,9 @@ function _restoreView(){
   if(rcptWrapRv) rcptWrapRv.style.display='none';
   const adminWrapRv=document.getElementById('admin-wrap');
   if(adminWrapRv) adminWrapRv.style.display='none';
+  const stuWrapRv=document.getElementById('stu-wrap');
+  if(stuWrapRv) stuWrapRv.style.display='none';
+  if(view==='students'){ goStuDash(); return; }
   if(view==='admin'&&s.role==='admin'){
     goAdminPanel(); return;
   }
