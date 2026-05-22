@@ -444,18 +444,18 @@ tbody td.indent{padding-left:28px;color:var(--muted2)}
 /* 상세 KPI 카드 */
 .dir-kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
 @media(max-width:900px){.dir-kpi-grid{grid-template-columns:repeat(2,1fr)}}
-.dir-kpi-card{border-radius:14px;padding:18px 20px;position:relative;overflow:hidden;flex:1}
-.dir-kpi-card::after{content:'';position:absolute;right:-18px;top:-18px;width:75px;height:75px;border-radius:50%;background:rgba(255,255,255,.13)}
-.dir-kpi-blue{background:linear-gradient(135deg,#4361EE,#738EFF);color:#fff}
-.dir-kpi-green{background:linear-gradient(135deg,#059669,#34D399);color:#fff}
-.dir-kpi-purple{background:linear-gradient(135deg,#7C5CFC,#A78BFA);color:#fff}
-.dir-kpi-amber{background:linear-gradient(135deg,#D97706,#FBBF24);color:#fff}
-.dir-kpi-red{background:linear-gradient(135deg,#DC2626,#F87171);color:#fff}
-.dir-kpi-lbl{font-size:11px;font-weight:600;opacity:.85;letter-spacing:.3px;margin-bottom:8px}
-.dir-kpi-val{font-size:24px;font-weight:900;letter-spacing:-1px;line-height:1.1}
-.dir-kpi-unit{font-size:11px;font-weight:400;opacity:.8;margin-left:2px}
-.dir-kpi-sub{margin-top:7px;font-size:11px;opacity:.85;display:flex;align-items:center;gap:4px}
-.dir-kpi-delta{display:inline-block;background:rgba(255,255,255,.22);border-radius:20px;padding:1px 8px;font-weight:700;font-size:11px}
+.dir-kpi-card{border-radius:14px;padding:18px 20px;position:relative;overflow:hidden;flex:1;background:var(--s1);box-shadow:0 2px 12px rgba(0,0,0,.08)}
+.dir-kpi-card::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:14px 14px 0 0}
+.dir-kpi-blue::after{background:linear-gradient(90deg,#4361EE,#738EFF)}
+.dir-kpi-green::after{background:linear-gradient(90deg,#10B981,#34D399)}
+.dir-kpi-purple::after{background:linear-gradient(90deg,#7C5CFC,#A78BFA)}
+.dir-kpi-amber::after{background:linear-gradient(90deg,#D97706,#FBBF24)}
+.dir-kpi-red::after{background:linear-gradient(90deg,#DC2626,#F87171)}
+.dir-kpi-lbl{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.3px;margin-bottom:8px}
+.dir-kpi-val{font-size:24px;font-weight:900;letter-spacing:-1px;line-height:1.1;color:var(--text)}
+.dir-kpi-unit{font-size:11px;font-weight:400;color:var(--muted);margin-left:2px}
+.dir-kpi-sub{margin-top:7px;font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px}
+.dir-kpi-delta{display:inline-block;background:var(--s3);border-radius:20px;padding:1px 8px;font-weight:700;font-size:11px;color:var(--text)}
 .dir-detail-bar{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
 .dir-detail-period-tag{font-size:11px;font-weight:600;color:var(--c25);background:#EEF2FF;border:1px solid #C7D2FE;border-radius:20px;padding:4px 14px}
 .dir-detail-unit-tag{font-size:11px;color:var(--muted);padding:4px 0}
@@ -4192,26 +4192,28 @@ function renderStuBar(month){
 }
 
 function _drawStuStackTotals(chart){
-  const {ctx,data,scales}=chart;
-  if(!scales?.x||!scales?.y) return;
+  const {ctx,data}=chart;
   const nPts=data.datasets[0]?.data?.length||0;
   ctx.save();
   ctx.textAlign='center'; ctx.textBaseline='bottom';
   for(let i=0;i<nPts;i++){
-    const totals={},minY={};
+    const totals={},minY={},xPos={};
     data.datasets.forEach((ds,di)=>{
       const meta=chart.getDatasetMeta(di);
       if(meta.hidden) return;
       const st=ds.stack||'def';
       totals[st]=(totals[st]||0)+(ds.data[i]||0);
       const bar=meta.data[i];
-      if(bar) minY[st]=Math.min(minY[st]??Infinity,bar.y);
+      if(bar){
+        minY[st]=Math.min(minY[st]??Infinity, bar.y);
+        xPos[st]=bar.x;
+      }
     });
     Object.entries(totals).forEach(([st,tot])=>{
-      if(tot<=0) return;
+      if(tot<=0||xPos[st]==null) return;
       ctx.font=st==='26'?'bold 11px sans-serif':'11px sans-serif';
       ctx.fillStyle=st==='26'?'#1a1a1a':'#9DA8C3';
-      ctx.fillText(tot.toLocaleString(),scales.x.getPixelForIndex(i),(minY[st]??0)-4);
+      ctx.fillText(tot.toLocaleString(), xPos[st], (minY[st]??0)-4);
     });
   }
   ctx.restore();
@@ -6554,7 +6556,7 @@ function renderDirDetail(){
   const p1K=getKpiSums(null,'profit1');
   const p2K=getKpiSums(null,'profit2');
   const fxK=v=>v!=null?Math.round(v/1000).toLocaleString('ko-KR'):'-';
-  const growK=(a,b)=>{if(b==null||b===0||a==null)return '';const p=Math.round((a-b)/Math.abs(b)*100);return `<span class="dir-kpi-delta">${p>=0?'+':''}${p}%</span>`;};
+  const growK=(a,b)=>{if(b==null||b===0||a==null)return '';const p=Math.round((a-b)/Math.abs(b)*100);return `<span class="dir-kpi-delta" style="color:${p>=0?'#059669':'var(--loss)'}">${p>=0?'+':''}${p}%</span>`;};
   const pctK=(a,b)=>(!b||b===0||a==null)?'-':Math.round(a/b*100)+'%';
   const periodLbl=activeMs.length===1?MN[activeMs[0]]:`${MN[activeMs[0]]}~${MN[activeMs[activeMs.length-1]]}`;
   const rev=hasYr26?revK.y26:revK.y25;
