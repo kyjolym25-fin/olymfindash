@@ -4191,41 +4191,37 @@ function renderStuBar(month){
   document.getElementById('stu_bar_label').textContent=`${month+1}월 기준 · 25년 vs 26년 실적 (명)`;
 }
 
-// 스택 합계 레이블 플러그인 (전역 등록, 1회)
-if(!window._stuStackTotalRegistered){
-  window._stuStackTotalRegistered=true;
-  Chart.register({
-    id:'stuStackTotal',
-    afterDatasetsDraw(chart){
-      if(!chart.options._showStackTotals) return;
-      const {ctx,data,scales:{x,y}}=chart;
-      const nPts=data.datasets[0]?.data?.length||0;
-      ctx.save();
-      ctx.textAlign='center'; ctx.textBaseline='bottom';
-      for(let i=0;i<nPts;i++){
-        const totals={},minY={};
-        data.datasets.forEach((ds,di)=>{
-          const meta=chart.getDatasetMeta(di);
-          if(meta.hidden) return;
-          const st=ds.stack||'def';
-          totals[st]=(totals[st]||0)+(ds.data[i]||0);
-          const bar=meta.data[i];
-          if(bar) minY[st]=Math.min(minY[st]??Infinity,bar.y);
-        });
-        Object.entries(totals).forEach(([st,tot])=>{
-          if(tot<=0) return;
-          ctx.font=st==='26'?'bold 11px sans-serif':'11px sans-serif';
-          ctx.fillStyle=st==='26'?'#1a1a1a':'#9DA8C3';
-          ctx.fillText(tot.toLocaleString(),x.getPixelForIndex(i),(minY[st]??0)-4);
-        });
-      }
-      ctx.restore();
-    }
-  });
+function _drawStuStackTotals(chart){
+  const {ctx,data,scales}=chart;
+  if(!scales?.x||!scales?.y) return;
+  const nPts=data.datasets[0]?.data?.length||0;
+  ctx.save();
+  ctx.textAlign='center'; ctx.textBaseline='bottom';
+  for(let i=0;i<nPts;i++){
+    const totals={},minY={};
+    data.datasets.forEach((ds,di)=>{
+      const meta=chart.getDatasetMeta(di);
+      if(meta.hidden) return;
+      const st=ds.stack||'def';
+      totals[st]=(totals[st]||0)+(ds.data[i]||0);
+      const bar=meta.data[i];
+      if(bar) minY[st]=Math.min(minY[st]??Infinity,bar.y);
+    });
+    Object.entries(totals).forEach(([st,tot])=>{
+      if(tot<=0) return;
+      ctx.font=st==='26'?'bold 11px sans-serif':'11px sans-serif';
+      ctx.fillStyle=st==='26'?'#1a1a1a':'#9DA8C3';
+      ctx.fillText(tot.toLocaleString(),scales.x.getPixelForIndex(i),(minY[st]??0)-4);
+    });
+  }
+  ctx.restore();
 }
 
 function renderStuMathEng(month){
-  const legOpts={_showStackTotals:true, plugins:{legend:{labels:{color:'#9DA8C3',font:{size:10},boxWidth:8,padding:8}}}};
+  const legOpts={
+    plugins:{legend:{labels:{color:'#9DA8C3',font:{size:10},boxWidth:8,padding:8}}},
+    animation:{onComplete({chart}){ _drawStuStackTotals(chart); }}
+  };
 
   stuMathChart=mkBar('c_stu_math',CAMPS_ALL,[
     {label:'26년 초중',data:CAMPS_ALL.map(c=>getStu(c,month).mc26),backgroundColor:'#10B981cc',borderRadius:3,borderSkipped:false,stack:'26'},
