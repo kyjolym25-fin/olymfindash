@@ -4758,6 +4758,8 @@ function goStuDash(){
   });
   document.getElementById('mainTabs').style.display='none';
   document.getElementById('stu-wrap').style.display='block';
+  // .page 클래스는 기본 display:none이므로 명시적으로 on 추가
+  document.getElementById('pg-students').classList.add('on');
   saveDashView('students');
   const lmi = latestActMi >= 0 ? latestActMi : 0;
   if(!inited['students']){ inited['students']=true; stuMonth=lmi; initStudents(); }
