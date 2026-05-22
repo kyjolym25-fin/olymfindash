@@ -7371,8 +7371,9 @@ function _renderChmTable(){
     const lblFw=isOp?'font-weight:800':'';
     const lblClr=acc.sec==='op1'?'color:#0369A1':acc.sec==='op2'?'color:#065F46':acc.sec==='common'?'color:#7C3AED':'';
     const dispLabel=(!showCommon&&acc.sec==='op2')?'영업이익':acc.label;
+    const stickyBg=(acc.sec==='op1'||acc.sec==='op2')?'#ECFDF5':isTotal?'#F8FAFC':'#fff';
     body+=`<tr style="${rowBg};${rowBt};border-bottom:1px solid rgba(228,232,244,.3)">`;
-    body+=`<td style="position:sticky;left:0;z-index:10;background:inherit;text-align:left;padding:0 14px;height:36px;font-size:12px;border-right:1px solid #E4E8F4;white-space:nowrap;${lblSt};${lblFw};${lblClr}">${dispLabel}</td>`;
+    body+=`<td style="position:sticky;left:0;z-index:10;background:${stickyBg};text-align:left;padding:0 14px;height:36px;font-size:12px;border-right:1px solid #E4E8F4;white-space:nowrap;${lblSt};${lblFw};${lblClr}">${dispLabel}</td>`;
     for(const id of visIds){
       const nd=CHM_NODES[id];
       const bg25=rowBg?rowBg:'background:#F8FAFF';
