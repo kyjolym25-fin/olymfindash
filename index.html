@@ -4097,6 +4097,32 @@ function buildStuMonthBar(){
 }
 
 
+let _stuTrendModalChart=null;
+function showStuTrendModal(campus,subject){
+  const modal=document.getElementById('stu-trend-modal');
+  document.getElementById('stu-trend-modal-title').textContent=`${campus} · ${subject} 재원생 추이`;
+  modal.style.display='flex';
+  const s=STU[campus];
+  const MN=['1','2','3','4','5','6','7','8','9','10','11','12'];
+  const key=subject==='수학'?'수학':'영어';
+  const d25=MN.map((_,i)=>s.yr25?.[key]?.['소계']?.[i]||0);
+  const d26=MN.map((_,i)=>s.yr26a?.[key]?.['소계']?.[i]||0);
+  const el=document.getElementById('c_stu_trend_modal');
+  if(_stuTrendModalChart){_stuTrendModalChart.destroy();_stuTrendModalChart=null;}
+  _stuTrendModalChart=new Chart(el.getContext('2d'),{
+    type:'line',
+    data:{labels:MN,datasets:[
+      {label:'25년',data:d25,borderColor:'#4361EE',backgroundColor:'#4361EE18',borderWidth:2,tension:.35,pointRadius:3,fill:true},
+      {label:'26년',data:d26,borderColor:'#10B981',backgroundColor:'#10B98118',borderWidth:2.5,tension:.35,pointRadius:3,fill:true},
+    ]},
+    options:{...CO_SM,animation:false}
+  });
+}
+function closeStuTrendModal(){
+  document.getElementById('stu-trend-modal').style.display='none';
+  if(_stuTrendModalChart){_stuTrendModalChart.destroy();_stuTrendModalChart=null;}
+}
+
 function renderStuCards(month){
   const hakEl=document.getElementById('stu_hak_cards');
   hakEl.innerHTML=CAMPS_HAK.map(c=>{
@@ -4114,15 +4140,15 @@ function renderStuCards(month){
       <div style="font-size:11px;color:var(--muted);margin-bottom:9px">25년 ${d.a25.toLocaleString()}명</div>
       <div style="height:4px;background:var(--border);border-radius:2px;margin-bottom:10px;overflow:hidden"><div style="height:100%;width:${barW}%;background:var(--c26a)"></div></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
-        <div style="background:var(--s3);border-radius:7px;padding:8px 10px">
-          <div style="font-size:10px;color:var(--muted);margin-bottom:2px">수학</div>
+        <div style="background:var(--s3);border-radius:7px;padding:8px 10px;cursor:pointer;transition:background .15s" onmouseenter="this.style.background='#dde3f0'" onmouseleave="this.style.background='var(--s3)'" onclick="showStuTrendModal('${c}','수학')">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:2px">수학 📈</div>
           <div style="font-size:15px;font-weight:700;color:var(--c25)">${d.ms26.toLocaleString()}<span style="font-size:10px;color:var(--muted);margin-left:2px">명</span></div>
-          <div style="font-size:10px;color:var(--muted);margin-top:3px;font-size:10px">초중 ${d.mc26.toLocaleString()}${d.mg26?` / 영재 ${d.mg26.toLocaleString()}`:''}${d.md26?` / 고등 ${d.md26.toLocaleString()}`:''}</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:3px">초중 ${d.mc26.toLocaleString()}${d.mg26?` / 영재 ${d.mg26.toLocaleString()}`:''}${d.md26?` / 고등 ${d.md26.toLocaleString()}`:''}</div>
         </div>
-        <div style="background:var(--s3);border-radius:7px;padding:8px 10px">
-          <div style="font-size:10px;color:var(--muted);margin-bottom:2px">영어</div>
+        <div style="background:var(--s3);border-radius:7px;padding:8px 10px;cursor:pointer;transition:background .15s" onmouseenter="this.style.background='#dde3f0'" onmouseleave="this.style.background='var(--s3)'" onclick="showStuTrendModal('${c}','영어')">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:2px">영어 📈</div>
           <div style="font-size:15px;font-weight:700;color:var(--c26p)">${d.es26?d.es26.toLocaleString():'-'}<span style="font-size:10px;color:var(--muted);margin-left:2px">${d.es26?'명':''}</span></div>
-          <div style="font-size:10px;color:var(--muted);margin-top:3px;font-size:10px">${d.es26?`초중 ${d.ec26.toLocaleString()} / 고등 ${d.ed26.toLocaleString()}`:'영어반 없음'}</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:3px">${d.es26?`초중 ${d.ec26.toLocaleString()} / 고등 ${d.ed26.toLocaleString()}`:'영어반 없음'}</div>
         </div>
       </div>
     </div>`;
@@ -4143,8 +4169,8 @@ function renderStuCards(month){
       <div style="font-size:26px;font-weight:900;color:var(--c26a);line-height:1;margin-bottom:3px">${d.a26.toLocaleString()}<span style="font-size:11px;font-weight:400;color:var(--muted);margin-left:3px">명</span></div>
       <div style="font-size:11px;color:var(--muted);margin-bottom:9px">25년 ${d.a25.toLocaleString()}명</div>
       <div style="height:4px;background:var(--border);border-radius:2px;margin-bottom:10px;overflow:hidden"><div style="height:100%;width:${barW}%;background:var(--c26a)"></div></div>
-      <div style="background:var(--s3);border-radius:7px;padding:8px 10px">
-        <div style="font-size:10px;color:var(--muted);margin-bottom:2px">수학 (고등 포함)</div>
+      <div style="background:var(--s3);border-radius:7px;padding:8px 10px;cursor:pointer;transition:background .15s" onmouseenter="this.style.background='#dde3f0'" onmouseleave="this.style.background='var(--s3)'" onclick="showStuTrendModal('${c}','수학')">
+        <div style="font-size:10px;color:var(--muted);margin-bottom:2px">수학 (고등 포함) 📈</div>
         <div style="font-size:15px;font-weight:700;color:var(--c25)">${d.ms26.toLocaleString()}<span style="font-size:10px;color:var(--muted);margin-left:2px">명</span></div>
         <div style="font-size:10px;color:var(--muted);margin-top:3px">25년 ${d.ms25.toLocaleString()}명</div>
       </div>
@@ -7832,6 +7858,19 @@ function handleRcptUpload(input) {
       <button onclick="saveCampEdit()" style="flex:2;padding:10px;background:linear-gradient(135deg,#4361EE,#7C5CFC);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:700">저장</button>
     </div>
     <div id="campEditMsg" style="font-size:11px;margin-top:8px;min-height:16px"></div>
+  </div>
+</div>
+<!-- ══ 재원생 추이 모달 ══ -->
+<div id="stu-trend-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:center;justify-content:center" onclick="closeStuTrendModal()">
+  <div style="background:#fff;border-radius:16px;padding:24px 24px 20px;width:min(520px,92vw);box-shadow:0 20px 60px rgba(0,0,0,.2)" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
+      <div>
+        <div id="stu-trend-modal-title" style="font-size:15px;font-weight:700;color:#1A2340"></div>
+        <div style="font-size:11px;color:#7B87A8;margin-top:3px">25년 vs 26년 월별 추이 · 단위: 명</div>
+      </div>
+      <button onclick="closeStuTrendModal()" style="background:none;border:none;font-size:20px;color:#9DA8C3;cursor:pointer;line-height:1;padding:0 0 0 12px">✕</button>
+    </div>
+    <div style="height:220px"><canvas id="c_stu_trend_modal"></canvas></div>
   </div>
 </div>
 </body>
