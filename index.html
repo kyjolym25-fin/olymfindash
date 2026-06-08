@@ -6513,6 +6513,8 @@ function renderDirDetail(){
   const norm=s=>String(s||'').replace(/\s+/g,'').toLowerCase();
   const lookup26={};
   if(data26) data26.rows.forEach(r=>{ lookup26[norm(r.label)]=r.vals; });
+  const lookup25={};
+  if(data25) data25.rows.forEach(r=>{ lookup25[norm(r.label)]=r.vals; });
   const baseData=data25||data26;
   const fx=v=>(v==null||v===undefined)?'':Math.round(v/1000).toLocaleString('ko-KR');
   const fxPct=(a,b)=>(!b||b===0)?'':Math.round(a/b*100)+'%';
@@ -6628,7 +6630,7 @@ function renderDirDetail(){
       if(labelKey&&norm(r.label).includes(labelKey)){row=r;break;}
     }
     if(!row) return {y25:null,y26:null,y25f:null};
-    const v25=row.vals||{};
+    const v25=lookup25[norm(row.label)]||{};
     const v26r=lookup26[norm(row.label)]||{};
     return {
       y25:activeMs.reduce((s,m)=>s+(v25[m]||0),0),
@@ -6679,7 +6681,7 @@ function renderDirDetail(){
     const isCostTotal=row.label.includes('비용 소계')||row.label.includes('비용소계');
     const effType=isCostTotal?'costtotal':row.type;
     const cls=`row-${effType}`;
-    const v25=row.vals||{};
+    const v25=lookup25[norm(row.label)]||{};
     const v26=(row._yr26key?lookup26[row._yr26key]:lookup26[norm(row.label)])||{};
     const isProfit=effType==='profit1'||effType==='profit2'||effType==='costtotal';
     const showSummary=isProfit||effType==='total';
@@ -6719,11 +6721,11 @@ function renderDirDetail(){
     tbody+=`<tr class="${cls}"><td>${dispLabel}</td>${cells}</tr>`;
 
     if(hasYr26){
-      const n25=isProfit&&sum25ytd<0, n26=isProfit&&sum26ytd<0, nf=isProfit&&sum25all<0;
-      let sc=`<td class="td-sticky-ytd25"${n25?' style="color:var(--loss)"':''}>${fx(sum25ytd)}</td>`;
+      const n25=data25&&isProfit&&sum25ytd<0, n26=isProfit&&sum26ytd<0, nf=data25&&isProfit&&sum25all<0;
+      let sc=`<td class="td-sticky-ytd25"${n25?' style="color:var(--loss)"':''}>${data25?fx(sum25ytd):''}</td>`;
       sc+=`<td class="td-sticky-ytd26"${n26?' style="color:var(--loss)"':''}>${fx(sum26ytd)}</td>`;
       sc+=`<td class="td-sticky-diff">${showSummary?fxDiff(sum26ytd,sum25ytd):''}</td>`;
-      sc+=`<td class="td-sticky-full"${nf?' style="color:var(--loss)"':''}>${fx(sum25all)}</td>`;
+      sc+=`<td class="td-sticky-full"${nf?' style="color:var(--loss)"':''}>${data25?fx(sum25all):''}</td>`;
       sc+=`<td class="td-sticky-rate">${showSummary?fxPct(sum26ytd,sum25all):''}</td>`;
       stbody+=`<tr class="${cls}">${sc}</tr>`;
     } else {
