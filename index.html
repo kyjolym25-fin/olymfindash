@@ -1596,6 +1596,17 @@ thead th{font-size:13px}
             <label class="camp-chk"><input type="checkbox" value="송파방이수학"> 송파방이</label>
             <label class="camp-chk"><input type="checkbox" value="미사수학"> 미사</label>
           </div>
+          <div class="camp-checks-group">고등</div>
+          <div class="camp-checks-grid">
+            <label class="camp-chk"><input type="checkbox" value="광진고등"> 광진</label>
+            <label class="camp-chk"><input type="checkbox" value="성동고등"> 성동</label>
+            <label class="camp-chk"><input type="checkbox" value="동대문고등"> 동대문</label>
+            <label class="camp-chk"><input type="checkbox" value="중랑고등"> 중랑</label>
+          </div>
+          <div class="camp-checks-group">영재</div>
+          <div class="camp-checks-grid">
+            <label class="camp-chk"><input type="checkbox" value="광진영재"> 광진</label>
+          </div>
         </div>
       </div>
       <button class="auth-btn-primary" style="margin-top:4px" onclick="adminAddUser()">계정 생성</button>
@@ -1804,6 +1815,17 @@ thead th{font-size:13px}
             <label class="camp-chk"><input type="checkbox" value="중계수학"> 중계</label>
             <label class="camp-chk"><input type="checkbox" value="송파방이수학"> 송파방이</label>
             <label class="camp-chk"><input type="checkbox" value="미사수학"> 미사</label>
+          </div>
+          <div class="camp-checks-group">고등</div>
+          <div class="camp-checks-grid">
+            <label class="camp-chk"><input type="checkbox" value="광진고등"> 광진</label>
+            <label class="camp-chk"><input type="checkbox" value="성동고등"> 성동</label>
+            <label class="camp-chk"><input type="checkbox" value="동대문고등"> 동대문</label>
+            <label class="camp-chk"><input type="checkbox" value="중랑고등"> 중랑</label>
+          </div>
+          <div class="camp-checks-group">영재</div>
+          <div class="camp-checks-grid">
+            <label class="camp-chk"><input type="checkbox" value="광진영재"> 광진</label>
           </div>
         </div>
       </div>
@@ -6328,15 +6350,44 @@ const DIR_GROUPS = [
   { name:'올림피아드', icon:'🏫', tag:'수학', sheets:['광진수학','성동수학','동대문수학','중랑수학'] },
   { name:'GLEC',       icon:'📚', tag:'영어', sheets:['광진영어','성동영어','동대문영어','중랑영어'] },
   { name:'U2M',        icon:'🎯', tag:'수학', sheets:['중계수학','송파방이수학','미사수학'] },
+  { name:'올림피아드 고등', icon:'🎓', tag:'고등', sheets:['광진고등','성동고등','동대문고등','중랑고등'] },
+  { name:'영재',       icon:'⭐', tag:'영재', sheets:['광진영재'] },
 ];
 
 const DIR_SKIP_SHEETS = new Set(['학원본부','U2M본부','교육넷수학']);
 function parseDirSheetName(name){
-  if(name.includes('고등')||name.includes('영재')) return null;
   if(DIR_SKIP_SHEETS.has(name)) return null;
-  if(name.endsWith('수학')) return {sheetKey:name, displayName:name.slice(0,-2)};
-  if(name.endsWith('영어')) return {sheetKey:name, displayName:name.slice(0,-2)};
+  if(name.endsWith('고등수학')) return {sheetKey:name, displayName:name.slice(0,-2)};
+  if(name.endsWith('고등영어')) return {sheetKey:name, displayName:name.slice(0,-2)};
+  if(name.endsWith('고등'))    return {sheetKey:name, displayName:name};
+  if(name.endsWith('영재'))    return {sheetKey:name, displayName:name.slice(0,-2)};
+  if(name.endsWith('수학'))    return {sheetKey:name, displayName:name.slice(0,-2)};
+  if(name.endsWith('영어'))    return {sheetKey:name, displayName:name.slice(0,-2)};
   return null;
+}
+
+function mergeDirData(a, b){
+  if(!a && !b) return null;
+  if(!a) return b;
+  if(!b) return a;
+  const months=[...new Set([...a.months,...b.months])].sort((x,y)=>x-y);
+  const bMap={};
+  b.rows.forEach(r=>{ bMap[r.label]=r.vals; });
+  const rows=a.rows.map(r=>{
+    const bv=bMap[r.label]||{};
+    const vals={};
+    months.forEach(m=>{ const s=(r.vals[m]||0)+(bv[m]||0); if(s!==0) vals[m]=s; });
+    return {...r, vals};
+  });
+  return {months, rows};
+}
+
+function buildCombinedDirSheets(){
+  ['광진','성동','동대문','중랑'].forEach(camp=>{
+    const mk=camp+'고등수학', ek=camp+'고등영어', ck=camp+'고등';
+    if(DIR_PL[mk]||DIR_PL[ek])    DIR_PL[ck]  =mergeDirData(DIR_PL[mk],  DIR_PL[ek]);
+    if(DIR_PL25[mk]||DIR_PL25[ek]) DIR_PL25[ck]=mergeDirData(DIR_PL25[mk],DIR_PL25[ek]);
+  });
 }
 
 function parseFullDirSheet(ws){
@@ -6788,6 +6839,7 @@ async function loadCampusPl(){
     if(r.sheet_name.endsWith('_25')) DIR_PL25[r.sheet_name.slice(0,-3)]=r.data;
     else DIR_PL[r.sheet_name]=r.data;
   });
+  buildCombinedDirSheets();
   const allM=dirAllMonths();
   if(allM.length) dirMonth=allM[allM.length-1];
 }
@@ -6833,6 +6885,7 @@ async function handleDirXlsxUpload(input){
     }
     const allM=dirAllMonths();
     if(allM.length) dirMonth=allM[allM.length-1];
+    buildCombinedDirSheets();
     const yearTag=isYr25?'25년 ':'';
     const allMonths=[...new Set(Object.values(targetPL).flatMap(d=>d.months))].sort((a,b)=>a-b).map(m=>MN[m]).join(',');
     msg.textContent=`✓ ${yearTag}${cnt}개 시트 · ${allMonths} 저장 완료`;
@@ -7859,6 +7912,17 @@ function handleRcptUpload(input) {
         <label class="camp-chk"><input type="checkbox" value="중계수학"> 중계</label>
         <label class="camp-chk"><input type="checkbox" value="송파방이수학"> 송파방이</label>
         <label class="camp-chk"><input type="checkbox" value="미사수학"> 미사</label>
+      </div>
+      <div class="camp-checks-group">고등</div>
+      <div class="camp-checks-grid">
+        <label class="camp-chk"><input type="checkbox" value="광진고등"> 광진</label>
+        <label class="camp-chk"><input type="checkbox" value="성동고등"> 성동</label>
+        <label class="camp-chk"><input type="checkbox" value="동대문고등"> 동대문</label>
+        <label class="camp-chk"><input type="checkbox" value="중랑고등"> 중랑</label>
+      </div>
+      <div class="camp-checks-group">영재</div>
+      <div class="camp-checks-grid">
+        <label class="camp-chk"><input type="checkbox" value="광진영재"> 광진</label>
       </div>
     </div>
     <div style="display:flex;gap:8px">
