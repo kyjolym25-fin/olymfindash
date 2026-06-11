@@ -4545,25 +4545,53 @@ function updateStudentTrend(){
     }
   });
 
-  // 마지막 실적 월 강조 주석 (canvas에 직접)
-  if(lastActual >= 0) {
-    const origDraw = stuTrendChart.draw.bind(stuTrendChart);
-    stuTrendChart.draw = function() {
-      origDraw();
-      const chart = stuTrendChart;
-      const meta = chart.getDatasetMeta(1);
-      if(!meta.data[lastActual]) return;
-      const pt = meta.data[lastActual];
-      const ctx2 = chart.ctx;
-      ctx2.save();
-      ctx2.fillStyle = '#10B981';
-      ctx2.font = 'bold 10px sans-serif';
-      ctx2.textAlign = 'center';
-      ctx2.fillText(`▲ ${data26[lastActual]}명`, pt.x, pt.y - 10);
-      ctx2.restore();
-    };
-    stuTrendChart.draw();
-  }
+  // 모든 데이터 포인트에 레이블 표시 (겹침 방지)
+  const origDraw = stuTrendChart.draw.bind(stuTrendChart);
+  stuTrendChart.draw = function() {
+    origDraw();
+    const chart = stuTrendChart;
+    const meta25 = chart.getDatasetMeta(0);
+    const meta26 = chart.getDatasetMeta(1);
+    const ctx2 = chart.ctx;
+    ctx2.save();
+    ctx2.textAlign = 'center';
+    ctx2.textBaseline = 'middle';
+
+    const R25 = 3, R26 = 5, PAD = 12;
+
+    months.forEach((_, i) => {
+      const v25 = data25[i];
+      const v26 = data26[i];
+      const pt25 = meta25.data[i];
+      const pt26 = meta26.data[i];
+      const has25 = v25 != null && pt25;
+      const has26 = v26 != null && pt26;
+      if(!has25 && !has26) return;
+
+      // 두 점 모두 있으면: y값 작을수록(화면상 위) 위쪽 레이블, 큰 쪽 아래쪽
+      let dir25 = -1, dir26 = -1; // -1=위, +1=아래
+      if(has25 && has26) {
+        dir25 = pt25.y <= pt26.y ? -1 : 1;
+        dir26 = pt25.y <= pt26.y ? 1 : -1;
+      }
+
+      if(has25) {
+        const offsetY = dir25 < 0 ? -(R25 + PAD) : (R25 + PAD);
+        ctx2.fillStyle = '#4361EEcc';
+        ctx2.font = '9px sans-serif';
+        ctx2.fillText(`${v25}`, pt25.x, pt25.y + offsetY);
+      }
+      if(has26) {
+        const offsetY = dir26 < 0 ? -(R26 + PAD) : (R26 + PAD);
+        ctx2.fillStyle = '#10B981';
+        ctx2.font = 'bold 10px sans-serif';
+        ctx2.fillText(`${v26}`, pt26.x, pt26.y + offsetY);
+      }
+    });
+
+    ctx2.restore();
+  };
+  stuTrendChart.draw();
 }
 
 function initStudents(){
