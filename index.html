@@ -693,7 +693,6 @@ thead th{font-size:13px}
           <div class="hub-ch-arrow">›</div>
         </div>
         <div class="hub-ch-card" id="hubCardDir">
-          <span class="hub-ch-badge">NEW</span>
           <div class="hub-ch-icon">🏫</div>
           <div class="hub-ch-body">
             <div class="hub-ch-title">직영캠퍼스 원장단 대시보드</div>
@@ -4503,47 +4502,9 @@ function updateStudentTrend(){
     },
   ];
 
-  const stuLabelPlugin = {
-    id: 'stuPointLabels',
-    afterDraw(chart) {
-      const meta25 = chart.getDatasetMeta(0);
-      const meta26 = chart.getDatasetMeta(1);
-      const c = chart.ctx;
-      c.save();
-      c.textAlign = 'center';
-      c.textBaseline = 'middle';
-      const R25 = 3, R26 = 5, PAD = 11;
-      months.forEach((_, i) => {
-        const v25 = data25[i], v26 = data26[i];
-        const pt25 = meta25.data[i], pt26 = meta26.data[i];
-        const has25 = v25 != null && pt25;
-        const has26 = v26 != null && pt26;
-        if(!has25 && !has26) return;
-        // 두 점 모두 있으면 위쪽 점 → 위, 아래쪽 점 → 아래
-        let dir25 = -1, dir26 = -1;
-        if(has25 && has26) {
-          dir25 = pt25.y <= pt26.y ? -1 : 1;
-          dir26 = pt25.y <= pt26.y ? 1 : -1;
-        }
-        if(has25) {
-          c.fillStyle = '#4361EEcc';
-          c.font = '9px sans-serif';
-          c.fillText(`${v25}`, pt25.x, pt25.y + dir25 * (R25 + PAD));
-        }
-        if(has26) {
-          c.fillStyle = '#10B981';
-          c.font = 'bold 10px sans-serif';
-          c.fillText(`${v26}`, pt26.x, pt26.y + dir26 * (R26 + PAD));
-        }
-      });
-      c.restore();
-    }
-  };
-
   stuTrendChart = new Chart(ctx.getContext('2d'), {
     type: 'line',
     data: { labels: months, datasets },
-    plugins: [stuLabelPlugin],
     options: {
       responsive: true, maintainAspectRatio: false,
       plugins: {
