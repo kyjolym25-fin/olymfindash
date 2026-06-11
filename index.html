@@ -1194,6 +1194,7 @@ thead th{font-size:13px}
       <div class="ch"><div><div class="ct">가맹사업 매출·영업이익 추이</div><div class="cs">25년 실적 vs 26년 실적 (백만원)</div></div></div>
       <div class="cw" style="height:210px"><canvas id="c_fr_profit"></canvas></div>
     </div>
+    <div id="fr_cost_detail"></div>
   </div><!-- /sp-franchise -->
 
   <!-- ── 미래교육사업본부 ── -->
@@ -3467,6 +3468,7 @@ function renderDeptKpi(mi){
   const frBadge=document.getElementById('fr_month_badge');
   if(frBadge) frBadge.textContent=`📅 당월 (${mn})`;
   renderFranchiseKpi();
+  renderFranchiseCostDetail();
 }
 
 // ============================================================
@@ -3478,6 +3480,7 @@ function initFranchise(){
   renderFranchiseKpi();
   renderFranchiseCountChart();
   renderFranchiseProfitChart();
+  renderFranchiseCostDetail();
 }
 
 function renderFranchiseKpi(){
@@ -3561,6 +3564,76 @@ function renderFranchiseProfitChart(){
       scales:{ x:{grid:{color:'#E4E8F4'},ticks:{color:'#9DA8C3',font:{size:12}}}, y:{grid:{color:'#E4E8F4'},ticks:{color:'#9DA8C3',font:{size:12}}} }
     }
   });
+}
+
+function renderFranchiseCostDetail(){
+  const el = document.getElementById('fr_cost_detail');
+  if(!el) return;
+  const mi = frMonth;
+  const MO = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  const mn = MO[mi];
+  const fr = DEPT_DATA.franchise;
+  const v25  = (fr.판관비.yr25   ? fr.판관비.yr25[mi]    ?? 0 : 0) * 1e6;
+  const v26p = (fr.판관비.yr26base ? fr.판관비.yr26base[mi] ?? 0 : 0) * 1e6;
+
+  const rawRows = RAW_DB.filter(r => r.cp === '교육넷' && r.t === '판매관리비' && r.m === mn);
+  if(!rawRows.length){ el.innerHTML = ''; return; }
+
+  const acctMap = new Map();
+  rawRows.forEach(r => acctMap.set(r.a, (acctMap.get(r.a)||0) + r.v));
+  const sorted = [...acctMap.entries()].sort((a,b) => b[1]-a[1]);
+  const total  = sorted.reduce((s,[,v]) => s+v, 0);
+
+  const fm   = v => (v/1e6).toFixed(1);
+  const fPct = (v,t) => t>0 ? (v/t*100).toFixed(1)+'%' : '-';
+  const thS  = 'padding:5px 10px;text-align:right;font-size:11px;font-weight:600';
+  const thL  = 'padding:5px 10px;text-align:left;font-size:11px;font-weight:600;color:var(--muted)';
+
+  let body = '';
+  sorted.forEach(([acct, amt]) => {
+    body += `<tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:5px 10px;font-size:13px">${acct}</td>
+      <td style="padding:5px 10px;text-align:right;font-size:13px">${fm(amt)}</td>
+      <td style="padding:5px 10px;text-align:right;font-size:12px;color:var(--muted)">${fPct(amt,total)}</td>
+    </tr>`;
+  });
+  body += `<tr style="background:var(--s2);font-weight:700;border-top:2px solid var(--border2)">
+    <td style="padding:6px 10px;font-size:13px">합계</td>
+    <td style="padding:6px 10px;text-align:right;font-size:13px">${fm(total)}</td>
+    <td style="padding:6px 10px;text-align:right;font-size:12px;color:var(--muted)">100%</td>
+  </tr>`;
+  if(v26p > 0){
+    const diff = total - v26p;
+    const dc = diff <= 0 ? 'var(--c26a)' : 'var(--loss)';
+    body += `<tr style="background:var(--s3)">
+      <td style="padding:4px 10px;font-size:11px;color:var(--muted)">▶ 26년 계획</td>
+      <td style="padding:4px 10px;text-align:right;font-size:11px;color:var(--c26p)">${fm(v26p)}</td>
+      <td style="padding:4px 10px;text-align:right;font-size:11px;color:${dc}">${diff>=0?'+':''}${fm(diff)}</td>
+    </tr>`;
+  }
+  if(v25 > 0){
+    body += `<tr style="background:var(--s3)">
+      <td style="padding:4px 10px;font-size:11px;color:var(--muted)">▶ 25년 실적</td>
+      <td style="padding:4px 10px;text-align:right;font-size:11px;color:var(--c25)">${fm(v25)}</td>
+      <td style="padding:4px 10px;text-align:right;font-size:11px;color:var(--muted)">-</td>
+    </tr>`;
+  }
+
+  el.innerHTML = `
+    <div class="full card" style="margin-top:12px">
+      <div class="ch"><div>
+        <div class="ct">판매관리비 세부내역</div>
+        <div class="cs">교육넷 ${mn} 실적 · 계정별 (백만원)</div>
+      </div></div>
+      <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">
+        <thead><tr style="background:var(--s3)">
+          <th style="${thL}">계정과목</th>
+          <th style="${thS};color:var(--c26a)">26년 실적</th>
+          <th style="${thS}">비율</th>
+        </tr></thead>
+        <tbody>${body}</tbody>
+      </table></div>
+    </div>`;
 }
 
 function initU2m(){
