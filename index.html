@@ -3576,7 +3576,8 @@ function renderFranchiseCostDetail(){
   const v25  = (fr.판관비.yr25   ? fr.판관비.yr25[mi]    ?? 0 : 0) * 1e6;
   const v26p = (fr.판관비.yr26base ? fr.판관비.yr26base[mi] ?? 0 : 0) * 1e6;
 
-  const rawRows = RAW_DB.filter(r => r.cp === '교육넷' && r.t === '판매관리비' && r.m === mn);
+  const isEduNet = r => r.cp === '교육넷' || (r.cc && r.cc.startsWith('교육넷'));
+  const rawRows = RAW_DB.filter(r => isEduNet(r) && r.t === '판매관리비' && r.m === mn);
   if(!rawRows.length){ el.innerHTML = ''; return; }
 
   const acctMap = new Map();
@@ -6154,6 +6155,7 @@ function applyRawToDashboard(){
       return r.cp;
     }
     if(r.cc === '학원본부') return '학원본부';
+    if(r.cc && r.cc.startsWith('교육넷')) return '교육넷';
     for(const c of _campPfx){ if(r.cc && r.cc.startsWith(c)) return c; }
     return null;
   };
@@ -6224,6 +6226,7 @@ function applyRawToDashboard(){
     renderFranchiseKpi();
     renderFranchiseCountChart();
     renderFranchiseProfitChart();
+    renderFranchiseCostDetail();
   }
 
   // ── 5. 캠퍼스/카테고리별 월별 매출·영업이익 → DEPT_DATA.yr26actual 갱신 ──
